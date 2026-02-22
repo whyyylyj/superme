@@ -302,22 +302,29 @@ function update(dt) {
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    LevelMap.drawBackground(ctx, cameraX, cameraY, canvas);
+    const level = LevelManager.currentLevel;
+    if (!level) return;
 
-    LevelMap.platforms.forEach(p => p.draw(ctx, cameraX, cameraY));
-    LevelMap.powerups.forEach(p => p.draw(ctx, cameraX, cameraY));
+    level.drawBackground(ctx, cameraX, cameraY, canvas);
+    level.platforms.forEach(p => p.draw(ctx, cameraX, cameraY));
+    level.powerups.forEach(p => p.draw(ctx, cameraX, cameraY));
 
-    if (gameState === 'play' || gameState === 'win') {
+    if (GameStateMachine.is('playing') || GameStateMachine.is('game_win')) {
         if (!player.markedForDeletion) player.draw(ctx, cameraX, cameraY);
     }
 
-    LevelMap.enemies.forEach(e => e.draw(ctx, cameraX, cameraY));
-    if (LevelMap.boss && !LevelMap.boss.markedForDeletion) {
-        LevelMap.boss.draw(ctx, cameraX, cameraY);
+    level.enemies.forEach(e => e.draw(ctx, cameraX, cameraY));
+    if (level.boss && !level.boss.markedForDeletion) {
+        level.boss.draw(ctx, cameraX, cameraY);
     }
 
     bullets.forEach(b => b.draw(ctx, cameraX, cameraY));
     ParticleSystem.draw(ctx, cameraX, cameraY);
+
+    // 过渡动画叠加
+    if (GameStateMachine.is('level_transition')) {
+        LevelManager.drawTransition(ctx, canvas);
+    }
 }
 
 function gameLoop(timestamp) {
@@ -332,8 +339,15 @@ function gameLoop(timestamp) {
     animationId = requestAnimationFrame(gameLoop);
 }
 
-// Initial draw for background
-LevelMap.drawBackground(ctx, 0, 0, canvas);
+// Initial draw for background (fallback if no level loaded)
+const level = LevelManager.currentLevel;
+if (level) {
+    level.drawBackground(ctx, 0, 0, canvas);
+} else {
+    // 默认深色背景
+    ctx.fillStyle = '#0a0a1a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
 
 // Event Listeners
 btnStart.addEventListener('click', initGame);

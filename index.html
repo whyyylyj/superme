@@ -71,21 +71,36 @@
     <script src="js/entity.js"></script>
     <script src="js/particle.js"></script>
 
-    <!-- 2. 弹幕系统（暂时保留原有 bullet.js） -->
+    <!-- 2. 变身系统 -->
+    <script src="js/transform/form-normal.js"></script>
+    <script src="js/transform/form-mecha.js"></script>
+    <script src="js/transform/form-dragon.js"></script>
+    <script src="js/transform/form-phantom.js"></script>
+    <script src="js/transform/transform-system.js"></script>
+
+    <!-- 3. 弹幕系统 -->
+    <script src="js/danmaku/bullet-pool.js"></script>
+    <script src="js/danmaku/patterns.js"></script>
+    <script src="js/danmaku/danmaku-engine.js"></script>
     <script src="js/bullet.js"></script>
 
-    <!-- 3. 游戏对象 -->
+    <!-- 4. 游戏对象 -->
     <script src="js/powerup.js"></script>
     <script src="js/player.js"></script>
     <script src="js/enemy.js"></script>
     <script src="js/boss.js"></script>
 
-    <!-- 4. 关卡 -->
+    <!-- 4.5 敌人系统 (Track C) -->
+    <script src="js/enemies/enemy-base.js"></script>
+    <script src="js/enemies/boss-base.js"></script>
+    <script src="js/enemies/boss-level1.js"></script>
+
+    <!-- 5. 关卡 -->
     <script src="js/level.js"></script>
     <script src="js/levels/level-base.js"></script>
     <script src="js/levels/level1-forest.js"></script>
 
-    <!-- 5. 核心管理 + 主循环 -->
+    <!-- 6. 核心管理 + 主循环 -->
     <script src="js/core/level-manager.js"></script>
     <script src="js/core/game-state.js"></script>
     <script src="js/main.js"></script>

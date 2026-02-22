@@ -86,9 +86,10 @@ function updateHUD() {
     uiPowerup.innerText = pwText;
 
     // Update Boss HUD if boss is active
-    if (LevelMap.boss && !LevelMap.boss.markedForDeletion && player.x > LevelMap.boss.x - 800) {
+    const level = LevelManager.currentLevel;
+    if (level && level.boss && !level.boss.markedForDeletion && player.x > level.boss.x - 800) {
         uiBossHud.classList.remove('hidden');
-        const hpPercent = (LevelMap.boss.hp / LevelMap.boss.maxHp) * 100;
+        const hpPercent = (level.boss.hp / level.boss.maxHp) * 100;
         uiBossHpBar.style.width = Math.max(0, hpPercent) + '%';
         if (hpPercent < 50) {
             uiBossHpBar.style.background = 'linear-gradient(90deg, #ffaa00, #ffff00)';
@@ -100,7 +101,10 @@ function updateHUD() {
 }
 
 function checkPowerupCollisions() {
-    LevelMap.powerups.forEach((pu, index) => {
+    const level = LevelManager.currentLevel;
+    if (!level) return;
+
+    level.powerups.forEach((pu, index) => {
         if (!pu.markedForDeletion && Physics.checkCollision(player, pu)) {
             // Apply effect
             switch (pu.type) {
@@ -137,19 +141,22 @@ function checkPowerupCollisions() {
     });
 
     // Cleanup powerups
-    LevelMap.powerups = LevelMap.powerups.filter(pu => !pu.markedForDeletion);
+    level.powerups = level.powerups.filter(pu => !pu.markedForDeletion);
 }
 
 function checkEnemyCollisions() {
+    const level = LevelManager.currentLevel;
+    if (!level) return;
+
     // Enemies touching player
-    LevelMap.enemies.forEach(enemy => {
+    level.enemies.forEach(enemy => {
         if (!enemy.markedForDeletion && Physics.checkCollision(player, enemy)) {
             player.takeDamage();
         }
     });
 
     // Boss touching player
-    if (LevelMap.boss && !LevelMap.boss.markedForDeletion && Physics.checkCollision(player, LevelMap.boss)) {
+    if (level.boss && !level.boss.markedForDeletion && Physics.checkCollision(player, level.boss)) {
         player.takeDamage();
     }
 
@@ -165,7 +172,7 @@ function checkEnemyCollisions() {
 
         if (b.friendly) {
             // Check enemies
-            LevelMap.enemies.forEach(enemy => {
+            level.enemies.forEach(enemy => {
                 if (!enemy.markedForDeletion && Physics.checkCollision(b, enemy)) {
                     enemy.takeDamage(b.damage);
                     b.markedForDeletion = true;
@@ -173,8 +180,8 @@ function checkEnemyCollisions() {
             });
 
             // Check boss
-            if (LevelMap.boss && !LevelMap.boss.markedForDeletion && Physics.checkCollision(b, LevelMap.boss)) {
-                LevelMap.boss.takeDamage(b.damage);
+            if (level.boss && !level.boss.markedForDeletion && Physics.checkCollision(b, level.boss)) {
+                level.boss.takeDamage(b.damage);
                 b.markedForDeletion = true;
             }
         } else {
@@ -186,7 +193,7 @@ function checkEnemyCollisions() {
         }
 
         // Check platform collisions for bullets
-        LevelMap.platforms.forEach(plat => {
+        level.platforms.forEach(plat => {
             if (Physics.checkCollision(b, plat)) {
                 b.markedForDeletion = true;
                 ParticleSystem.createExplosion(b.x, b.y, b.color, 3);
@@ -195,64 +202,100 @@ function checkEnemyCollisions() {
     });
 }
 
-function update(dt) {
-    if (gameState !== 'play' && gameState !== 'win') return;
-
-    if (Input.shoot && gameState === 'play') {
+/**
+ * 原有的游戏玩法逻辑
+ * 提取为独立函数，便于状态机调用
+ */
+function updateGameplay(dt) {
+    if (Input.shoot) {
         player.shoot(bullets);
     }
 
-    if (gameState === 'play') {
-        player.update(dt, LevelMap.platforms, LevelMap.width);
-
-        if (player.hp <= 0) {
-            gameState = 'gameover';
-            uiGameOverScreen.classList.remove('hidden');
-            uiGameOverScreen.classList.add('active');
-            uiHUD.classList.add('hidden');
-        }
-    }
+    player.update(dt, LevelManager.currentLevel.platforms, LevelManager.currentLevel.width);
 
     // Smooth Camera Follow
     const targetCamX = player.x - canvas.width / 2 + player.width / 2;
-    // Don't scroll past left/right edges
-    cameraX += (Math.max(0, Math.min(targetCamX, LevelMap.width - canvas.width)) - cameraX) * 5 * dt;
+    cameraX += (Math.max(0, Math.min(targetCamX, LevelManager.currentLevel.width - canvas.width)) - cameraX) * 5 * dt;
 
-    // Entities
-    LevelMap.enemies.forEach(e => e.update(dt, LevelMap.platforms));
-    LevelMap.enemies = LevelMap.enemies.filter(e => !e.markedForDeletion);
+    // 更新关卡
+    LevelManager.currentLevel.update(dt, player, bullets);
 
-    LevelMap.powerups.forEach(p => p.update(dt, LevelMap.platforms));
-
-    if (LevelMap.boss && !LevelMap.boss.markedForDeletion) {
-        LevelMap.boss.update(dt, player, bullets, LevelMap.platforms);
-    } else if (LevelMap.boss && LevelMap.boss.markedForDeletion && gameState === 'play') {
-        // Boss killed -> Win condition
-        gameState = 'win';
-        uiWinScreen.classList.remove('hidden');
-        uiWinScreen.classList.add('active');
-        uiHUD.classList.add('hidden');
-        uiBossHud.classList.add('hidden');
-    }
-
+    // 更新子弹
     bullets.forEach(b => b.update(dt));
     bullets = bullets.filter(b => !b.markedForDeletion);
 
+    // 更新粒子
     ParticleSystem.update(dt);
 
-    if (gameState === 'play') {
-        checkPowerupCollisions();
-        checkEnemyCollisions();
-    }
+    // 碰撞检测
+    checkPowerupCollisions();
+    checkEnemyCollisions();
 
     updateHUD();
+}
 
-    // Spawn win fireworks
-    if (gameState === 'win' && Math.random() < 0.1) {
-        ParticleSystem.createFirework(
-            cameraX + Math.random() * canvas.width,
-            cameraY + Math.random() * canvas.height * 0.5
-        );
+function update(dt) {
+    const state = GameStateMachine.currentState;
+
+    switch (state) {
+        case 'playing':
+            updateGameplay(dt);
+
+            // 检查关卡完成
+            if (LevelManager.currentLevel && LevelManager.currentLevel.isCompleted) {
+                const hasNext = LevelManager.nextLevel();
+                if (hasNext) {
+                    GameStateMachine.changeState('level_transition');
+                } else {
+                    GameStateMachine.changeState('game_win');
+                }
+            }
+
+            // 检查玩家死亡
+            if (player.hp <= 0) {
+                GameStateMachine.changeState('game_over');
+                uiGameOverScreen.classList.remove('hidden');
+                uiGameOverScreen.classList.add('active');
+                uiHUD.classList.add('hidden');
+            }
+            break;
+
+        case 'level_transition':
+            ParticleSystem.update(dt);
+            const done = LevelManager.updateTransition(dt);
+            if (done) {
+                // 重置玩家位置到新关卡起始点
+                player.x = 100;
+                player.y = 300;
+                player.hp = CONFIG.PLAYER.MAX_HP;
+                bullets = [];
+                GameStateMachine.changeState('playing');
+            }
+            break;
+
+        case 'boss_intro':
+            // Boss 登场演出（可选，暂时跳过）
+            break;
+
+        case 'game_over':
+            // Game Over 界面（静态，无需更新）
+            break;
+
+        case 'game_win':
+            // 胜利烟花
+            if (Math.random() < 0.1) {
+                ParticleSystem.createFirework(
+                    cameraX + Math.random() * canvas.width,
+                    cameraY + Math.random() * canvas.height * 0.5
+                );
+            }
+            ParticleSystem.update(dt);
+            break;
+
+        case 'start':
+        case 'paused':
+            // 静态状态，无需更新
+            break;
     }
 }
 

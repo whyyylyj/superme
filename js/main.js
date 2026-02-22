@@ -72,6 +72,10 @@ function initGame() {
 }
 
 function updateHUD() {
+    // 更新关卡号
+    const levelNum = LevelManager.currentLevelIndex + 1;
+    document.getElementById('level-val').innerText = levelNum;
+
     uiHp.innerText = Math.max(0, player.hp);
     let wpnStr = 'Normal';
     if (player.weapon === 'spread') wpnStr = 'Scatter';

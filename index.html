@@ -19,45 +19,80 @@
             <!-- HUD -->
             <div id="hud" class="hidden">
                 <div class="hud-item title">SUPERME</div>
-                <div class="hud-item">LV: <span id="level-val">1</span></div>
-                <div class="hud-item">HP: <span id="hp-val">3</span></div>
-                <div class="hud-item">WPN: <span id="wpn-val">Normal</span></div>
-                <div class="hud-item powerup"><span id="powerup-val"></span></div>
+                <div class="hud-item">
+                    <div class="hp-hearts" id="hp-hearts">
+                        <!-- JS 动态生成 -->
+                    </div>
+                </div>
+                <div class="hud-item">
+                    <span id="wpn-val" class="weapon-indicator">Normal</span>
+                </div>
+                <div class="hud-item">
+                    <div class="transform-bar" id="transform-bar" style="display:none">
+                        <div class="transform-bar-fill" id="transform-bar-fill"></div>
+                    </div>
+                    <span id="form-val" class="form-indicator"></span>
+                </div>
+                <div class="hud-item">LV<span id="level-val">1</span></div>
+                <div id="bullets-count"
+                    style="position: absolute; right: 10px; bottom: -570px; font-size: 8px; color: rgba(255,255,255,0.3);">
+                </div>
             </div>
 
             <!-- Start Screen -->
             <div id="start-screen" class="overlay active">
                 <h1 class="logo glow">SUPERME</h1>
-                <p>An Epic Journey Awaits</p>
-                <div class="controls-info">
-                    <p>[W/A/S/D] or [Arrows] to Move</p>
-                    <p>[Space] to Jump</p>
-                    <p>[J] or [Z] to Shoot</p>
+                <p>━━ An Epic Bullet Hell Journey ━━</p>
+                <div style="font-size: 0.8rem; margin-bottom: 20px;">
+                    ◇ 3 LEVELS ◇ 4 FORMS ◇ DANMAKU
                 </div>
-                <button id="start-btn" class="btn">START GAME</button>
+                <div class="controls-info">
+                    <p>[WASD/Arrows] Move &nbsp;&nbsp; [Space] Jump</p>
+                    <p>[J/Z] Shoot &nbsp;&nbsp; [K/X] Transform &nbsp;&nbsp; [Esc] Pause</p>
+                </div>
+                <button id="start-btn" class="btn">▶ START GAME</button>
+                <div style="margin-top: 30px; font-size: 0.6rem; color: #555;">v1.0 | 2026</div>
             </div>
 
             <!-- Boss HUD -->
             <div id="boss-hud" class="hidden">
-                <div class="boss-name">MEGA BOSS</div>
+                <div class="boss-name">
+                    <span class="boss-star">★</span>
+                    <span id="boss-name-text">BOSS</span>
+                    <span class="boss-star">★</span>
+                </div>
                 <div class="boss-hp-bar-container">
                     <div id="boss-hp-bar" class="boss-hp-fill"></div>
+                </div>
+                <div class="boss-phase" id="boss-phase" style="font-size: 0.6rem; color: #fff; margin-top: 5px;">Phase 1
                 </div>
             </div>
 
             <!-- Game Over Screen -->
             <div id="game-over-screen" class="overlay hidden">
-                <h1 class="text-danger">GAME OVER</h1>
-                <p>The journey ends here...</p>
-                <button id="restart-btn" class="btn">TRY AGAIN</button>
+                <h1 class="text-danger game-over-text">G A M E O V E R</h1>
+                <p id="game-over-quote" style="font-style: italic; color: #aaa;">"The darkness consumed you..."</p>
+                <div style="display: flex; gap: 20px;">
+                    <button id="restart-btn" class="btn">▶ TRY AGAIN</button>
+                    <button id="menu-btn" class="btn">◀ MAIN MENU</button>
+                </div>
             </div>
 
             <!-- Win Screen -->
             <div id="win-screen" class="overlay hidden">
-                <h1 class="text-success glow">VICTORY!</h1>
-                <p>You defeated the Mega Boss!</p>
-                <div class="fireworks-container"></div>
-                <button id="play-again-btn" class="btn">PLAY AGAIN</button>
+                <div class="fireworks-container" style="z-index: 1;"></div>
+                <h1 class="text-success victory-text" style="z-index: 2;">★ C O N G R A T S ★</h1>
+                <p style="z-index: 2;">You defeated the Sky Tyrant<br>and saved the world! ✨</p>
+                <button id="play-again-btn" class="btn" style="z-index: 2;">▶ PLAY AGAIN</button>
+            </div>
+
+            <!-- Pause Screen -->
+            <div id="pause-screen" class="overlay hidden">
+                <h1 class="glow">PAUSED</h1>
+                <p>Take a breather, hero.</p>
+                <button id="resume-btn" class="btn" style="margin-bottom: 15px;">RESUME</button>
+                <button id="mute-btn" class="btn btn-small" style="margin-bottom: 15px;">🔊 SOUND: ON</button>
+                <button id="quit-btn" class="btn btn-danger">QUIT TO MENU</button>
             </div>
         </div>
     </div>
@@ -66,6 +101,8 @@
     <!-- 1. 核心基础 -->
     <script src="js/core/event-bus.js"></script>
     <script src="js/core/asset-manager.js"></script>
+    <script src="js/core/screen-effects.js"></script>
+    <script src="js/core/audio-manager.js"></script>
     <script src="js/physics.js"></script>
     <script src="js/input.js"></script>
     <script src="js/entity.js"></script>
@@ -95,6 +132,7 @@
     <script src="js/enemies/boss-base.js"></script>
     <script src="js/enemies/boss-level1.js"></script>
     <script src="js/enemies/boss-level2.js"></script>
+    <script src="js/enemies/boss-level3.js"></script>
     <script src="js/enemies/enemy-types.js"></script>
 
     <!-- 5. 关卡 -->
@@ -102,6 +140,7 @@
     <script src="js/levels/level-base.js"></script>
     <script src="js/levels/level1-forest.js"></script>
     <script src="js/levels/level2-nether.js"></script>
+    <script src="js/levels/level3-sky.js"></script>
 
     <!-- 6. 核心管理 + 主循环 -->
     <script src="js/core/level-manager.js"></script>

@@ -38,7 +38,8 @@ body {
 
 canvas {
     display: block;
-    image-rendering: pixelated; /* Keeps pixel art looking sharp */
+    image-rendering: pixelated;
+    /* Keeps pixel art looking sharp */
 }
 
 /* UI Layer Overlays */
@@ -48,7 +49,8 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    pointer-events: none; /* Let clicks pass through to canvas if needed */
+    pointer-events: none;
+    /* Let clicks pass through to canvas if needed */
 }
 
 .overlay {
@@ -62,7 +64,8 @@ canvas {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    pointer-events: auto; /* Re-enable clicks for overlays */
+    pointer-events: auto;
+    /* Re-enable clicks for overlays */
     text-align: center;
     transition: opacity 0.5s ease;
 }
@@ -211,14 +214,170 @@ p {
 
 /* Animations */
 @keyframes pulse {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 10px var(--secondary-color); }
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1.1);
+        opacity: 1;
+        text-shadow: 0 0 10px var(--secondary-color);
+    }
 }
 
 /* Fireworks Container - visual effects rendered via canvas are mapped over it */
 .fireworks-container {
     position: absolute;
-    top: 0; left: 0; width: 100%; height: 100%;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     pointer-events: none;
     z-index: -1;
+}
+
+/* HP 心形 */
+.hp-hearts {
+    display: flex;
+    gap: 4px;
+}
+
+.hp-heart {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    display: inline-block;
+}
+
+.hp-heart.full::before {
+    content: '♥';
+    color: #ff3333;
+    text-shadow: 0 0 5px #ff3333;
+    font-size: 14px;
+}
+
+.hp-heart.empty::before {
+    content: '♥';
+    color: #333333;
+    font-size: 14px;
+}
+
+/* 变身进度条 */
+.transform-bar {
+    width: 120px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.transform-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary-color);
+    transition: width 0.1s linear, background-color 0.3s;
+    border-radius: 4px;
+}
+
+.form-indicator {
+    vertical-align: middle;
+}
+
+/* Animations added */
+.logo {
+    animation: logoGlow 2s ease-in-out infinite alternate,
+        logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0% {
+        text-shadow:
+            0 0 10px var(--primary-color),
+            0 0 20px var(--primary-color),
+            0 0 30px var(--secondary-color);
+    }
+
+    100% {
+        text-shadow:
+            0 0 20px var(--primary-color),
+            0 0 40px var(--primary-color),
+            0 0 60px var(--secondary-color),
+            0 0 80px var(--secondary-color);
+    }
+}
+
+@keyframes logoPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.btn {
+    animation: btnBreathe 2s ease-in-out infinite;
+}
+
+@keyframes btnBreathe {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2),
+            0 0 5px rgba(0, 255, 204, 0.1);
+    }
+
+    50% {
+        box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.4),
+            0 0 15px rgba(0, 255, 204, 0.3);
+    }
+}
+
+.game-over-text {
+    animation: textShake 0.5s ease-in-out infinite;
+}
+
+@keyframes textShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px) rotate(-0.5deg);
+    }
+
+    75% {
+        transform: translateX(3px) rotate(0.5deg);
+    }
+}
+
+.victory-text {
+    background: linear-gradient(90deg,
+            #ff0000, #ff8800, #ffff00,
+            #00ff00, #0088ff, #aa00ff);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowMove 2s linear infinite;
+}
+
+@keyframes rainbowMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 400% 50%;
+    }
 }

@@ -12,7 +12,10 @@ const Input = {
         ArrowRight: false,
         ' ': false, // Space
         j: false,
-        z: false
+        z: false,
+        k: false,
+        x: false,
+        Escape: false
     },
 
     // Derived properties for easy access
@@ -22,6 +25,8 @@ const Input = {
     get right() { return this.keys.d || this.keys.ArrowRight; },
     get jump() { return this.keys[' ']; },
     get shoot() { return this.keys.j || this.keys.z; },
+    get transform() { return this.keys.k || this.keys.x; },
+    get pause() { return this.keys.Escape; },
 
     init: function () {
         window.addEventListener('keydown', (e) => {

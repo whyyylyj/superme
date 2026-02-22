@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superme - The Ultimate Adventure!</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- Main Game Canvas -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- UI Overlays -->
+        <div id="ui-layer">
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div class="hud-item title">SUPERME</div>
+                <div class="hud-item">HP: <span id="hp-val">3</span></div>
+                <div class="hud-item">WPN: <span id="wpn-val">Normal</span></div>
+                <div class="hud-item powerup"><span id="powerup-val"></span></div>
+            </div>
+
+            <!-- Start Screen -->
+            <div id="start-screen" class="overlay active">
+                <h1 class="logo glow">SUPERME</h1>
+                <p>An Epic Journey Awaits</p>
+                <div class="controls-info">
+                    <p>[W/A/S/D] or [Arrows] to Move</p>
+                    <p>[Space] to Jump</p>
+                    <p>[J] or [Z] to Shoot</p>
+                </div>
+                <button id="start-btn" class="btn">START GAME</button>
+            </div>
+
+            <!-- Boss HUD -->
+            <div id="boss-hud" class="hidden">
+                <div class="boss-name">MEGA BOSS</div>
+                <div class="boss-hp-bar-container">
+                    <div id="boss-hp-bar" class="boss-hp-fill"></div>
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="game-over-screen" class="overlay hidden">
+                <h1 class="text-danger">GAME OVER</h1>
+                <p>The journey ends here...</p>
+                <button id="restart-btn" class="btn">TRY AGAIN</button>
+            </div>
+
+            <!-- Win Screen -->
+            <div id="win-screen" class="overlay hidden">
+                <h1 class="text-success glow">VICTORY!</h1>
+                <p>You defeated the Mega Boss!</p>
+                <div class="fireworks-container"></div>
+                <button id="play-again-btn" class="btn">PLAY AGAIN</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- 1. 核心基础 -->
+    <script src="js/core/event-bus.js"></script>
+    <script src="js/core/asset-manager.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/entity.js"></script>
+    <script src="js/particle.js"></script>
+
+    <!-- 2. 弹幕系统（暂时保留原有 bullet.js） -->
+    <script src="js/bullet.js"></script>
+
+    <!-- 3. 游戏对象 -->
+    <script src="js/powerup.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/boss.js"></script>
+
+    <!-- 4. 关卡 -->
+    <script src="js/level.js"></script>
+
+    <!-- 5. 核心管理 + 主循环 -->
+    <script src="js/core/level-manager.js"></script>
+    <script src="js/core/game-state.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>

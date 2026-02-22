@@ -21,13 +21,13 @@ const GameStateMachine = {
 
     // 状态转换规则（白名单）
     transitions: {
-        'start':            ['playing'],
-        'playing':          ['paused', 'boss_intro', 'level_transition', 'game_over'],
-        'paused':           ['playing'],
-        'boss_intro':       ['playing'],
+        'start': ['playing'],
+        'playing': ['paused', 'boss_intro', 'level_transition', 'game_over', 'game_win'],
+        'paused': ['playing'],
+        'boss_intro': ['playing'],
         'level_transition': ['playing'],
-        'game_over':        ['start'],
-        'game_win':         ['start'],
+        'game_over': ['start'],
+        'game_win': ['start'],
     },
 
     /**

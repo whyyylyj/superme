@@ -35,6 +35,8 @@ function initGame() {
     // 重置系统
     GameStateMachine.reset();
     LevelManager.reset();
+    TransformSystem.init();   // 🔧 P1修复：统一在此处初始化/重置变身系统
+    DanmakuEngine.init();
 
     // 创建游戏实体
     player = new Player(100, 300);
@@ -87,6 +89,16 @@ function updateHUD() {
     if (player.invincible) pwText += 'INVINCIBLE ';
     if (player.shieldMode) pwText += 'SHIELD ';
     if (player.speedMode) pwText += 'SPEED ';
+
+    // Add current transform form
+    const formName = TransformSystem.currentForm ? TransformSystem.currentForm.name : 'Normal';
+    const remainingTime = TransformSystem.getRemainingTime();
+    if (remainingTime > 0) {
+        pwText += `${formName} (${Math.ceil(remainingTime)}s)`;
+    } else if (formName !== 'Normal') {
+        pwText += formName;
+    }
+
     uiPowerup.innerText = pwText;
 
     // Update Boss HUD if boss is active
@@ -138,6 +150,18 @@ function checkPowerupCollisions() {
                     player.speedMode = true;
                     player.speedTimer = player.speedMaxTime;
                     ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ff8800', 50);
+                    break;
+                case 'transform_mecha':
+                    TransformSystem.transform('Mecha', player);
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#cccccc', 40);
+                    break;
+                case 'transform_dragon':
+                    TransformSystem.transform('Dragon', player);
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ff6600', 50);
+                    break;
+                case 'transform_phantom':
+                    TransformSystem.transform('Phantom', player);
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#aa00ff', 60);
                     break;
             }
             pu.markedForDeletion = true;
@@ -224,6 +248,38 @@ function updateGameplay(dt) {
     // 更新关卡
     LevelManager.currentLevel.update(dt, player, bullets);
 
+    // Assign homing targets for friendly homing bullets
+    bullets.forEach(b => {
+        if (b.homing && b.friendly && !b.homingTarget) {
+            let nearest = null;
+            let nearestDist = Infinity;
+
+            const level = LevelManager.currentLevel;
+            const enemies = level ? level.enemies : [];
+
+            enemies.forEach(e => {
+                if (e.markedForDeletion) return;
+                const dist = Math.hypot(e.x - b.x, e.y - b.y);
+                if (dist < nearestDist) {
+                    nearestDist = dist;
+                    nearest = e;
+                }
+            });
+
+            if (level && level.boss && !level.boss.markedForDeletion) {
+                const dist = Math.hypot(level.boss.x - b.x, level.boss.y - b.y);
+                if (dist < nearestDist) {
+                    nearest = level.boss;
+                }
+            }
+
+            b.homingTarget = nearest;
+        }
+    });
+
+    // Update danmaku emitters
+    DanmakuEngine.update(dt, bullets);
+
     // 更新子弹
     bullets.forEach(b => b.update(dt));
     bullets = bullets.filter(b => !b.markedForDeletion);
@@ -264,7 +320,8 @@ function update(dt) {
             }
             break;
 
-        case 'level_transition':
+        case 'level_transition': {
+            // 🔧 P1修复：加 {} 块作用域，避免 const 声明泄漏到 switch 作用域
             ParticleSystem.update(dt);
             const done = LevelManager.updateTransition(dt);
             if (done) {
@@ -276,6 +333,7 @@ function update(dt) {
                 GameStateMachine.changeState('playing');
             }
             break;
+        }
 
         case 'boss_intro':
             // Boss 登场演出（可选，暂时跳过）

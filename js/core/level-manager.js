@@ -63,8 +63,9 @@ const LevelManager = {
         this.transitionTimer = this.transitionDuration;
 
         EventBus.emit(EventBus.EVENTS.LEVEL_TRANSITION, {
-            from: this.currentLevelIndex - 1,
-            to: this.currentLevelIndex
+            // 🔧 P1修复：统一使用 1-based levelNumber（与 level:start 事件保持一致）
+            from: this.currentLevelIndex,       // 自增后 currentLevelIndex 是新关卡，故原关卡 = currentLevelIndex
+            to: this.currentLevelIndex + 1
         });
 
         return true;

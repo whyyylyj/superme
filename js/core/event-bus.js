@@ -36,7 +36,8 @@ const EventBus = {
      */
     emit(event, data) {
         if (!this._listeners[event]) return;
-        this._listeners[event].forEach(cb => cb(data));
+        // 🔧 P1修复：遍历副本，防止 callback 内部调用 off() 时数组突变导致回调被跳过
+        [...this._listeners[event]].forEach(cb => cb(data));
     },
 
     /**

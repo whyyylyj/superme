@@ -69,5 +69,22 @@ const CONFIG = {
         MECHA: '#cccccc',
         DRAGON: '#ff6600',
         PHANTOM: '#aa00ff',
+    },
+
+    // 道具配置
+    POWERUPS: {
+        BAMBOO: {
+            DURATION: 15,
+        },
+        STAR: {
+            DURATION: 10,
+        },
+        SHIELD: {
+            DURATION: 0, // Until hit
+        },
+        SPEED: {
+            DURATION: 8,
+            BOOSTED_SPEED: 500,
+        },
     }
 };

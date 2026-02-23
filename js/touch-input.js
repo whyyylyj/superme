@@ -81,7 +81,7 @@ const TouchInput = {
         document.addEventListener('touchstart', resumeAudio, { passive: true });
         document.addEventListener('mousedown', resumeAudio, { passive: true });
 
-        // Prevent default touch behavior ONLY on specific control elements to allow 
+        // Prevent default touch behavior ONLY on specific control elements to allow
         // normal clicks on other UI elements (like Start button)
         touchControls.addEventListener('touchstart', e => {
             // Check if touch is on an active control button or joystick
@@ -89,6 +89,21 @@ const TouchInput = {
                 e.preventDefault();
             }
         }, { passive: false });
+
+        // Mobile optimization: Auto-enable homing mode on touch devices
+        if (typeof player !== 'undefined' && player) {
+            player.homingMode = true;
+            console.log('[TouchInput] Auto-enabled homing mode for mobile');
+
+            // Visual feedback: create green particles to indicate homing mode
+            if (typeof ParticleSystem !== 'undefined') {
+                setTimeout(() => {
+                    const centerX = player.x + player.width / 2;
+                    const centerY = player.y + player.height / 2;
+                    ParticleSystem.createExplosion(centerX, centerY, '#00ff00', 10);
+                }, 500);
+            }
+        }
     },
 
     /**

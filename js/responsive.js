@@ -26,6 +26,9 @@
     // stretch: 拉伸填满（不推荐，会变形）
     const SCALE_MODE = 'fit';
 
+    // 横屏模式下的最小高度比例（用于防止横屏时游戏区域过小）
+    const LANDSCAPE_MIN_HEIGHT_RATIO = 0.65;
+
     // 安全边距（防止被浏览器 UI 遮挡，单位：像素）
     const SAFE_MARGIN_TOP = 0;
     const SAFE_MARGIN_BOTTOM = 0;
@@ -75,11 +78,23 @@
     function calculateScale(availableWidth, availableHeight) {
         let scale, width, height;
 
+        // 检测横屏模式
+        const isLandscapeMode = availableWidth > availableHeight;
+
         if (SCALE_MODE === 'fit') {
             // 保持宽高比，完整显示
             const scaleX = availableWidth / DESIGN_WIDTH;
             const scaleY = availableHeight / DESIGN_HEIGHT;
             scale = Math.min(scaleX, scaleY);
+
+            // 横屏模式下，确保游戏区域不会太小
+            if (isLandscapeMode && isMobileDevice) {
+                const minScale = (availableHeight * LANDSCAPE_MIN_HEIGHT_RATIO) / DESIGN_HEIGHT;
+                scale = Math.max(scale, minScale);
+                // 但不超过屏幕宽度
+                scale = Math.min(scale, scaleX);
+            }
+
             width = DESIGN_WIDTH * scale;
             height = DESIGN_HEIGHT * scale;
         } else if (SCALE_MODE === 'fill') {
@@ -160,6 +175,7 @@
     const handleResize = debounce(() => {
         // 重新检测设备类型和方向
         const wasMobile = isMobileDevice;
+        const wasLandscape = isLandscapeOrientation;
         isMobileDevice = detectMobile();
         isLandscapeOrientation = detectLandscape();
 
@@ -183,7 +199,15 @@
             document.body.classList.remove('landscape');
         }
 
+        // 方向变化时重新计算缩放
+        if (wasLandscape !== isLandscapeOrientation) {
+            console.log(`[Responsive] Orientation changed: ${wasLandscape ? 'landscape' : 'portrait'} -> ${isLandscapeOrientation ? 'landscape' : 'portrait'}`);
+        }
+
         applyScale();
+
+        // 更新竖屏提示显示状态
+        updateOrientationHint();
 
         // 触发全局事件，通知其他模块（如 touch-input）
         window.dispatchEvent(new CustomEvent('game-resize', {
@@ -191,10 +215,45 @@
                 scale: currentScale,
                 width: currentWidth,
                 height: currentHeight,
-                isMobile: isMobileDevice
+                isMobile: isMobileDevice,
+                isLandscape: isLandscapeOrientation
             }
         }));
     }, 100);
+
+    /**
+     * 显示/隐藏竖屏提示
+     */
+    function updateOrientationHint() {
+        const hint = document.getElementById('orientation-hint');
+        if (!hint) return;
+
+        // 仅在移动端竖屏且未手动关闭时显示
+        if (isMobileDevice && !isLandscapeOrientation && !orientationHintDismissed) {
+            hint.classList.remove('hidden');
+            hint.classList.add('active');
+        } else {
+            hint.classList.add('hidden');
+            hint.classList.remove('active');
+        }
+    }
+
+    // 用户是否手动关闭了提示
+    let orientationHintDismissed = false;
+
+    /**
+     * 设置竖屏提示关闭状态
+     */
+    function dismissOrientationHint() {
+        orientationHintDismissed = true;
+        updateOrientationHint();
+        // 保存到 sessionStorage，当前会话不再提示
+        try {
+            sessionStorage.setItem('orientationHintDismissed', 'true');
+        } catch (e) {
+            // 忽略存储错误
+        }
+    }
 
     /**
      * 初始化响应式系统
@@ -206,6 +265,23 @@
         if (!gameContainer || !canvas) {
             console.error('[Responsive] game-container or canvas not found!');
             return;
+        }
+
+        // 恢复之前的提示关闭状态
+        try {
+            orientationHintDismissed = sessionStorage.getItem('orientationHintDismissed') === 'true';
+        } catch (e) {
+            orientationHintDismissed = false;
+        }
+
+        // 绑定继续按钮事件
+        const continueBtn = document.getElementById('orientation-continue-btn');
+        if (continueBtn) {
+            continueBtn.addEventListener('click', dismissOrientationHint);
+            continueBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                dismissOrientationHint();
+            });
         }
 
         // 初始检测设备类型
@@ -234,11 +310,20 @@
         // 初始应用缩放
         applyScale();
 
+        // 显示/隐藏竖屏提示
+        updateOrientationHint();
+
         // 监听窗口大小变化
         window.addEventListener('resize', handleResize, { passive: true });
 
         // 监听方向变化
-        window.addEventListener('orientationchange', handleResize, { passive: true });
+        window.addEventListener('orientationchange', () => {
+            // 方向变化时稍微延迟处理，确保尺寸已更新
+            setTimeout(() => {
+                handleResize();
+                updateOrientationHint();
+            }, 100);
+        }, { passive: true });
 
         // 监听全屏变化
         document.addEventListener('fullscreenchange', handleResize, { passive: true });

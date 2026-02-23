@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>移动端横屏测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+        }
+        .info-box {
+            background: #16213e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        .label {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+        .value {
+            color: #fff;
+            margin-left: 10px;
+        }
+        .true {
+            color: #00ff66;
+        }
+        .false {
+            color: #ff3333;
+        }
+        #test-area {
+            width: 300px;
+            height: 200px;
+            background: #0f3460;
+            border: 2px solid #e94560;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+        @media (orientation: portrait) {
+            #test-area {
+                background: #533483;
+                border-color: #f39422;
+            }
+            #test-area::after {
+                content: "竖屏模式";
+            }
+        }
+        @media (orientation: landscape) {
+            #test-area::after {
+                content: "横屏模式";
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 移动端横屏测试</h1>
+    
+    <div class="info-box">
+        <div><span class="label">窗口宽度:</span><span class="value" id="window-width">-</span></div>
+        <div><span class="label">窗口高度:</span><span class="value" id="window-height">-</span></div>
+        <div><span class="label">宽高比:</span><span class="value" id="aspect-ratio">-</span></div>
+        <div><span class="label">是否横屏:</span><span class="value" id="is-landscape">-</span></div>
+        <div><span class="label">是否移动设备:</span><span class="value" id="is-mobile">-</span></div>
+        <div><span class="label">屏幕方向:</span><span class="value" id="orientation">-</span></div>
+    </div>
+
+    <div id="test-area"></div>
+
+    <div class="info-box">
+        <h3>测试说明:</h3>
+        <ol>
+            <li>在手机上打开此页面</li>
+            <li>旋转设备观察数值变化</li>
+            <li>测试区域颜色会在横屏/竖屏切换</li>
+            <li>验证 Responsive API 是否可用</li>
+        </ol>
+    </div>
+
+    <script>
+        function updateInfo() {
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            const isLandscape = width > height;
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            const orientation = screen.orientation ? screen.orientation.type : (isLandscape ? 'landscape' : 'portrait');
+
+            document.getElementById('window-width').textContent = width + 'px';
+            document.getElementById('window-height').textContent = height + 'px';
+            document.getElementById('aspect-ratio').textContent = (width / height).toFixed(2);
+            
+            const landscapeEl = document.getElementById('is-landscape');
+            landscapeEl.textContent = isLandscape ? '是' : '否';
+            landscapeEl.className = 'value ' + (isLandscape ? 'true' : 'false');
+            
+            const mobileEl = document.getElementById('is-mobile');
+            mobileEl.textContent = isMobile ? '是' : '否';
+            mobileEl.className = 'value ' + (isMobile ? 'true' : 'false');
+            
+            document.getElementById('orientation').textContent = orientation;
+        }
+
+        window.addEventListener('resize', updateInfo);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateInfo, 100);
+        });
+        
+        updateInfo();
+    </script>
+</body>
+</html>

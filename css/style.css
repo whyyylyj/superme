@@ -1276,11 +1276,11 @@ body.desktop-device .desktop-only-text {
         min-width: 80px;
     }
 
-    /* 移动端摇杆优化 */
+    /* 移动端摇杆优化 - 竖屏默认位置 */
     body.mobile-device .virtual-joystick {
         bottom: 25px;
-        left: 50%;
-        transform: translateX(-280%); /* 移动端调整偏移 */
+        left: 25px;
+        transform: none;
         width: 110px;
         height: 110px;
     }
@@ -1294,15 +1294,15 @@ body.desktop-device .desktop-only-text {
     body.mobile-device .action-buttons-container {
         bottom: 25px;
         right: 20px;
-        gap: 22px;
+        gap: 15px;
     }
 
     body.mobile-device .action-btn-row {
-        gap: 22px;
+        gap: 15px;
     }
 
     body.mobile-device .action-btn {
-        width: 70px; /* 移动端主按钮尺寸 */
+        width: 70px;
         height: 70px;
         font-size: 1.6rem;
     }
@@ -1344,56 +1344,10 @@ body.desktop-device .desktop-only-text {
     }
 
     /* 暂停按钮位置调整 */
-    body.mobile-device .touch-top-right {
-        top: 10px;
-        right: 10px;
-    }
-
     body.mobile-device .pause-btn {
         width: 40px;
         height: 40px;
         font-size: 0.7rem;
-    }
-
-    /* 横屏模式主战斗按钮 */
-    body.mobile-device .action-buttons-container {
-        bottom: 20px;
-        right: 15px;
-        gap: 18px;
-    }
-
-    body.mobile-device .action-btn-row {
-        gap: 18px;
-    }
-
-    body.mobile-device .action-btn {
-        width: 65px;
-        height: 65px;
-    }
-
-    /* 横屏模式辅助按钮 */
-    body.mobile-device .touch-top-right {
-        top: 12px;
-        right: 12px;
-    }
-
-    body.mobile-device .auxiliary-buttons {
-        gap: 6px;
-    }
-
-    body.mobile-device .aux-btn-row {
-        gap: 6px;
-    }
-
-    body.mobile-device .aux-btn {
-        width: 34px;
-        height: 34px;
-        font-size: 0.6rem;
-    }
-
-    body.mobile-device .aux-btn.small {
-        width: 32px;
-        height: 32px;
     }
 
     /* 移动端 Boss HUD */
@@ -1455,34 +1409,125 @@ body.desktop-device .desktop-only-text {
     }
 }
 
-/* 横屏模式优化 */
-@media (max-width: 800px) and (orientation: landscape) {
+/* =============================================
+   横屏模式优化 - Landscape
+   ============================================= */
+@media (max-width: 900px) and (orientation: landscape) {
+    /* 横屏 HUD 更紧凑 */
     body.mobile-device #hud {
-        font-size: 0.45rem;
+        font-size: 0.42rem;
         padding: 5px 10px;
+        gap: 6px;
     }
 
     body.mobile-device .hp-bar-container {
-        width: 80px;
+        width: 70px;
         height: 8px;
     }
 
-    /* 横屏模式摇杆位置 */
+    body.mobile-device #score-val {
+        font-size: 0.6rem;
+        min-width: 60px;
+    }
+
+    /* 横屏模式摇杆位置 - 左下角 */
     body.mobile-device .virtual-joystick {
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-260%);
-        width: 95px;
-        height: 95px;
+        bottom: 15px;
+        left: 15px;
+        transform: none;
+        width: 90px;
+        height: 90px;
     }
 
     body.mobile-device .joystick-knob {
-        width: 38px;
-        height: 38px;
+        width: 36px;
+        height: 36px;
+    }
+
+    /* 横屏模式主战斗按钮 - 更靠近右下角 */
+    body.mobile-device .action-buttons-container {
+        bottom: 15px;
+        right: 15px;
+        gap: 12px;
+    }
+
+    body.mobile-device .action-btn-row {
+        gap: 12px;
+    }
+
+    body.mobile-device .action-btn {
+        width: 58px;
+        height: 58px;
+        font-size: 1.4rem;
+    }
+
+    body.mobile-device .action-btn::before {
+        inset: -8px;
+    }
+
+    /* 横屏模式辅助按钮 - 右上角 */
+    body.mobile-device .touch-top-right {
+        top: 10px;
+        right: 10px;
+    }
+
+    body.mobile-device .auxiliary-buttons {
+        gap: 6px;
+    }
+
+    body.mobile-device .aux-btn-row {
+        gap: 6px;
+    }
+
+    body.mobile-device .aux-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.55rem;
+    }
+
+    body.mobile-device .pause-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.6rem;
+    }
+
+    /* 横屏 Boss HUD */
+    body.mobile-device #boss-hud {
+        bottom: 80px;
+    }
+
+    body.mobile-device .boss-hp-bar-container {
+        height: 10px;
+    }
+
+    /* 横屏关卡选择 */
+    body.mobile-device .level-cards {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    body.mobile-device .level-card {
+        width: 140px;
+        padding: 12px 8px;
+    }
+
+    body.mobile-device .level-card-icon {
+        font-size: 1.8rem;
+    }
+
+    body.mobile-device .level-card-name {
+        font-size: 0.55rem;
+    }
+
+    body.mobile-device .level-card-desc {
+        font-size: 0.35rem;
     }
 }
 
-/* iPhone notch support */
+/* =============================================
+   iPhone Notch / 安全区域支持
+   ============================================= */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
     #touch-controls {
         padding-bottom: env(safe-area-inset-bottom);
@@ -1490,20 +1535,90 @@ body.desktop-device .desktop-only-text {
         padding-right: env(safe-area-inset-right);
     }
 
+    /* 竖屏安全区域 */
     .virtual-joystick {
-        left: calc(50% + env(safe-area-inset-left));
-        transform: translateX(-250%);
-        bottom: calc(40px + env(safe-area-inset-bottom));
+        left: calc(25px + env(safe-area-inset-left));
+        bottom: calc(25px + env(safe-area-inset-bottom));
     }
 
     .action-buttons-container {
-        right: calc(30px + env(safe-area-inset-right));
-        bottom: calc(30px + env(safe-area-inset-bottom));
+        right: calc(20px + env(safe-area-inset-right));
+        bottom: calc(25px + env(safe-area-inset-bottom));
     }
 
     .touch-top-right {
-        top: calc(20px + env(safe-area-inset-top));
-        right: calc(20px + env(safe-area-inset-right));
+        top: calc(15px + env(safe-area-inset-top));
+        right: calc(15px + env(safe-area-inset-right));
+    }
+
+    /* 横屏安全区域 - 使用更小的基础值 */
+    @media (orientation: landscape) {
+        .virtual-joystick {
+            left: calc(15px + env(safe-area-inset-left));
+            bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+
+        .action-buttons-container {
+            right: calc(15px + env(safe-area-inset-right));
+            bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+
+        .touch-top-right {
+            top: calc(10px + env(safe-area-inset-top));
+            right: calc(10px + env(safe-area-inset-right));
+        }
+    }
+}
+
+/* =============================================
+   竖屏提示 - Orientation Hint
+   ============================================= */
+#orientation-hint {
+    background: rgba(10, 10, 26, 0.95);
+    z-index: 200;
+    display: none;
+}
+
+#orientation-hint.active {
+    display: flex;
+}
+
+.orientation-hint-content {
+    text-align: center;
+    padding: 30px;
+}
+
+.rotate-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: rotateHint 2s ease-in-out infinite;
+}
+
+@keyframes rotateHint {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(90deg);
+    }
+}
+
+.hint-text {
+    font-size: 1rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.hint-sub {
+    font-size: 0.6rem;
+    color: #888;
+}
+
+/* 仅在移动端竖屏时显示提示 */
+@media (max-width: 800px) and (orientation: portrait) {
+    body.mobile-device #orientation-hint:not(.hidden) {
+        display: flex;
     }
 }
 

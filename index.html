@@ -7,6 +7,11 @@
         content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="x5-fullscreen" content="true">
     <title>Superme - The Ultimate Adventure!</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -61,6 +66,16 @@
             <div id="level-message" class="overlay hidden no-bg">
                 <h1 id="level-message-text" class="glow big-text">STAGE 1</h1>
                 <p id="level-subtitle-text" class="glow-secondary">PREPARE TO FIGHT</p>
+            </div>
+
+            <!-- 竖屏提示 - 建议横屏游玩 -->
+            <div id="orientation-hint" class="overlay hidden">
+                <div class="orientation-hint-content">
+                    <div class="rotate-icon">📱➡️📱</div>
+                    <p class="hint-text">请旋转设备至横屏</p>
+                    <p class="hint-sub">获得最佳游戏体验</p>
+                    <button id="orientation-continue-btn" class="btn btn-outline" style="margin-top: 20px; font-size: 0.5rem;">继续游玩</button>
+                </div>
             </div>
 
             <!-- Start Screen -->

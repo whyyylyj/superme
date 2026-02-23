@@ -228,5 +228,50 @@ window.addEventListener('deviceorientation', (e) => {
 
 **状态**: ✅ 手机端适配完成
 
-**测试服务器**: http://localhost:8000  
+**测试服务器**: http://localhost:8000
 **测试页面**: http://localhost:8000/test-mobile.html
+
+---
+
+## 🆕 Mobile-Exclusive Optimizations (Feb 23, 2026)
+
+### Auto-Homing Mode (自动追踪)
+
+On touch devices, the homing mode (子弹跟踪) is **automatically enabled** at game start.
+
+- **Behavior:** Bullets automatically track nearest enemy
+- **Manual Control:** Tap 🎯 button to toggle homing on/off
+- **Visual Feedback:** Green particle explosion when enabled
+- **Desktop:** Remains opt-in via M key (no change)
+
+### Jump-Shoot Combo (跳跃射击组合技)
+
+Pressing the jump button (⬆️) automatically triggers continuous shooting.
+
+- **Behavior:** Hold jump to jump + shoot simultaneously
+- **Cooldown:** Respects existing shoot timing (no bullet spam)
+- **Manual Override:** Fire button (🔥) still works independently
+- **Desktop:** No change - keyboard controls remain separate
+
+### Implementation Details
+
+See: `js/touch-input.js`
+
+- Auto-homing enabled in `TouchInput.init()` at device detection
+- Jump-shoot combo in `setupButtons()` event handlers
+- Touch-only logic - zero impact on desktop gameplay
+
+### Testing Verification
+
+**Mobile Tests:**
+- [x] Auto-homing enabled on touch devices
+- [x] Jump button triggers auto-shoot
+- [x] Manual controls (🎯, 🔥) remain functional
+- [x] Desktop gameplay unchanged
+
+**Console Logs:**
+```
+[TouchInput] Auto-enabled homing mode for mobile
+[TouchInput] Jump pressed - auto-shooting enabled
+[TouchInput] Jump released - auto-shooting disabled
+```

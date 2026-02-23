@@ -1,7 +1,16 @@
 /**
  * touch-input.js
  * Handles virtual joystick and action buttons for mobile devices.
- * 
+ *
+ * Mobile-Only Optimizations:
+ * - Auto-enable homing mode on touch devices (Task 1)
+ * - Jump button triggers auto-shoot (Task 2)
+ *
+ * Desktop Behavior:
+ * - TouchInput.init() skips all initialization
+ * - No changes to desktop keyboard controls
+ * - Homing mode remains opt-in via M key
+ *
  * Features:
  * - Virtual joystick with deadzone
  * - Action buttons with haptic feedback

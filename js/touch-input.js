@@ -27,8 +27,8 @@ const TouchInput = {
         startY: 0,
         currentX: 0,
         currentY: 0,
-        maxRadius: 50,
-        deadzone: 10
+        maxRadius: 60,
+        deadzone: 15
     },
 
     // 连射模式
@@ -317,18 +317,36 @@ const TouchInput = {
 
     setupButtons: function () {
         const buttons = document.querySelectorAll('.action-btn, .aux-btn, .pause-btn');
+        
+        // 记录按钮按下状态，用于解决冲突
+        const buttonState = {
+            shoot: false,
+            jump: false
+        };
+
         buttons.forEach(btn => {
             const key = btn.dataset.key;
             if (!key) return;
 
             btn.addEventListener('touchstart', (e) => {
-                // 特殊处理连射按钮
+                // 特殊处理连射按钮：改为切换模式 (Toggle)
                 if (key === 'autofire') {
-                    this.startAutoFire();
-                    btn.classList.add('active');
-                    this.vibrate([10, 30, 10]);
+                    if (this.autoFire.isActive) {
+                        this.stopAutoFire();
+                        btn.classList.remove('active');
+                        this.vibrate(20);
+                    } else {
+                        this.startAutoFire();
+                        btn.classList.add('active');
+                        this.vibrate([10, 30, 10]);
+                    }
                     e.preventDefault();
                     return;
+                }
+
+                // 记录状态
+                if (key === 'shoot' || key === 'jump') {
+                    buttonState[key] = true;
                 }
 
                 // 正常按钮处理
@@ -366,12 +384,15 @@ const TouchInput = {
                 // 如果是暂停按钮，忽略 touchend，因为已经在 touchstart 中处理了脉冲
                 if (key === 'pause') return;
 
-                // 特殊处理连射按钮
+                // 特殊处理连射按钮：连射按钮现在是切换模式，在 touchend 中不做处理
                 if (key === 'autofire') {
-                    this.stopAutoFire();
-                    btn.classList.remove('active');
                     e.preventDefault();
                     return;
+                }
+
+                // 记录状态
+                if (key === 'shoot' || key === 'jump') {
+                    buttonState[key] = false;
                 }
 
                 // 正常按钮处理
@@ -379,26 +400,43 @@ const TouchInput = {
                 btn.classList.remove('active');
 
                 // Mobile optimization: Stop auto-shoot when jump button released
+                // 只有在射击键也没按下，且没有自动连发时才停止射击
                 if (key === 'jump') {
-                    Input.virtualKeys.shoot = false;
-                    console.log('[TouchInput] Jump released - auto-shooting disabled');
+                    if (!buttonState.shoot && !this.autoFire.isActive) {
+                        Input.virtualKeys.shoot = false;
+                        console.log('[TouchInput] Jump released - auto-shooting disabled');
+                    } else {
+                        console.log('[TouchInput] Jump released - keeping shoot active due to other source');
+                    }
                 }
+                
+                // 同样，如果松开的是射击键，但跳跃键还在按着，保持射击
+                if (key === 'shoot') {
+                    if (buttonState.jump || this.autoFire.isActive) {
+                        Input.virtualKeys.shoot = true;
+                    }
+                }
+
                 e.preventDefault();
             });
 
             btn.addEventListener('touchcancel', (e) => {
-                if (key === 'autofire') {
-                    this.stopAutoFire();
-                    btn.classList.remove('active');
-                    return;
+                // 连射按钮切换模式下，通常不因 touchcancel 而停止，除非用户滑出太远或系统中断
+                if (key === 'autofire') return;
+
+                if (key === 'shoot' || key === 'jump') {
+                    buttonState[key] = false;
                 }
+
                 Input.virtualKeys[key] = false;
                 btn.classList.remove('active');
 
                 // Mobile optimization: Stop auto-shoot on touch cancel
                 if (key === 'jump') {
-                    Input.virtualKeys.shoot = false;
-                    console.log('[TouchInput] Jump cancelled - auto-shooting disabled');
+                    if (!buttonState.shoot && !this.autoFire.isActive) {
+                        Input.virtualKeys.shoot = false;
+                        console.log('[TouchInput] Jump cancelled - auto-shooting disabled');
+                    }
                 }
             });
         });

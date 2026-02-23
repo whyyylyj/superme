@@ -121,6 +121,17 @@ class Player extends Entity {
             this.sitWasPressed = false;
         }
 
+        // 坐下时如果有移动输入，自动取消坐下状态
+        if (this.sitMode && (Input.left || Input.right || Input.jump || Input.up || Input.down)) {
+            this.sitMode = false;
+            this.sitTimer = 0;
+            this.currentDreamText = '';
+            // 如果是移动端虚拟按键触发的 SIT，我们需要重置虚拟按键状态以防止冲突
+            if (typeof Input.virtualKeys !== 'undefined') {
+                Input.virtualKeys.sit = false;
+            }
+        }
+
         // 坐下时不能移动或攻击
         if (this.sitMode) {
             this.vx = 0;

@@ -978,36 +978,29 @@ body.desktop-device .desktop-only-text {
 
 /* =============================================
    Touch Controls (Mobile)
-   重新设计：主战斗按钮在右下，辅助功能在右上
+   重新设计：弧形布局 (Arc Layout)
    ============================================= */
 
 /* 主要战斗按钮容器（右下角） */
 .action-buttons-container {
     position: absolute;
-    bottom: 30px;
-    right: 30px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px; /* 增加垂直间距 */
-    pointer-events: auto;
+    bottom: 40px;
+    right: 40px;
+    width: 220px;
+    height: 220px;
+    pointer-events: none;
 }
 
-.action-btn-row {
-    display: flex;
-    gap: 20px; /* 增加水平间距 */
-    justify-content: flex-end;
-    align-items: center;
-}
-
-/* 主战斗按钮样式 - 更大更突出 */
+/* 主战斗按钮样式 - 默认弧形定位 */
 .action-btn {
-    width: 75px; /* 增大主按钮 */
+    position: absolute;
+    width: 75px;
     height: 75px;
     background: rgba(255, 0, 255, 0.2);
     border: 3px solid var(--secondary-color);
     border-radius: 50%;
     color: #fff;
-    font-size: 1.8rem; /* 使用 emoji，字号更大 */
+    font-size: 1.8rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1017,77 +1010,55 @@ body.desktop-device .desktop-only-text {
     touch-action: manipulation;
     box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
     transition: all 0.1s;
-    position: relative;
-    /* 增加触摸区域 */
-}
-
-.action-btn::before {
-    content: '';
-    position: absolute;
-    inset: -10px;
-    border-radius: 50%;
     pointer-events: auto;
 }
 
-.action-btn.active {
-    background: rgba(255, 0, 255, 0.5);
-    box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
-    transform: scale(0.92);
-}
-
+/* 按钮位置 - 基于拇指弧线 (以右下角为原点向外扩展) */
 .action-btn.btn-shoot {
+    bottom: 0;
+    right: 60px; /* 主射击键 */
     background: rgba(255, 51, 51, 0.3);
     border-color: var(--danger-color);
     box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
 }
 
-.action-btn.btn-shoot.active {
-    background: rgba(255, 51, 51, 0.6);
-    box-shadow: 0 0 25px rgba(255, 51, 51, 0.7);
-}
-
 .action-btn.btn-jump {
+    bottom: 80px;
+    right: 0; /* 跳跃键 - 在射击键右上方，符合大部分平台跳跃逻辑 */
     background: rgba(0, 255, 102, 0.2);
     border-color: var(--success-color);
     box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
 }
 
+.action-btn.btn-transform {
+    bottom: 120px;
+    right: 90px; /* 变身键 - 在左上方，稍远一些，防止误触 */
+    width: 65px; /* 变身键稍小 */
+    height: 65px;
+    font-size: 1.5rem;
+    background: rgba(255, 0, 255, 0.2);
+    border-color: var(--secondary-color);
+}
+
+.action-btn::before {
+    content: '';
+    position: absolute;
+    inset: -15px; /* 增加热区 */
+    border-radius: 50%;
+}
+
+.action-btn.active {
+    transform: scale(0.92);
+    filter: brightness(1.5);
+    box-shadow: 0 0 25px currentColor;
+}
+
+.action-btn.btn-shoot.active {
+    background: rgba(255, 51, 51, 0.6);
+}
+
 .action-btn.btn-jump.active {
     background: rgba(0, 255, 102, 0.5);
-    box-shadow: 0 0 25px rgba(0, 255, 102, 0.6);
-}
-
-.action-btn.small {
-    min-width: 45px;
-    height: 45px;
-    font-size: 0.4rem;
-}
-
-.action-btn.btn-m {
-    background: rgba(100, 100, 255, 0.2);
-    border-color: #6666ff;
-}
-
-.action-btn.btn-m.active {
-    background: rgba(100, 100, 255, 0.5);
-}
-
-.action-btn.btn-k {
-    background: rgba(255, 165, 0, 0.2);
-    border-color: orange;
-}
-
-.action-btn.btn-k.active {
-    background: rgba(255, 165, 0, 0.5);
-}
-
-.action-btn.btn-sit {
-    background: rgba(128, 128, 128, 0.2);
-    border-color: #888;
-}
-
-.action-btn.btn-sit.active {
-    background: rgba(128, 128, 128, 0.5);
 }
 
 /* =============================================
@@ -1290,21 +1261,36 @@ body.desktop-device .desktop-only-text {
         height: 45px;
     }
 
-    /* 移动端按钮优化 - 主战斗按钮更大 */
+    /* 移动端按钮优化 - 保持弧形布局并缩放 */
     body.mobile-device .action-buttons-container {
         bottom: 25px;
-        right: 20px;
-        gap: 15px;
-    }
-
-    body.mobile-device .action-btn-row {
-        gap: 15px;
+        right: 25px;
+        width: 180px;
+        height: 180px;
     }
 
     body.mobile-device .action-btn {
-        width: 70px;
-        height: 70px;
+        width: 65px;
+        height: 65px;
         font-size: 1.6rem;
+    }
+
+    body.mobile-device .action-btn.btn-shoot {
+        bottom: 0;
+        right: 50px;
+    }
+
+    body.mobile-device .action-btn.btn-jump {
+        bottom: 70px;
+        right: 0;
+    }
+
+    body.mobile-device .action-btn.btn-transform {
+        bottom: 110px;
+        right: 80px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
     }
 
     body.mobile-device .action-btn::before {
@@ -1444,21 +1430,36 @@ body.desktop-device .desktop-only-text {
         height: 36px;
     }
 
-    /* 横屏模式主战斗按钮 - 更靠近右下角 */
+    /* 横屏模式主战斗按钮 - 弧形布局更紧凑 */
     body.mobile-device .action-buttons-container {
         bottom: 15px;
         right: 15px;
-        gap: 12px;
-    }
-
-    body.mobile-device .action-btn-row {
-        gap: 12px;
+        width: 150px;
+        height: 150px;
     }
 
     body.mobile-device .action-btn {
-        width: 58px;
-        height: 58px;
+        width: 55px;
+        height: 55px;
         font-size: 1.4rem;
+    }
+
+    body.mobile-device .action-btn.btn-shoot {
+        bottom: 0;
+        right: 45px;
+    }
+
+    body.mobile-device .action-btn.btn-jump {
+        bottom: 60px;
+        right: 0;
+    }
+
+    body.mobile-device .action-btn.btn-transform {
+        bottom: 90px;
+        right: 70px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.1rem;
     }
 
     body.mobile-device .action-btn::before {

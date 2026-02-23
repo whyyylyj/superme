@@ -12,6 +12,10 @@ on:
       - main
   workflow_dispatch: # 允许手动触发部署
 
+# 设置权限以允许向 gh-pages 分支推送
+permissions:
+  contents: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

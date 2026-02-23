@@ -24,7 +24,7 @@ const TouchInput = {
 
     // 连射模式
     autoFire: {
-        enabled: false,
+        enabled: true, // 默认开启连射模式
         interval: 150, // 连射间隔（毫秒）
         timer: null,
         isActive: false

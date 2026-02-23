@@ -165,8 +165,9 @@ class EnemyTicTacToe extends Entity {
      * @param {number} levelNumber - 当前关卡编号
      */
     triggerChallenge(levelNumber = 1) {
-        // 设置冷却时间
-        this.cooldown = this.cooldownTime;
+        // 标记为删除状态，触发后立即消失
+        this.markedForDeletion = true;
+        this.active = false;
 
         // 发送事件
         if (typeof EventBus !== 'undefined') {

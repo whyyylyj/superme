@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹幕组合生成器 - 单元测试</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        h1 {
+            color: #4a7c43;
+            border-bottom: 2px solid #4a7c43;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #00ff7f;
+            margin-top: 30px;
+        }
+        .test-section {
+            background: #16213e;
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #4a7c43;
+        }
+        .test-result {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .pass {
+            background: rgba(0, 255, 127, 0.2);
+            border-left: 4px solid #00ff7f;
+        }
+        .fail {
+            background: rgba(255, 0, 0, 0.2);
+            border-left: 4px solid #ff0000;
+        }
+        code {
+            background: #0f3460;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            background: #4a7c43;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background: #00ff7f;
+        }
+        #output {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 5px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎮 弹幕组合生成器 - 单元测试</h1>
+
+    <div class="test-section">
+        <h2>测试控制</h2>
+        <button onclick="runAllTests()">▶ 运行所有测试</button>
+        <button onclick="clearOutput()">🗑️ 清空输出</button>
+        <button onclick="window.location.href='index.html'">🎮 启动游戏</button>
+    </div>
+
+    <div class="test-section">
+        <h2>测试输出</h2>
+        <div id="output"></div>
+    </div>
+
+    <script src="js/danmaku/bullet-genes.js"></script>
+    <script src="js/danmaku/pattern-weaver.js"></script>
+
+    <script>
+        // 测试输出辅助函数
+        function log(message, type = 'info') {
+            const output = document.getElementById('output');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+        }
+
+        // 测试1: 弹幕基因系统加载
+        function testBulletGenesLoad() {
+            try {
+                if (typeof BULLET_GENES === 'undefined') {
+                    log('❌ BULLET_GENES 未定义', 'fail');
+                    return false;
+                }
+                if (typeof BulletMutator === 'undefined') {
+                    log('❌ BulletMutator 未定义', 'fail');
+                    return false;
+                }
+                log('✅ 弹幕基因系统加载成功', 'pass');
+                return true;
+            } catch (e) {
+                log(`❌ 弹幕基因系统加载失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 测试2: 弹幕编织器加载
+        function testPatternWeaverLoad() {
+            try {
+                if (typeof PatternWeaver === 'undefined') {
+                    log('❌ PatternWeaver 未定义', 'fail');
+                    return false;
+                }
+                if (typeof PRESET_WEAVES === 'undefined') {
+                    log('❌ PRESET_WEAVES 未定义', 'fail');
+                    return false;
+                }
+                log('✅ 弹幕编织器加载成功', 'pass');
+                log(`📦 已加载 ${Object.keys(PRESET_WEAVES).length} 个预设组合`, 'pass');
+                return true;
+            } catch (e) {
+                log(`❌ 弹幕编织器加载失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 测试3: 基因变异功能
+        function testMutation() {
+            try {
+                const baseParams = { speed: 250, size: 8 };
+                const mutated = BulletMutator.mutatePattern(baseParams, 0);
+
+                if (mutated.speed === baseParams.speed) {
+                    log('⚠️ 速度未发生变异（可能是随机数问题）', 'fail');
+                    return false;
+                }
+
+                if (mutated.color === undefined) {
+                    log('❌ 变异后缺少颜色属性', 'fail');
+                    return false;
+                }
+
+                log(`✅ 基因变异功能正常`, 'pass');
+                log(`📊 原始速度: ${baseParams}, 变异后: ${JSON.stringify(mutated)}`, 'pass');
+                return true;
+            } catch (e) {
+                log(`❌ 基因变异测试失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 测试4: 弹幕组合功能
+        function testPatternCombination() {
+            try {
+                const mockEmitter = { x: 100, y: 100 };
+                const weaver = new PatternWeaver(mockEmitter);
+
+                const combined = weaver.combine(
+                    'circle', { count: 8 },
+                    'spiral', { arms: 3 },
+                    'parallel',
+                    5
+                );
+
+                if (combined.type !== 'combined') {
+                    log('❌ 组合类型错误', 'fail');
+                    return false;
+                }
+
+                if (combined.patterns.length !== 2) {
+                    log('❌ 组合模式数量错误', 'fail');
+                    return false;
+                }
+
+                log('✅ 弹幕组合功能正常', 'pass');
+                log(`📦 组合类型: ${combined.mode}, 模式数: ${combined.patterns.length}`, 'pass');
+                return true;
+            } catch (e) {
+                log(`❌ 弹幕组合测试失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 测试5: 预设组合
+        function testPresetWeaves() {
+            try {
+                const presetNames = Object.keys(PRESET_WEAVES);
+                let validCount = 0;
+
+                presetNames.forEach(name => {
+                    const preset = PRESET_WEAVES[name];
+                    if (preset.patterns && preset.params && preset.blendMode) {
+                        validCount++;
+                    }
+                });
+
+                if (validCount !== presetNames.length) {
+                    log(`❌ 预设组合验证失败: ${validCount}/${presetNames.length}`, 'fail');
+                    return false;
+                }
+
+                log('✅ 预设组合验证通过', 'pass');
+                log(`📦 有效预设: ${validCount}个`, 'pass');
+                log(`📋 预设列表: ${presetNames.join(', ')}`, 'pass');
+                return true;
+            } catch (e) {
+                log(`❌ 预设组合测试失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 测试6: 颜色变异
+        function testColorMutation() {
+            try {
+                const color1 = BulletMutator.mutateColor(0);
+                const color2 = BulletMutator.mutateColor(1);
+                const color3 = BulletMutator.mutateColor(2);
+
+                if (!color1 || !color2 || !color3) {
+                    log('❌ 颜色变异返回空值', 'fail');
+                    return false;
+                }
+
+                log('✅ 颜色变异功能正常', 'pass');
+                log(`🎨 第一关: ${color1}`, 'pass');
+                log(`🎨 第二关: ${color2}`, 'pass');
+                log(`🎨 第三关: ${color3}`, 'pass');
+                return true;
+            } catch (e) {
+                log(`❌ 颜色变异测试失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 测试7: 编织器更新
+        function testWeaverUpdate() {
+            try {
+                const mockEmitter = { x: 100, y: 100 };
+                const weaver = new PatternWeaver(mockEmitter);
+
+                const combined = weaver.combine(
+                    'circle', { count: 8 },
+                    'spiral', { arms: 3 },
+                    'parallel',
+                    0.1 // 短持续时间
+                );
+
+                weaver.startWeave('test', combined);
+
+                // 模拟更新
+                let iterations = 0;
+                const maxIterations = 20;
+
+                const interval = setInterval(() => {
+                    weaver.update(0.016); // ~60fps
+                    iterations++;
+
+                    if (iterations >= maxIterations) {
+                        clearInterval(interval);
+                        log('✅ 编织器更新功能正常', 'pass');
+                        log(`📦 活跃编织数: ${weaver.activeWeaves.size}`, 'pass');
+                    }
+                }, 16);
+
+                return true;
+            } catch (e) {
+                log(`❌ 编织器更新测试失败: ${e.message}`, 'fail');
+                return false;
+            }
+        }
+
+        // 运行所有测试
+        function runAllTests() {
+            clearOutput();
+            log('🚀 开始运行测试套件...', 'info');
+            log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+
+            setTimeout(() => testBulletGenesLoad(), 100);
+            setTimeout(() => testPatternWeaverLoad(), 200);
+            setTimeout(() => testMutation(), 300);
+            setTimeout(() => testPatternCombination(), 400);
+            setTimeout(() => testPresetWeaves(), 500);
+            setTimeout(() => testColorMutation(), 600);
+            setTimeout(() => testWeaverUpdate(), 700);
+
+            setTimeout(() => {
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', 'info');
+                log('🎉 测试套件执行完成！', 'pass');
+            }, 1000);
+        }
+
+        // 页面加载时自动运行测试
+        window.onload = function() {
+            log('✅ 测试页面加载完成', 'pass');
+            log('📝 点击"运行所有测试"按钮开始测试', 'info');
+        };
+    </script>
+</body>
+</html>

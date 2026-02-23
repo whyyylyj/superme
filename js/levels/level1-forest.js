@@ -84,109 +84,153 @@ class Level1Forest extends LevelBase {
     }
 
     /**
-     * 生成平台布局
+     * 生成平台布局（使用片段系统）
      */
     generatePlatforms() {
-        // ============ 区域1: 起始区域 (0-1000px) ============
-        // 地面平台
-        this.addPlatform(0, 500, 800, 100, '#223344');
-        this.addPlatform(900, 500, 400, 100, '#223344');
+        // 使用片段构建器程序化生成关卡
+        const builder = new SegmentBuilder();
 
-        // 教程浮动平台（引导跳跃）
-        this.addPlatform(300, 350, 150, 20, '#2a4a2a');
-        this.addPlatform(600, 250, 120, 20, '#2a4a2a');
+        // 起始区域（教程）
+        builder.addSegment(SEGMENT_LIBRARY.forest.tutorial_start);
 
-        // ============ 区域2: 学习区域 (1000-2000px) ============
-        this.addPlatform(1400, 500, 600, 100, '#223344');
+        // 平台跳跃教学区
+        builder.addSegment(SEGMENT_LIBRARY.forest.low_jump)
+               .addSegment(SEGMENT_LIBRARY.forest.basic_ground);
 
-        // 多层跳跃训练
-        this.addPlatform(1100, 350, 100, 20, '#2a4a2a');
-        this.addPlatform(1300, 280, 100, 20, '#2a4a2a');
-        this.addPlatform(1500, 200, 150, 20, '#2a4a2a');
-        this.addPlatform(1800, 300, 150, 20, '#2a4a2a');
+        // 第一个战斗区域
+        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
 
-        // ============ 区域3: 挑战区域 (2000-3000px) ============
-        this.addPlatform(2100, 500, 900, 100, '#223344');
+        // 多层跳跃挑战
+        builder.addSegment(SEGMENT_LIBRARY.forest.multi_layer)
+               .addSegment(SEGMENT_LIBRARY.forest.big_gap);
 
-        // 上升平台序列
-        this.addPlatform(2200, 380, 120, 20, '#2a4a2a');
-        this.addPlatform(2400, 280, 120, 20, '#2a4a2a');
-        this.addPlatform(2600, 180, 120, 20, '#2a4a2a');
-        this.addPlatform(2800, 280, 120, 20, '#2a4a2a');
+        // 空中战斗区
+        builder.addSegment(SEGMENT_LIBRARY.forest.high_platform)
+               .addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
-        // ============ 区域4: Boss前准备 (3000-4000px) ============
-        this.addPlatform(3100, 500, 900, 100, '#223344');
+        // 连续跳跃挑战
+        builder.addSegment(SEGMENT_LIBRARY.forest.jump_challenge);
 
-        // 战术平台
-        this.addPlatform(3300, 350, 200, 20, '#2a4a2a');
-        this.addPlatform(3700, 250, 150, 20, '#2a4a2a');
+        // 隐藏道具区域
+        builder.addSegment(SEGMENT_LIBRARY.forest.tree_hideout);
 
-        // ============ 区域5: Boss竞技场 (4000-5000px) ============
-        // 大型Boss战平台
-        this.addPlatform(4000, 500, 1000, 100, '#2a3a2a');
+        // Boss 前连续战斗
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush)
+               .addSegment(SEGMENT_LIBRARY.forest.small_battle)
+               .addSegment(SEGMENT_LIBRARY.forest.empty)
+               .addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
-        // 上层平台（战术移动用）
-        this.addPlatform(4200, 350, 150, 20, '#2a4a2a');
-        this.addPlatform(4550, 350, 150, 20, '#2a4a2a');
-        this.addPlatform(4300, 200, 400, 20, '#2a4a2a');
+        // 构建关卡数据
+        const levelData = builder.build();
+
+        // 创建平台对象
+        levelData.platforms.forEach(p => {
+            this.platforms.push(new Platform(p.x, p.y, p.width, p.height, p.color));
+        });
+
+        // 更新关卡宽度
+        this.config.width = levelData.width;
+
+        console.log(`📐 片段系统构建完成: 宽度=${levelData.width}px, 平台=${levelData.platforms.length}个`);
     }
 
     /**
-     * 生成敌人
+     * 生成敌人（使用片段系统）
      */
     generateEnemies() {
-        // 区域1: 简单敌人（教程）
-        this.enemies.push(EnemyTypes.createSlime(400, 320));
-        this.enemies.push(EnemyTypes.createSlime(700, 220));
+        // 使用片段构建器获取敌人数据
+        const builder = new SegmentBuilder();
 
-        // 区域2: 引入追踪敌人
-        this.enemies.push(EnemyTypes.createGoblin(1200, 470));
-        this.enemies.push(EnemyTypes.createBat(1500, 270));
-        this.enemies.push(EnemyTypes.createSeedling(1700, 470));
-        this.enemies.push(EnemyTypes.createBat(1900, 170));
+        // 重复使用相同的片段序列（与generatePlatforms保持一致）
+        builder.addSegment(SEGMENT_LIBRARY.forest.tutorial_start);
+        builder.addSegment(SEGMENT_LIBRARY.forest.low_jump);
+        builder.addSegment(SEGMENT_LIBRARY.forest.basic_ground);
+        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.multi_layer);
+        builder.addSegment(SEGMENT_LIBRARY.forest.big_gap);
+        builder.addSegment(SEGMENT_LIBRARY.forest.high_platform);
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
+        builder.addSegment(SEGMENT_LIBRARY.forest.jump_challenge);
+        builder.addSegment(SEGMENT_LIBRARY.forest.tree_hideout);
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
+        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.empty);
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
-        // 区域3: 成组敌人
-        this.enemies.push(EnemyTypes.createSlime(2200, 350));
-        this.enemies.push(EnemyTypes.createGoblin(2300, 470));
-        this.enemies.push(EnemyTypes.createSeedling(2500, 250));
-        this.enemies.push(EnemyTypes.createBat(2700, 250));
+        const levelData = builder.build();
 
-        // 区域4: Boss前小怪
-        this.enemies.push(EnemyTypes.createGoblin(3200, 470));
-        this.enemies.push(EnemyTypes.createBat(3400, 320));
-        this.enemies.push(EnemyTypes.createSlime(3600, 470));
-        this.enemies.push(EnemyTypes.createSeedling(3800, 220));
+        // 根据片段数据创建敌人
+        levelData.enemies.forEach(e => {
+            this.spawnEnemyFromData(e.x, e.y, e.type);
+        });
 
-        // Boss区域不放置小怪
+        console.log(`👾 片段系统生成敌人: ${levelData.enemies.length}个`);
     }
 
     /**
-     * 生成道具
+     * 从片段数据生成敌人
+     */
+    spawnEnemyFromData(x, y, type) {
+        // 根据类型创建敌人（兼容现有的EnemyTypes系统）
+        switch(type) {
+            case 'walking':
+                this.enemies.push(EnemyTypes.createSlime(x, y));
+                break;
+            case 'flying':
+                this.enemies.push(EnemyTypes.createBat(x, y));
+                break;
+            case 'goblin':
+                this.enemies.push(EnemyTypes.createGoblin(x, y));
+                break;
+            case 'seedling':
+                this.enemies.push(EnemyTypes.createSeedling(x, y));
+                break;
+            default:
+                console.warn(`未知敌人类型: ${type}`);
+        }
+    }
+
+    /**
+     * 生成道具（使用片段系统）
      */
     generatePowerups() {
-        // 区域1: 基础道具
-        this.powerups.push(this.createPowerUp(350, 200, 'speed'));
-        this.powerups.push(this.createPowerUp(650, 150, 'spread'));
+        // 使用片段构建器获取道具数据
+        const builder = new SegmentBuilder();
 
-        // 区域2: 进阶道具
-        this.powerups.push(this.createPowerUp(1400, 400, 'shield'));
-        this.powerups.push(this.createPowerUp(1550, 100, 'rapid'));
+        // 重复使用相同的片段序列
+        builder.addSegment(SEGMENT_LIBRARY.forest.tutorial_start);
+        builder.addSegment(SEGMENT_LIBRARY.forest.low_jump);
+        builder.addSegment(SEGMENT_LIBRARY.forest.basic_ground);
+        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.multi_layer);
+        builder.addSegment(SEGMENT_LIBRARY.forest.big_gap);
+        builder.addSegment(SEGMENT_LIBRARY.forest.high_platform);
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
+        builder.addSegment(SEGMENT_LIBRARY.forest.jump_challenge);
+        builder.addSegment(SEGMENT_LIBRARY.forest.tree_hideout);
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
+        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.empty);
+        builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
-        // 区域3: 强化道具
-        this.powerups.push(this.createPowerUp(2400, 200, 'star'));
-        this.powerups.push(this.createPowerUp(2700, 200, 'bamboo'));
+        const levelData = builder.build();
 
-        // 区域4: Boss前准备
-        this.powerups.push(this.createPowerUp(3350, 250, 'spread'));
-        this.powerups.push(this.createPowerUp(3750, 150, 'shield'));
+        // 根据片段数据创建道具
+        levelData.powerups.forEach(p => {
+            this.powerups.push(new PowerUp(p.x, p.y, p.type));
+        });
+
+        console.log(`🎁 片段系统生成道具: ${levelData.powerups.length}个`);
     }
 
     /**
      * 生成Boss
      */
     generateBoss() {
-        // Boss位于关卡末端
-        this.boss = new TreantKing(4500, 350);
+        // Boss位于关卡末端（动态计算）
+        const bossX = this.config.width - 500;
+        this.boss = new TreantKing(bossX, 350);
+        console.log(`🌳 Boss位置: ${bossX}`);
     }
 
     /**
@@ -334,9 +378,9 @@ class Level1Forest extends LevelBase {
     /**
      * 更新关卡
      */
-    update(dt, player, bullets) {
+    update(dt, player, bullets, level) {
         // 更新敌人（传入player和bullets以支持高级AI）
-        this.enemies.forEach(e => e.update(dt, player, this.platforms, bullets));
+        this.enemies.forEach(e => e.update(dt, player, this.platforms, bullets, level));
         this.enemies = this.enemies.filter(e => !e.markedForDeletion);
 
         // 更新道具
@@ -344,7 +388,7 @@ class Level1Forest extends LevelBase {
 
         // 更新Boss
         if (this.boss && !this.boss.markedForDeletion) {
-            this.boss.update(dt, player, this.platforms, bullets);
+            this.boss.update(dt, player, this.platforms, bullets, level);
         } else if (this.boss && this.boss.markedForDeletion) {
             this.isCompleted = true;
             this.triggerVictoryEffects();

@@ -27,3 +27,6 @@ temp/
 
 # Build output
 _site/
+
+# Git worktrees
+.worktrees/

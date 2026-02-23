@@ -326,6 +326,12 @@ const TouchInput = {
                 Input.virtualKeys[key] = true;
                 btn.classList.add('active');
 
+                // Mobile optimization: Jump button triggers auto-shoot
+                if (key === 'jump') {
+                    Input.virtualKeys.shoot = true;
+                    console.log('[TouchInput] Jump pressed - auto-shooting enabled');
+                }
+
                 // Haptic feedback
                 if (key === 'shoot') {
                     this.vibrate(10);
@@ -362,6 +368,12 @@ const TouchInput = {
                 // 正常按钮处理
                 Input.virtualKeys[key] = false;
                 btn.classList.remove('active');
+
+                // Mobile optimization: Stop auto-shoot when jump button released
+                if (key === 'jump') {
+                    Input.virtualKeys.shoot = false;
+                    console.log('[TouchInput] Jump released - auto-shooting disabled');
+                }
                 e.preventDefault();
             });
 
@@ -373,6 +385,12 @@ const TouchInput = {
                 }
                 Input.virtualKeys[key] = false;
                 btn.classList.remove('active');
+
+                // Mobile optimization: Stop auto-shoot on touch cancel
+                if (key === 'jump') {
+                    Input.virtualKeys.shoot = false;
+                    console.log('[TouchInput] Jump cancelled - auto-shooting disabled');
+                }
             });
         });
 

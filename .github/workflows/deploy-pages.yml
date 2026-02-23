@@ -35,9 +35,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. 设置 Pages 环境
+      # 2. 设置 Pages 环境（自动启用 Pages）
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
 
       # 3. 准备部署文件（排除不必要的文件）
       - name: Prepare deployment files

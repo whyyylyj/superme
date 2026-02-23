@@ -39,14 +39,27 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
-      # 3. 上传构建产物（本项目无需构建，直接上传整个项目）
+      # 3. 准备部署文件（排除不必要的文件）
+      - name: Prepare deployment files
+        run: |
+          # 创建部署目录
+          mkdir -p ./_site
+          
+          # 复制必要的文件
+          cp -r index.html css/ js/ ./_site/
+          
+          # 复制文档和 README（可选）
+          cp README.md ./_site/ 2>/dev/null || true
+          cp -r docs/ ./_site/ 2>/dev/null || true
+
+      # 4. 上传构建产物
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 上传整个项目根目录
-          path: '.'
+          # 只上传 _site 目录（不含 tests, node_modules 等）
+          path: './_site'
 
-      # 4. 部署到 GitHub Pages
+      # 5. 部署到 GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

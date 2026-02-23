@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Superme - The Ultimate Adventure!</title>
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -184,6 +187,32 @@
                 <button id="mute-btn" class="btn btn-small" style="margin-bottom: 15px;">🔊 SOUND: ON</button>
                 <button id="quit-btn" class="btn btn-danger">QUIT TO MENU</button>
             </div>
+
+            <!-- Touch Controls -->
+            <div id="touch-controls" class="hidden">
+                <div class="virtual-joystick" id="virtual-joystick">
+                    <div class="joystick-knob" id="joystick-knob"></div>
+                </div>
+
+                <div class="action-buttons-container">
+                    <div class="action-btn-row">
+                        <div class="action-btn small btn-k" data-key="transform">K</div>
+                        <div class="action-btn btn-jump" data-key="jump">JUMP</div>
+                    </div>
+                    <div class="action-btn-row">
+                        <div class="action-btn small btn-m" data-key="homing">M</div>
+                        <div class="action-btn btn-shoot" data-key="shoot">FIRE</div>
+                    </div>
+                </div>
+
+                <div class="touch-bottom-left">
+                    <div class="action-btn small btn-sit" data-key="sit">SIT</div>
+                </div>
+
+                <div class="touch-top-right">
+                    <div class="pause-btn" data-key="pause">⏸</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -195,6 +224,7 @@
     <script src="js/core/audio-manager.js"></script>
     <script src="js/physics.js"></script>
     <script src="js/input.js"></script>
+    <script src="js/touch-input.js"></script>
     <script src="js/entity.js"></script>
     <script src="js/particle.js"></script>
 
@@ -204,6 +234,9 @@
     <script src="js/transform/form-dragon.js"></script>
     <script src="js/transform/form-phantom.js"></script>
     <script src="js/transform/transform-system.js"></script>
+
+    <!-- 2.5 小游戏系统 -->
+    <script src="js/minigame/tic-tac-toe.js"></script>
 
     <!-- 3. 弹幕系统 -->
     <script src="js/danmaku/bullet-pool.js"></script>

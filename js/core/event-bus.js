@@ -62,4 +62,10 @@ EventBus.EVENTS = {
     GAME_OVER: 'game:over',
     GAME_WIN: 'game:win',
     STATE_CHANGE: 'state:change',
+
+    // 井字棋小游戏事件
+    TIC_TAC_TOE_TRIGGER: 'tic_tac_toe:trigger',
+    TIC_TAC_TOE_WIN: 'tic_tac_toe:win',
+    TIC_TAC_TOE_LOSE: 'tic_tac_toe:lose',
+    TIC_TAC_TOE_DRAW: 'tic_tac_toe:draw',
 };

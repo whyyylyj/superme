@@ -14,6 +14,7 @@ const GameStateMachine = {
         BOSS_INTRO: 'boss_intro',          // Boss 登场演出
         GAME_OVER: 'game_over',            // 游戏失败
         GAME_WIN: 'game_win',              // 游戏通关
+        TIC_TAC_TOE: 'tic_tac_toe',        // 井字棋小游戏
     },
 
     currentState: 'start',
@@ -22,12 +23,13 @@ const GameStateMachine = {
     // 状态转换规则（白名单）
     transitions: {
         'start': ['playing'],
-        'playing': ['paused', 'boss_intro', 'level_transition', 'game_over', 'game_win'],
+        'playing': ['paused', 'boss_intro', 'level_transition', 'game_over', 'game_win', 'tic_tac_toe'],
         'paused': ['playing'],
         'boss_intro': ['playing'],
         'level_transition': ['playing'],
         'game_over': ['start'],
         'game_win': ['start'],
+        'tic_tac_toe': ['playing', 'game_over'],
     },
 
     /**

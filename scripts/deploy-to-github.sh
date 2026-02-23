@@ -63,13 +63,11 @@ if [ -n "$UNCOMMITTED" ]; then
     echo -e "${YELLOW}⚠️  存在未提交的更改：${NC}"
     git status --short
     echo ""
-    read -p "是否提交这些更改？(y/n) " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        git add .
-        git commit -m "$COMMIT_MSG"
-        echo -e "${GREEN}✓${NC} 更改已提交"
-    fi
+    # 自动提交更改（非交互模式）
+    echo -e "${BLUE}📝 自动提交更改...${NC}"
+    git add .
+    git commit -m "$COMMIT_MSG"
+    echo -e "${GREEN}✓${NC} 更改已提交"
 fi
 
 # 推送到 main 分支
@@ -78,19 +76,26 @@ echo -e "${BLUE}🚀 推送到 main 分支...${NC}"
 git branch -M main 2>/dev/null || true
 git push -u origin main
 
-if [ $? -eq 0 ]; then
-    echo ""
+PUSH_STATUS=$?
+
+echo ""
+if [ $PUSH_STATUS -eq 0 ]; then
     echo -e "${GREEN}╔════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║  ✅ 推送成功！                        ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
     echo ""
     echo -e "${YELLOW}📦 GitHub Actions 正在部署...${NC}"
     echo ""
+    
+    # 提取用户名和仓库名
+    REPO_PATH="${REMOTE#*github.com/}"
+    REPO_PATH="${REPO_PATH%.git}"
+    
     echo "查看部署进度："
-    echo "  https://github.com/${REMOTE#*github.com/}/actions"
+    echo "  https://github.com/${REPO_PATH}/actions"
     echo ""
     echo "部署完成后访问："
-    echo "  https://${REMOTE#*github.com/}" | sed 's/\.git$//' | sed 's/^/https:\/\//'
+    echo "  https://${REPO_PATH}"
     echo ""
 else
     echo -e "${RED}❌ 推送失败${NC}"

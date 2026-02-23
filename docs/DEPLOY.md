@@ -15,7 +15,25 @@
 
 ## 🚀 部署步骤
 
-### 方法一：自动部署（推荐）
+### 方法一：使用部署脚本（最简单）
+
+```bash
+# 自动提交并部署
+./scripts/deploy-to-github.sh "feat: 更新游戏内容"
+
+# 或使用 npm 命令
+npm run deploy:github "feat: 更新游戏内容"
+```
+
+脚本会自动：
+- 检查 Git 状态
+- 提交未提交的更改
+- 推送到 main 分支
+- 触发 GitHub Actions 部署
+
+---
+
+### 方法二：手动命令部署
 
 每次推送到 `main` 分支时自动部署：
 
@@ -30,11 +48,9 @@ git push origin main
 # 3. 等待 1-2 分钟，部署完成！
 ```
 
-访问：`https://你的用户名.github.io/superme/`
-
 ---
 
-### 方法二：手动触发部署
+### 方法三：GitHub 手动触发
 
 在 GitHub 网站上手动触发部署：
 

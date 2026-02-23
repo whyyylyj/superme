@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "📦 准备部署文件..."
           mkdir -p ./_site
-          cp -r index.html css/ js/ ./_site/
+          cp -r index.html css/ js/ ./_site/ 2>/dev/null || true
           cp README.md ./_site/ 2>/dev/null || true
           cp -r docs/ ./_site/ 2>/dev/null || true
           echo "✅ 部署文件准备完成"

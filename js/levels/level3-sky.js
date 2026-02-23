@@ -52,7 +52,13 @@ class Level3Sky extends LevelBase {
         this.generatePowerups();
         this.generateBoss();
 
-        console.log(`✅ 第三关初始化完成: ${this.movingPlatforms.length} 移动平台, ${this.enemies.length} 敌人, ${this.lightPillars.length} 光柱`);
+        // 井字棋触发点系统
+        this.addPossibleTriggerLocation({ x: 1500, y: 100 });
+        this.addPossibleTriggerLocation({ x: 2800, y: 80 });
+        this.addPossibleTriggerLocation({ x: 4200, y: 120 });
+        this.activateRandomTriggers(2);
+
+        console.log(`✅ 第三关初始化完成: ${this.movingPlatforms.length} 移动平台, ${this.enemies.length} 敌人, ${this.lightPillars.length} 光柱, ${this.ticTacToeTriggers.length} 井字棋触发点`);
     }
 
     /**
@@ -430,7 +436,7 @@ class Level3Sky extends LevelBase {
      */
     drawBackground(ctx, cameraX, cameraY, canvas) {
         ctx.fillStyle = this.config.bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
 
         this.backgroundLayers.forEach(layer => {
             this.drawBackgroundLayer(ctx, cameraX, cameraY, canvas, layer);
@@ -451,7 +457,7 @@ class Level3Sky extends LevelBase {
      */
     drawBackgroundLayer(ctx, cameraX, cameraY, canvas, layer) {
         const parallaxX = cameraX * layer.parallax;
-        const offsetX = parallaxX % canvas.width;
+        const offsetX = parallaxX % CONFIG.CANVAS_WIDTH;
 
         ctx.save();
         ctx.fillStyle = layer.color;
@@ -477,8 +483,8 @@ class Level3Sky extends LevelBase {
     drawStarfield(ctx, canvas, offsetX) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         for (let i = 0; i < 100; i++) {
-            const x = ((i * 67) % canvas.width - offsetX) % canvas.width;
-            const y = (i * 43) % canvas.height;
+            const x = ((i * 67) % CONFIG.CANVAS_WIDTH - offsetX) % CONFIG.CANVAS_WIDTH;
+            const y = (i * 43) % CONFIG.CANVAS_HEIGHT;
             const size = (i % 3) + 1;
             ctx.fillRect(x, y, size, size);
         }
@@ -491,8 +497,8 @@ class Level3Sky extends LevelBase {
         ctx.fillStyle = 'rgba(138, 138, 202, 0.2)';
 
         for (let i = 0; i < 10; i++) {
-            const x = ((i * 234) - offsetX) % (canvas.width + 200) - 100;
-            const y = 100 + (i * 57) % (canvas.height - 200);
+            const x = ((i * 234) - offsetX) % (CONFIG.CANVAS_WIDTH + 200) - 100;
+            const y = 100 + (i * 57) % (CONFIG.CANVAS_HEIGHT - 200);
             const w = 150 + (i % 5) * 30;
             const h = 60 + (i % 3) * 20;
 
@@ -509,8 +515,8 @@ class Level3Sky extends LevelBase {
         ctx.fillStyle = 'rgba(58, 58, 110, 0.4)';
 
         for (let i = 0; i < 8; i++) {
-            const x = ((i * 345) - offsetX) % (canvas.width + 300) - 150;
-            const y = canvas.height - 100 - (i % 4) * 40;
+            const x = ((i * 345) - offsetX) % (CONFIG.CANVAS_WIDTH + 300) - 150;
+            const y = CONFIG.CANVAS_HEIGHT - 100 - (i % 4) * 40;
             const w = 80 + (i % 3) * 20;
             const h = 150 + (i % 5) * 30;
 
@@ -534,14 +540,14 @@ class Level3Sky extends LevelBase {
         const voidY = this.voidLine - cameraY;
         ctx.beginPath();
         ctx.moveTo(0, voidY);
-        ctx.lineTo(canvas.width, voidY);
+        ctx.lineTo(CONFIG.CANVAS_WIDTH, voidY);
         ctx.stroke();
 
         // 虚空警告文字
         ctx.fillStyle = 'rgba(138, 43, 226, 0.7)';
         ctx.font = '12px "Press Start 2P", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText('VOID LINE - DO NOT FALL', canvas.width / 2, voidY - 10);
+        ctx.fillText('VOID LINE - DO NOT FALL', CONFIG.CANVAS_WIDTH / 2, voidY - 10);
 
         ctx.restore();
     }
@@ -557,16 +563,16 @@ class Level3Sky extends LevelBase {
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#9932cc';
 
-        const playerX = cameraX + canvas.width / 2;
+        const playerX = cameraX + CONFIG.CANVAS_WIDTH / 2;
 
         if (playerX < 1000) {
-            ctx.fillText('SKY TEMPLE - AVOID THE VOID', canvas.width / 2, 80);
+            ctx.fillText('SKY TEMPLE - AVOID THE VOID', CONFIG.CANVAS_WIDTH / 2, 80);
         } else if (playerX > 2000 && playerX < 3500) {
-            ctx.fillText('LIGHT PILLARS AHEAD!', canvas.width / 2, 80);
+            ctx.fillText('LIGHT PILLARS AHEAD!', CONFIG.CANVAS_WIDTH / 2, 80);
         } else if (playerX > 5000 && playerX < 6000) {
             ctx.fillStyle = 'rgba(255, 50, 255, 0.9)';
             ctx.font = '20px "Press Start 2P", monospace';
-            ctx.fillText('FINAL BOSS AHEAD!', canvas.width / 2, 80);
+            ctx.fillText('FINAL BOSS AHEAD!', CONFIG.CANVAS_WIDTH / 2, 80);
         }
 
         ctx.restore();
@@ -723,8 +729,8 @@ class Level3Sky extends LevelBase {
     triggerVictoryEffects() {
         if (typeof ParticleSystem !== 'undefined') {
             const canvas = document.getElementById('gameCanvas');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+            const centerX = CONFIG.CANVAS_WIDTH / 2;
+            const centerY = CONFIG.CANVAS_HEIGHT / 2;
 
             // 终极烟花表演
             for (let wave = 0; wave < 10; wave++) {

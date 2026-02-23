@@ -66,7 +66,13 @@ class Level1Forest extends LevelBase {
         // 生成Boss
         this.generateBoss();
 
-        console.log(`✅ 第一关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.powerups.length} 道具`);
+        // 井字棋触发点系统
+        this.addPossibleTriggerLocation({ x: 800, y: 250 });
+        this.addPossibleTriggerLocation({ x: 1500, y: 180 });
+        this.addPossibleTriggerLocation({ x: 2500, y: 300 });
+        this.activateRandomTriggers(2);
+
+        console.log(`✅ 第一关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.powerups.length} 道具, ${this.ticTacToeTriggers.length} 井字棋触发点`);
     }
 
     /**
@@ -275,7 +281,7 @@ class Level1Forest extends LevelBase {
     drawBackground(ctx, cameraX, cameraY, canvas) {
         // 基础背景色
         ctx.fillStyle = this.config.bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
 
         // 绘制每一层视差背景
         this.backgroundLayers.forEach(layer => {
@@ -291,7 +297,7 @@ class Level1Forest extends LevelBase {
      */
     drawBackgroundLayer(ctx, cameraX, cameraY, canvas, layer) {
         const parallaxX = cameraX * layer.parallax;
-        const offsetX = parallaxX % canvas.width;
+        const offsetX = parallaxX % CONFIG.CANVAS_WIDTH;
 
         ctx.save();
         ctx.fillStyle = layer.color;
@@ -317,8 +323,8 @@ class Level1Forest extends LevelBase {
     drawStars(ctx, canvas, offsetX) {
         ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
         for (let i = 0; i < 50; i++) {
-            const x = ((i * 73) % canvas.width - offsetX) % canvas.width;
-            const y = (i * 37) % (canvas.height * 0.6);
+            const x = ((i * 73) % CONFIG.CANVAS_WIDTH - offsetX) % CONFIG.CANVAS_WIDTH;
+            const y = (i * 37) % (CONFIG.CANVAS_HEIGHT * 0.6);
             const size = (i % 3) + 1;
             ctx.fillRect(x, y, size, size);
         }
@@ -332,18 +338,18 @@ class Level1Forest extends LevelBase {
 
         // 简化的树木形状
         for (let i = 0; i < 20; i++) {
-            const x = ((i * 150) - offsetX) % (canvas.width + 200) - 100;
+            const x = ((i * 150) - offsetX) % (CONFIG.CANVAS_WIDTH + 200) - 100;
             const height = 100 + (i % 5) * 30;
             const width = 60 + (i % 3) * 20;
 
             // 树干
-            ctx.fillRect(x + width / 2 - 5, canvas.height - height, 10, height);
+            ctx.fillRect(x + width / 2 - 5, CONFIG.CANVAS_HEIGHT - height, 10, height);
 
             // 树冠（三角形）
             ctx.beginPath();
-            ctx.moveTo(x, canvas.height - height + 20);
-            ctx.lineTo(x + width / 2, canvas.height - height - 40);
-            ctx.lineTo(x + width, canvas.height - height + 20);
+            ctx.moveTo(x, CONFIG.CANVAS_HEIGHT - height + 20);
+            ctx.lineTo(x + width / 2, CONFIG.CANVAS_HEIGHT - height - 40);
+            ctx.lineTo(x + width, CONFIG.CANVAS_HEIGHT - height + 20);
             ctx.fill();
         }
     }
@@ -356,8 +362,8 @@ class Level1Forest extends LevelBase {
 
         // 漂浮的树叶
         for (let i = 0; i < 30; i++) {
-            const x = ((i * 101) - offsetX) % (canvas.width + 100) - 50;
-            const y = 50 + (i * 23) % canvas.height;
+            const x = ((i * 101) - offsetX) % (CONFIG.CANVAS_WIDTH + 100) - 50;
+            const y = 50 + (i * 23) % CONFIG.CANVAS_HEIGHT;
             const size = 8 + (i % 5) * 3;
 
             ctx.beginPath();
@@ -378,20 +384,20 @@ class Level1Forest extends LevelBase {
         ctx.shadowColor = '#00ff00';
 
         // 根据玩家位置显示不同提示
-        const playerX = cameraX + canvas.width / 2;
+        const playerX = cameraX + CONFIG.CANVAS_WIDTH / 2;
 
         if (playerX < 500) {
-            ctx.fillText('WASD / Arrows to Move', canvas.width / 2, 100);
+            ctx.fillText('WASD / Arrows to Move', CONFIG.CANVAS_WIDTH / 2, 100);
         } else if (playerX < 1000) {
-            ctx.fillText('Space to Jump', canvas.width / 2, 100);
+            ctx.fillText('Space to Jump', CONFIG.CANVAS_WIDTH / 2, 100);
         } else if (playerX < 1500) {
-            ctx.fillText('J / Z to Shoot', canvas.width / 2, 100);
+            ctx.fillText('J / Z to Shoot', CONFIG.CANVAS_WIDTH / 2, 100);
         } else if (playerX < 2000) {
-            ctx.fillText('Collect Power-ups!', canvas.width / 2, 100);
+            ctx.fillText('Collect Power-ups!', CONFIG.CANVAS_WIDTH / 2, 100);
         } else if (playerX > 4000) {
             ctx.fillStyle = 'rgba(255, 100, 100, 0.8)';
             ctx.shadowColor = '#ff0000';
-            ctx.fillText('BOSS AHEAD!', canvas.width / 2, 100);
+            ctx.fillText('BOSS AHEAD!', CONFIG.CANVAS_WIDTH / 2, 100);
         }
 
         ctx.restore();
@@ -427,8 +433,8 @@ class Level1Forest extends LevelBase {
         // 播放烟花效果（如果存在ParticleSystem）
         if (typeof ParticleSystem !== 'undefined') {
             const canvas = document.getElementById('gameCanvas');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+            const centerX = CONFIG.CANVAS_WIDTH / 2;
+            const centerY = CONFIG.CANVAS_HEIGHT / 2;
 
             for (let i = 0; i < 5; i++) {
                 setTimeout(() => {

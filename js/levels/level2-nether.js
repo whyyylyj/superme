@@ -52,7 +52,13 @@ class Level2Nether extends LevelBase {
         this.generatePowerups();
         this.generateBoss();
 
-        console.log(`✅ 第二关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.geysers.length} 喷泉`);
+        // 井字棋触发点系统
+        this.addPossibleTriggerLocation({ x: 1200, y: 200 });
+        this.addPossibleTriggerLocation({ x: 2200, y: 150 });
+        this.addPossibleTriggerLocation({ x: 3500, y: 250 });
+        this.activateRandomTriggers(2);
+
+        console.log(`✅ 第二关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.geysers.length} 喷泉, ${this.ticTacToeTriggers.length} 井字棋触发点`);
     }
 
     /**
@@ -254,7 +260,7 @@ class Level2Nether extends LevelBase {
      */
     drawBackground(ctx, cameraX, cameraY, canvas) {
         ctx.fillStyle = this.config.bgColor;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, CONFIG.CANVAS_WIDTH, CONFIG.CANVAS_HEIGHT);
 
         this.backgroundLayers.forEach(layer => {
             this.drawBackgroundLayer(ctx, cameraX, cameraY, canvas, layer);
@@ -269,7 +275,7 @@ class Level2Nether extends LevelBase {
      */
     drawBackgroundLayer(ctx, cameraX, cameraY, canvas, layer) {
         const parallaxX = cameraX * layer.parallax;
-        const offsetX = parallaxX % canvas.width;
+        const offsetX = parallaxX % CONFIG.CANVAS_WIDTH;
 
         ctx.save();
         ctx.fillStyle = layer.color;
@@ -295,8 +301,8 @@ class Level2Nether extends LevelBase {
     drawLavaGlow(ctx, canvas, offsetX) {
         ctx.fillStyle = 'rgba(255, 69, 0, 0.1)';
         for (let i = 0; i < 20; i++) {
-            const x = ((i * 157) % canvas.width - offsetX) % canvas.width;
-            const y = canvas.height - 50 - (i % 3) * 30;
+            const x = ((i * 157) % CONFIG.CANVAS_WIDTH - offsetX) % CONFIG.CANVAS_WIDTH;
+            const y = CONFIG.CANVAS_HEIGHT - 50 - (i % 3) * 30;
             const radius = 100 + (i % 5) * 20;
 
             ctx.beginPath();
@@ -312,14 +318,14 @@ class Level2Nether extends LevelBase {
         ctx.fillStyle = 'rgba(68, 34, 34, 0.5)';
 
         for (let i = 0; i < 15; i++) {
-            const x = ((i * 213) - offsetX) % (canvas.width + 200) - 100;
+            const x = ((i * 213) - offsetX) % (CONFIG.CANVAS_WIDTH + 200) - 100;
             const height = 80 + (i % 4) * 30;
             const width = 60 + (i % 3) * 20;
 
             ctx.beginPath();
-            ctx.moveTo(x, canvas.height);
-            ctx.lineTo(x + width / 2, canvas.height - height);
-            ctx.lineTo(x + width, canvas.height);
+            ctx.moveTo(x, CONFIG.CANVAS_HEIGHT);
+            ctx.lineTo(x + width / 2, CONFIG.CANVAS_HEIGHT - height);
+            ctx.lineTo(x + width, CONFIG.CANVAS_HEIGHT);
             ctx.fill();
         }
     }
@@ -331,8 +337,8 @@ class Level2Nether extends LevelBase {
         ctx.fillStyle = 'rgba(255, 69, 0, 0.4)';
 
         for (let i = 0; i < 40; i++) {
-            const x = ((i * 91) - offsetX) % (canvas.width + 50) - 25;
-            const y = canvas.height - (i * 17) % canvas.height;
+            const x = ((i * 91) - offsetX) % (CONFIG.CANVAS_WIDTH + 50) - 25;
+            const y = CONFIG.CANVAS_HEIGHT - (i * 17) % CONFIG.CANVAS_HEIGHT;
             const size = 3 + (i % 4) * 2;
 
             ctx.beginPath();
@@ -352,18 +358,18 @@ class Level2Nether extends LevelBase {
         ctx.shadowBlur = 10;
         ctx.shadowColor = '#ff0000';
 
-        const playerX = cameraX + canvas.width / 2;
+        const playerX = cameraX + CONFIG.CANVAS_WIDTH / 2;
 
         if (playerX > 500 && playerX < 1500) {
-            ctx.fillText('WARNING: Lava Ahead!', canvas.width / 2, 80);
+            ctx.fillText('WARNING: Lava Ahead!', CONFIG.CANVAS_WIDTH / 2, 80);
         } else if (playerX > 3000 && playerX < 4500) {
-            ctx.fillText('GEYSER ZONE!', canvas.width / 2, 80);
+            ctx.fillText('GEYSER ZONE!', CONFIG.CANVAS_WIDTH / 2, 80);
             ctx.font = '12px "Press Start 2P", monospace';
-            ctx.fillText('Watch for warning signs', canvas.width / 2, 100);
+            ctx.fillText('Watch for warning signs', CONFIG.CANVAS_WIDTH / 2, 100);
         } else if (playerX > 4500) {
             ctx.fillStyle = 'rgba(255, 50, 50, 0.9)';
             ctx.font = '20px "Press Start 2P", monospace';
-            ctx.fillText('INFERNO DRAGON AHEAD!', canvas.width / 2, 80);
+            ctx.fillText('INFERNO DRAGON AHEAD!', CONFIG.CANVAS_WIDTH / 2, 80);
         }
 
         ctx.restore();
@@ -598,8 +604,8 @@ class Level2Nether extends LevelBase {
     triggerVictoryEffects() {
         if (typeof ParticleSystem !== 'undefined') {
             const canvas = document.getElementById('gameCanvas');
-            const centerX = canvas.width / 2;
-            const centerY = canvas.height / 2;
+            const centerX = CONFIG.CANVAS_WIDTH / 2;
+            const centerY = CONFIG.CANVAS_HEIGHT / 2;
 
             for (let i = 0; i < 8; i++) {
                 setTimeout(() => {

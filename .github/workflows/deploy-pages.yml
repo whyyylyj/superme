@@ -39,5 +39,5 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          # 保留 .nojekyll 文件（防止 Jekyll 处理）
-          nojekyll: true
+          # 禁用 Jekyll 处理（防止 .md 文件被处理）
+          disable_nojekyll: true

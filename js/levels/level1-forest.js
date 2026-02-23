@@ -66,18 +66,23 @@ class Level1Forest extends LevelBase {
         // 生成Boss
         this.generateBoss();
 
+        // 🚩 Checkpoint 系统 - 在关键位置添加保存点
+        this.createCheckpoint(1200, 420); // Checkpoint 1: 教程区域后
+        this.createCheckpoint(2800, 420); // Checkpoint 2: 中间区域
+        this.createCheckpoint(4200, 420); // Checkpoint 3: Boss 前区域
+
         // 井字棋精灵 - 彩蛋游戏触发者（2 个显眼的位置）
         if (typeof EnemyTicTacToe !== 'undefined') {
             const enemy1 = new EnemyTicTacToe(500, 420);
             enemy1.levelNumber = 1;
             this.enemies.push(enemy1);
-            
+
             const enemy2 = new EnemyTicTacToe(2000, 420);
             enemy2.levelNumber = 1;
             this.enemies.push(enemy2);
         }
 
-        console.log(`✅ 第一关初始化完成：${this.platforms.length} 平台，${this.enemies.length} 敌人，${this.powerups.length} 道具`);
+        console.log(`✅ 第一关初始化完成：${this.platforms.length} 平台，${this.enemies.length} 敌人，${this.powerups.length} 道具，${this.checkpoints.length} 保存点`);
     }
 
     /**

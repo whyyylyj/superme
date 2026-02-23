@@ -24,36 +24,133 @@ class LevelBase {
      * @param {number} y
      */
     createCheckpoint(x, y) {
-        this.checkpoints.push({
+        const checkpoint = {
             x: x,
             y: y,
-            width: 40,
-            height: 60,
+            width: 80,  // 增大宽度：40 → 80
+            height: 120, // 增大高度：60 → 120
             active: false,
+            pulseTime: 0,  // 脉动动画时间
+            particles: [], // 粒子数组
+
+            // 更新动画
+            update(dt) {
+                this.pulseTime += dt * 3; // 脉动速度
+
+                // 更新粒子（如果已激活）
+                if (this.active) {
+                    // 生成新粒子
+                    if (Math.random() < 0.3) {
+                        this.particles.push({
+                            x: this.width / 2,
+                            y: this.height / 2,
+                            vx: (Math.random() - 0.5) * 100,
+                            vy: -Math.random() * 80 - 50,
+                            life: 1.0,
+                            size: Math.random() * 4 + 2
+                        });
+                    }
+
+                    // 更新粒子位置和生命
+                    this.particles = this.particles.filter(p => {
+                        p.x += p.vx * dt;
+                        p.y += p.vy * dt;
+                        p.life -= dt * 0.8;
+                        return p.life > 0;
+                    });
+                }
+            },
+
             draw(ctx, cameraX, cameraY) {
                 ctx.save();
-                ctx.translate(this.x - cameraX, this.y - cameraY);
-                // Draw flagpole
-                ctx.fillStyle = '#cccccc';
-                ctx.fillRect(0, 0, 4, this.height);
-                // Draw flag
-                ctx.fillStyle = this.active ? '#00ff00' : '#ff0000';
-                ctx.beginPath();
-                ctx.moveTo(4, 0);
-                ctx.lineTo(this.width, 15);
-                ctx.lineTo(4, 30);
-                ctx.fill();
+                const screenX = this.x - cameraX;
+                const screenY = this.y - cameraY;
+                ctx.translate(screenX, screenY);
 
+                // 计算脉动效果（呼吸灯）
+                const pulse = (Math.sin(this.pulseTime) + 1) / 2; // 0 ~ 1
+                const glowSize = this.active ? 15 + pulse * 10 : 5 + pulse * 3;
+
+                // 绘制光晕
                 if (this.active) {
                     ctx.shadowColor = '#00ff00';
-                    ctx.shadowBlur = 10;
-                    ctx.fillStyle = '#00ff00';
-                    ctx.font = '10px "Press Start 2P"';
-                    ctx.fillText('SAVED', -5, -10);
+                    ctx.shadowBlur = glowSize;
+                } else {
+                    ctx.shadowColor = '#ffaa00';
+                    ctx.shadowBlur = glowSize;
                 }
+
+                // 绘制旗杆（更粗）
+                ctx.fillStyle = this.active ? '#00ffcc' : '#cccccc';
+                ctx.fillRect(-2, -this.height, 6, this.height);
+
+                // 绘制底座
+                ctx.fillStyle = this.active ? '#00aa88' : '#888888';
+                ctx.fillRect(-15, 0, 36, 12);
+
+                // 绘制旗帜（更大）
+                const flagColor = this.active ? '#00ff00' : '#ff4444';
+                ctx.fillStyle = flagColor;
+                ctx.beginPath();
+                ctx.moveTo(4, -this.height + 10);
+                ctx.lineTo(this.width, -this.height + 35);
+                ctx.lineTo(4, -this.height + 60);
+                ctx.fill();
+
+                // 旗帜上的星星图标（激活时）
+                if (this.active) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '20px Arial';
+                    ctx.fillText('★', 15, -this.height + 42);
+                }
+
+                // 绘制文字 "CHECKPOINT"（更大更明显）
+                ctx.shadowBlur = this.active ? 20 : 10;
+                ctx.fillStyle = this.active ? '#00ff00' : '#ffaa00';
+                ctx.font = 'bold 14px "Press Start 2P", monospace';
+                ctx.textAlign = 'center';
+                ctx.fillText('CHECKPOINT', this.width / 2, -this.height - 15);
+
+                // 激活状态下的额外文字
+                if (this.active) {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 10px "Press Start 2P", monospace';
+                    ctx.fillText('✓ SAVED', this.width / 2, 25);
+                }
+
+                // 绘制粒子效果
+                if (this.active && this.particles.length > 0) {
+                    this.particles.forEach(p => {
+                        ctx.globalAlpha = p.life;
+                        ctx.fillStyle = '#00ff00';
+                        ctx.beginPath();
+                        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        ctx.fill();
+                    });
+                    ctx.globalAlpha = 1.0;
+                }
+
+                // 绘制碰撞检测区域提示（半透明框）
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = this.active ? '#00ff00' : '#ffaa00';
+                ctx.fillRect(0, -this.height + 60, this.width, this.height);
+                ctx.globalAlpha = 1.0;
+
                 ctx.restore();
+            },
+
+            // 扩大碰撞检测区域
+            getCollisionBox() {
+                return {
+                    x: this.x - 20,
+                    y: this.y - this.height + 60,
+                    width: this.width + 40,
+                    height: this.height
+                };
             }
-        });
+        };
+
+        this.checkpoints.push(checkpoint);
     }
 
     /**
@@ -73,16 +170,30 @@ class LevelBase {
     update(dt, player, bullets) {
         // 更新并检查暂存点
         this.checkpoints.forEach(cp => {
-            if (!cp.active && Physics.checkCollision(player, cp)) {
-                cp.active = true;
-                if (typeof LevelManager !== 'undefined') {
-                    LevelManager.setCheckpoint(this.levelNumber - 1, cp.x, cp.y - player.height); // Spawn slightly above checkpoint
-                }
-                if (typeof showLevelMessage !== 'undefined') {
-                    showLevelMessage('CHECKPOINT REACHED', 'PROGRESS SAVED', 2000);
+            // 更新动画
+            if (cp.update) cp.update(dt);
+
+            // 检查碰撞（使用扩大后的碰撞箱）
+            if (!cp.active) {
+                const collisionBox = cp.getCollisionBox ? cp.getCollisionBox() : cp;
+                if (Physics.checkCollision(player, collisionBox)) {
+                    cp.active = true;
+                    if (typeof LevelManager !== 'undefined') {
+                        LevelManager.setCheckpoint(this.levelNumber - 1, cp.x, cp.y - player.height);
+                    }
+                    if (typeof showLevelMessage !== 'undefined') {
+                        showLevelMessage('CHECKPOINT REACHED', 'PROGRESS SAVED', 2000);
+                    }
+                    // 触发屏幕闪烁效果
+                    if (typeof ScreenEffects !== 'undefined') {
+                        ScreenEffects.flash(0.3, '#00ff00');
+                    }
+                    // 播放 checkpoint 音效
+                    if (typeof AudioManager !== 'undefined' && AudioManager.sfx) {
+                        AudioManager.sfx.checkpoint();
+                    }
                 }
             }
-            if (cp.update) cp.update(dt);
         });
 
         // 更新敌人

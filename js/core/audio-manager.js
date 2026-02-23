@@ -109,6 +109,13 @@ const AudioManager = {
             notes.forEach((freq, i) => {
                 setTimeout(() => AudioManager.playTone(freq, 0.3, 'sine', 0.2), i * 300);
             });
+        },
+
+        checkpoint() {
+            // 保存点激活音效 - 清脆的三连音
+            AudioManager.playTone(523, 0.1, 'sine', 0.15); // C5
+            setTimeout(() => AudioManager.playTone(659, 0.1, 'sine', 0.15), 80); // E5
+            setTimeout(() => AudioManager.playTone(784, 0.2, 'sine', 0.2), 160); // G5
         }
     },
 

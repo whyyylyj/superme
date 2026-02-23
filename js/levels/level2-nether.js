@@ -52,18 +52,23 @@ class Level2Nether extends LevelBase {
         this.generatePowerups();
         this.generateBoss();
 
+        // 🚩 Checkpoint 系统 - 在关键位置添加保存点
+        this.createCheckpoint(1500, 380); // Checkpoint 1: 熔岩入口区域后
+        this.createCheckpoint(3500, 380); // Checkpoint 2: 中间区域
+        this.createCheckpoint(5000, 380); // Checkpoint 3: Boss 前区域
+
         // 井字棋精灵 - 彩蛋游戏触发者（2 个显眼的位置）
         if (typeof EnemyTicTacToe !== 'undefined') {
             const enemy1 = new EnemyTicTacToe(800, 380);
             enemy1.levelNumber = 2;
             this.enemies.push(enemy1);
-            
+
             const enemy2 = new EnemyTicTacToe(2500, 380);
             enemy2.levelNumber = 2;
             this.enemies.push(enemy2);
         }
 
-        console.log(`✅ 第二关初始化完成：${this.platforms.length} 平台，${this.enemies.length} 敌人，${this.geysers.length} 喷泉`);
+        console.log(`✅ 第二关初始化完成：${this.platforms.length} 平台，${this.enemies.length} 敌人，${this.geysers.length} 喷泉，${this.checkpoints.length} 保存点`);
     }
 
     /**

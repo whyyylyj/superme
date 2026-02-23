@@ -917,63 +917,64 @@ body.desktop-device .desktop-only-text {
     display: block;
 }
 
-/* Virtual Joystick */
+/* =============================================
+   Invisible Full Left Screen Joystick Zone
+   整个左半屏都是摇杆操作区域（不可见）
+   ============================================= */
+.joystick-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    /* 完全不可见，但接收触摸事件 */
+    background: transparent;
+    pointer-events: auto;
+    touch-action: none;
+    z-index: 100;
+}
+
+/* 原有的摇杆样式保留（可用于调试或可选显示） */
 .virtual-joystick {
     position: absolute;
     bottom: 40px;
-    left: 50%; /* 居中左侧区域 */
-    transform: translateX(-250%); /* 向左偏移到舒适位置 */
+    left: 50%;
+    transform: translateX(-250%);
     width: 120px;
     height: 120px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(0, 255, 204, 0.3);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 255, 204, 0.1);
     border-radius: 50%;
-    pointer-events: auto;
+    pointer-events: none; /* 不再接收触摸，由 joystick-zone 处理 */
     touch-action: none;
     transition: all 0.3s ease;
+    opacity: 0; /* 默认完全隐藏 */
 }
 
-/* SIT 模式激活时的视觉反馈 */
-.virtual-joystick.sit-active {
-    background: rgba(255, 200, 0, 0.2);
-    border-color: rgba(255, 200, 0, 0.6);
-    box-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
-    animation: sit-pulse 1s infinite;
+/* 调试模式可显示摇杆（添加 debug 类时） */
+body.debug-mode .virtual-joystick {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 204, 0.3);
 }
 
-@keyframes sit-pulse {
-
-    0%,
-    100% {
-        box-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
-    }
-
-    50% {
-        box-shadow: 0 0 30px rgba(255, 200, 0, 0.7);
-    }
-}
-
+/* 摇杆按钮也隐藏（仅用于视觉反馈） */
 .joystick-knob {
     position: absolute;
     top: 50%;
     left: 50%;
     width: 50px;
     height: 50px;
-    background: rgba(0, 255, 204, 0.5);
+    background: rgba(0, 255, 204, 0.3);
     border-radius: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
     transition: transform 0.05s, background 0.3s;
+    opacity: 0; /* 默认隐藏 */
 }
 
-.joystick-knob:active {
-    background: rgba(0, 255, 204, 0.8);
-}
-
-/* SIT 模式下摇杆按钮变色 */
-.virtual-joystick.sit-active .joystick-knob {
-    background: rgba(255, 200, 0, 0.7);
-    box-shadow: 0 0 20px rgba(255, 200, 0, 0.6);
+body.debug-mode .joystick-knob {
+    opacity: 1;
 }
 
 /* =============================================
@@ -1247,18 +1248,14 @@ body.desktop-device .desktop-only-text {
         min-width: 80px;
     }
 
-    /* 移动端摇杆优化 - 竖屏默认位置 */
+    /* 移动端摇杆已隐藏，整个左半屏为操作区域 */
+    /* 调试模式下可显示摇杆位置 */
     body.mobile-device .virtual-joystick {
-        bottom: 25px;
-        left: 25px;
-        transform: none;
-        width: 110px;
-        height: 110px;
+        opacity: 0;
     }
 
     body.mobile-device .joystick-knob {
-        width: 45px;
-        height: 45px;
+        opacity: 0;
     }
 
     /* 移动端按钮优化 - 保持弧形布局并缩放 */
@@ -1416,18 +1413,13 @@ body.desktop-device .desktop-only-text {
         min-width: 60px;
     }
 
-    /* 横屏模式摇杆位置 - 左下角 */
+    /* 横屏模式摇杆已隐藏，整个左半屏为操作区域 */
     body.mobile-device .virtual-joystick {
-        bottom: 15px;
-        left: 15px;
-        transform: none;
-        width: 90px;
-        height: 90px;
+        opacity: 0;
     }
 
     body.mobile-device .joystick-knob {
-        width: 36px;
-        height: 36px;
+        opacity: 0;
     }
 
     /* 横屏模式主战斗按钮 - 弧形布局更紧凑 */
@@ -1536,10 +1528,9 @@ body.desktop-device .desktop-only-text {
         padding-right: env(safe-area-inset-right);
     }
 
-    /* 竖屏安全区域 */
+    /* 竖屏安全区域 - 摇杆已隐藏 */
     .virtual-joystick {
-        left: calc(25px + env(safe-area-inset-left));
-        bottom: calc(25px + env(safe-area-inset-bottom));
+        opacity: 0;
     }
 
     .action-buttons-container {
@@ -1555,8 +1546,7 @@ body.desktop-device .desktop-only-text {
     /* 横屏安全区域 - 使用更小的基础值 */
     @media (orientation: landscape) {
         .virtual-joystick {
-            left: calc(15px + env(safe-area-inset-left));
-            bottom: calc(15px + env(safe-area-inset-bottom));
+            opacity: 0;
         }
 
         .action-buttons-container {

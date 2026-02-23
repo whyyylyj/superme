@@ -5,6 +5,7 @@
  * Mobile-Only Optimizations:
  * - Auto-enable homing mode on touch devices (Task 1)
  * - Jump button triggers auto-shoot (Task 2)
+ * - Full left screen joystick zone (invisible) (Task 3)
  *
  * Desktop Behavior:
  * - TouchInput.init() skips all initialization
@@ -12,10 +13,10 @@
  * - Homing mode remains opt-in via M key
  *
  * Features:
- * - Virtual joystick with deadzone
+ * - Virtual joystick with deadzone (invisible, full left screen)
  * - Action buttons with haptic feedback
- * - Long-press joystick for SIT/rest mode
  * - Multi-touch support
+ * - Landscape orientation optimized
  */
 
 const TouchInput = {
@@ -27,7 +28,7 @@ const TouchInput = {
         startY: 0,
         currentX: 0,
         currentY: 0,
-        maxRadius: 60,
+        maxRadius: 80,
         deadzone: 15
     },
 
@@ -35,14 +36,6 @@ const TouchInput = {
     autoFire: {
         enabled: true, // 默认开启连射模式
         interval: 150, // 连射间隔（毫秒）
-        timer: null,
-        isActive: false
-    },
-
-    // 长按 SIT 模式
-    sitMode: {
-        enabled: false,       // 禁用长按，现在使用按钮控制
-        longPressDuration: 800,
         timer: null,
         isActive: false
     },
@@ -68,8 +61,8 @@ const TouchInput = {
             return;
         }
 
-        console.log('[TouchInput] Initializing for touch device');
-        
+        console.log('[TouchInput] Initializing for touch device (full left screen joystick)');
+
         // Ensure touch controls are visible if active (usually shown during initGame)
         if (typeof GameStateMachine !== 'undefined' && GameStateMachine.is('playing')) {
             touchControls.classList.remove('hidden');
@@ -94,7 +87,7 @@ const TouchInput = {
         // normal clicks on other UI elements (like Start button)
         touchControls.addEventListener('touchstart', e => {
             // Check if touch is on an active control button or joystick
-            if (e.target.closest('.action-btn, .pause-btn, .virtual-joystick')) {
+            if (e.target.closest('.action-btn, .pause-btn, .virtual-joystick, .joystick-zone')) {
                 e.preventDefault();
             }
         }, { passive: false });
@@ -117,7 +110,7 @@ const TouchInput = {
 
     /**
      * Helper for haptic feedback
-     * @param {number|number[]} pattern 
+     * @param {number|number[]} pattern
      */
     vibrate: function(pattern = 10) {
         if ('vibrate' in navigator && Input.isTouchDevice) {
@@ -129,142 +122,174 @@ const TouchInput = {
         }
     },
 
+    /**
+     * Setup invisible full left screen joystick zone
+     * Uses dynamic first-touch positioning for better ergonomics
+     */
     setupJoystick: function () {
-        const joystickArea = document.getElementById('virtual-joystick');
-        const knob = document.getElementById('joystick-knob');
-        if (!joystickArea || !knob) return;
+        // Create invisible joystick zone covering entire left half of screen
+        let joystickZone = document.getElementById('joystick-zone');
+        
+        if (!joystickZone) {
+            joystickZone = document.createElement('div');
+            joystickZone.id = 'joystick-zone';
+            joystickZone.className = 'joystick-zone';
+            // Insert at beginning of touch-controls
+            const touchControls = document.getElementById('touch-controls');
+            if (touchControls) {
+                touchControls.insertBefore(joystickZone, touchControls.firstChild);
+            }
+        }
 
-        joystickArea.addEventListener('touchstart', (e) => {
-            const touch = e.changedTouches[0];
-            const rect = joystickArea.getBoundingClientRect();
+        // Track multiple touches for better landscape handling
+        const activeTouches = new Map();
 
-            this.joystick.active = true;
-            this.joystick.touchId = touch.identifier;
-            this.joystick.startX = rect.left + rect.width / 2;
-            this.joystick.startY = rect.top + rect.height / 2;
-
-            // 长按 SIT 模式已禁用，移除计时器
-            // this.startSitModeTimer();
-
-            this.vibrate(10); // Small feedback on start
-            this.moveJoystick(touch);
-        });
+        joystickZone.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                
+                // Only handle touches on left half of screen
+                if (touch.clientX < window.innerWidth / 2) {
+                    // First touch becomes the active joystick touch
+                    if (!this.joystick.active) {
+                        this.joystick.active = true;
+                        this.joystick.touchId = touch.identifier;
+                        // Use first touch position as the "center" for relative movement
+                        this.joystick.startX = touch.clientX;
+                        this.joystick.startY = touch.clientY;
+                        activeTouches.set(touch.identifier, {
+                            startX: touch.clientX,
+                            startY: touch.clientY
+                        });
+                        
+                        this.vibrate(10);
+                        this.moveJoystick(touch);
+                    } else {
+                        // Store additional touches for potential handoff
+                        activeTouches.set(touch.identifier, {
+                            startX: touch.clientX,
+                            startY: touch.clientY
+                        });
+                    }
+                }
+            }
+        }, { passive: false });
 
         window.addEventListener('touchmove', (e) => {
             if (!this.joystick.active) return;
 
             for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === this.joystick.touchId) {
-                    // 移除 SIT 模式相关逻辑
-                    this.moveJoystick(e.changedTouches[i]);
-                    break;
+                const touch = e.changedTouches[i];
+                
+                // Handle active joystick touch
+                if (touch.identifier === this.joystick.touchId) {
+                    this.moveJoystick(touch);
+                } 
+                // Handle touch handoff if original touch ended but new touch is nearby
+                else if (activeTouches.has(touch.identifier)) {
+                    const stored = activeTouches.get(touch.identifier);
+                    const dx = touch.clientX - stored.startX;
+                    const dy = touch.clientY - stored.startY;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // If new touch moved significantly, consider it for joystick
+                    if (distance > 20 && !this.joystick.active) {
+                        this.joystick.active = true;
+                        this.joystick.touchId = touch.identifier;
+                        this.joystick.startX = stored.startX;
+                        this.joystick.startY = stored.startY;
+                        this.moveJoystick(touch);
+                    }
                 }
             }
-        });
+        }, { passive: false });
 
         window.addEventListener('touchend', (e) => {
-            if (!this.joystick.active) return;
-
             for (let i = 0; i < e.changedTouches.length; i++) {
-                if (e.changedTouches[i].identifier === this.joystick.touchId) {
-                    // 移除 SIT 模式相关逻辑
+                const touch = e.changedTouches[i];
+                
+                if (touch.identifier === this.joystick.touchId) {
                     this.resetJoystick();
-                    break;
+                    activeTouches.delete(touch.identifier);
+                    
+                    // Try to handoff to another active touch
+                    for (const [id, data] of activeTouches.entries()) {
+                        if (data.startX < window.innerWidth / 2) {
+                            this.joystick.active = true;
+                            this.joystick.touchId = id;
+                            this.joystick.startX = data.startX;
+                            this.joystick.startY = data.startY;
+                            break;
+                        }
+                    }
+                } else {
+                    activeTouches.delete(touch.identifier);
                 }
             }
         });
 
         window.addEventListener('touchcancel', (e) => {
-            if (!this.joystick.active) return;
-            this.cancelSitMode();
-            this.resetJoystick();
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                const touch = e.changedTouches[i];
+                if (touch.identifier === this.joystick.touchId) {
+                    this.resetJoystick();
+                }
+                activeTouches.delete(touch.identifier);
+            }
         });
     },
 
     /**
-     * 启动 SIT 模式计时器
+     * Move joystick based on touch position
+     * Uses relative movement from first touch point
      */
-    startSitModeTimer: function() {
-        if (!this.sitMode.enabled) return;
-        
-        this.cancelSitMode(); // 清除之前的计时器
-        
-        this.sitMode.timer = setTimeout(() => {
-            this.sitMode.isActive = true;
-            Input.virtualKeys.down = true;  // 保持下蹲
-            Input.virtualKeys.sit = true;   // 触发 SIT 状态
-            
-            // 视觉反馈：摇杆变色或闪烁
-            const joystickArea = document.getElementById('virtual-joystick');
-            if (joystickArea) {
-                joystickArea.classList.add('sit-active');
-            }
-            
-            // 震动反馈
-            this.vibrate([20, 50, 20]);
-        }, this.sitMode.longPressDuration);
-    },
-
-    /**
-     * 取消 SIT 模式
-     */
-    cancelSitMode: function() {
-        if (this.sitMode.timer) {
-            clearTimeout(this.sitMode.timer);
-            this.sitMode.timer = null;
-        }
-        
-        if (this.sitMode.isActive) {
-            this.sitMode.isActive = false;
-            Input.virtualKeys.sit = false;
-            
-            const joystickArea = document.getElementById('virtual-joystick');
-            if (joystickArea) {
-                joystickArea.classList.remove('sit-active');
-            }
-        }
-    },
-
     moveJoystick: function (touch) {
         // Get current scale to convert screen pixels to game pixels
         const scale = (typeof Responsive !== 'undefined') ? Responsive.getScale() : 1;
-        
+
+        // Calculate relative movement from start position
         const dx = (touch.clientX - this.joystick.startX) / scale;
         const dy = (touch.clientY - this.joystick.startY) / scale;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
+        // Update visual joystick knob (if visible for debugging)
         const knob = document.getElementById('joystick-knob');
-        const limitedDistance = Math.min(distance, this.joystick.maxRadius);
-        const angle = Math.atan2(dy, dx);
+        if (knob) {
+            const limitedDistance = Math.min(distance, this.joystick.maxRadius);
+            const angle = Math.atan2(dy, dx);
+            const moveX = Math.cos(angle) * limitedDistance;
+            const moveY = Math.sin(angle) * limitedDistance;
+            knob.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
+        }
 
-        const moveX = Math.cos(angle) * limitedDistance;
-        const moveY = Math.sin(angle) * limitedDistance;
-
-        knob.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
-
-        // Map to Input.virtualKeys
-        // Note: deadzone is now in game pixels
-        Input.virtualKeys.left = dx < -this.joystick.deadzone;
-        Input.virtualKeys.right = dx > this.joystick.deadzone;
-        Input.virtualKeys.up = dy < -this.joystick.deadzone;
-        Input.virtualKeys.down = dy > this.joystick.deadzone;
+        // Map to Input.virtualKeys with deadzone
+        // Increased deadzone for more precise control
+        const effectiveDeadzone = this.joystick.deadzone * 1.5;
+        
+        Input.virtualKeys.left = dx < -effectiveDeadzone;
+        Input.virtualKeys.right = dx > effectiveDeadzone;
+        Input.virtualKeys.up = dy < -effectiveDeadzone;
+        Input.virtualKeys.down = dy > effectiveDeadzone;
     },
 
+    /**
+     * Reset joystick state
+     */
     resetJoystick: function () {
         this.joystick.active = false;
         this.joystick.touchId = null;
-        
-        // 取消 SIT 模式
-        this.cancelSitMode();
 
         const knob = document.getElementById('joystick-knob');
-        knob.style.transform = 'translate(-50%, -50%)';
+        if (knob) {
+            knob.style.transform = 'translate(-50%, -50%)';
+        }
 
         Input.virtualKeys.left = false;
         Input.virtualKeys.right = false;
         Input.virtualKeys.up = false;
         Input.virtualKeys.down = false;
-        Input.virtualKeys.sit = false;
     },
 
     /**

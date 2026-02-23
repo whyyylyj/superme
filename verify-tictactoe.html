@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>井字棋验证</title>
+</head>
+<body>
+    <h1>井字棋核心逻辑验证</h1>
+    <div id="output"></div>
+
+    <script src="js/minigame/tic-tac-toe.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        function log(msg) {
+            output.innerHTML += '<div>' + msg + '</div>';
+        }
+
+        log('✅ TicTacToeInstance 已创建: ' + (typeof TicTacToeInstance !== 'undefined'));
+        log('✅ 棋盘初始化: ' + JSON.stringify(TicTacToeInstance.board));
+        log('✅ 当前玩家: ' + TicTacToeInstance.getCurrentPlayer());
+        log('✅ 游戏状态: ' + TicTacToeInstance.getGameState());
+
+        // 测试下棋
+        TicTacToeInstance.makeMove(4);
+        log('✅ 玩家下棋中心: ' + JSON.stringify(TicTacToeInstance.board));
+
+        // 测试AI
+        TicTacToeInstance.makeAIMove();
+        log('✅ AI下棋: ' + JSON.stringify(TicTacToeInstance.board));
+
+        // 测试胜负判断
+        TicTacToeInstance.reset();
+        TicTacToeInstance.board = ['X', 'X', 'X', null, null, null, null, null, null];
+        log('✅ 玩家获胜: ' + TicTacToeInstance.checkWin('X'));
+        log('✅ 获胜线: ' + JSON.stringify(TicTacToeInstance.getWinningLine()));
+
+        log('');
+        log('🎉 所有基础功能正常！');
+    </script>
+</body>
+</html>

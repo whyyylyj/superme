@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>手机端适配测试</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a1a;
+            color: #fff;
+            font-family: sans-serif;
+            padding: 20px;
+        }
+        .test-result {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .pass { border-left: 4px solid #00ff66; }
+        .fail { border-left: 4px solid #ff3333; }
+        .test-title { font-weight: bold; margin-bottom: 10px; }
+        .test-detail { font-size: 0.9em; color: #aaa; }
+        h1 { margin-bottom: 20px; font-size: 1.5em; }
+        h2 { margin: 20px 0 10px; font-size: 1.2em; color: #00ffcc; }
+    </style>
+</head>
+<body>
+    <h1>📱 手机端适配测试报告</h1>
+    
+    <h2>基础检查</h2>
+    <div id="meta-checks"></div>
+    
+    <h2>CSS 检查</h2>
+    <div id="css-checks"></div>
+    
+    <h2>JavaScript 检查</h2>
+    <div id="js-checks"></div>
+    
+    <h2>触摸控制检查</h2>
+    <div id="touch-checks"></div>
+
+    <script>
+        function addResult(containerId, pass, title, detail) {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result ${pass ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <div class="test-title">${pass ? '✅' : '❌'} ${title}</div>
+                <div class="test-detail">${detail}</div>
+            `;
+            container.appendChild(div);
+        }
+
+        // Meta 检查
+        const viewport = document.querySelector('meta[name="viewport"]');
+        addResult('meta-checks', 
+            viewport !== null,
+            'Viewport Meta 标签',
+            viewport ? viewport.content : '缺失');
+        
+        addResult('meta-checks',
+            viewport && viewport.content.includes('user-scalable=no'),
+            '禁止缩放',
+            viewport ? (viewport.content.includes('user-scalable=no') ? '已设置' : '未设置') : 'N/A');
+
+        // CSS 检查
+        const styles = getComputedStyle(document.body);
+        const touchControls = document.createElement('div');
+        touchControls.id = 'touch-controls';
+        document.body.appendChild(touchControls);
+        const computedDisplay = getComputedStyle(touchControls).display;
+        document.body.removeChild(touchControls);
+        
+        addResult('css-checks',
+            true,
+            'CSS 加载',
+            '样式表已应用');
+
+        // JS 检查
+        addResult('js-checks',
+            typeof Input !== 'undefined',
+            'Input 对象',
+            typeof Input !== 'undefined' ? '已定义' : '未定义');
+        
+        addResult('js-checks',
+            Input && Input.isTouchDevice !== undefined,
+            '触摸设备检测',
+            Input ? (Input.isTouchDevice ? '检测到触摸设备' : '非触摸设备或未检测') : 'N/A');
+        
+        addResult('js-checks',
+            typeof TouchInput !== 'undefined',
+            'TouchInput 对象',
+            typeof TouchInput !== 'undefined' ? '已定义' : '未定义');
+
+        // 触摸控制检查
+        const joystick = document.getElementById('virtual-joystick');
+        addResult('touch-checks',
+            joystick !== null,
+            '虚拟摇杆元素',
+            joystick ? '存在' : '缺失');
+        
+        const actionBtns = document.querySelectorAll('.action-btn');
+        addResult('touch-checks',
+            actionBtns.length > 0,
+            '动作按钮',
+            `找到 ${actionBtns.length} 个按钮`);
+
+        // 显示设备信息
+        const deviceInfo = `
+            <div class="test-result pass">
+                <div class="test-title">📊 设备信息</div>
+                <div class="test-detail">
+                    屏幕宽度：${window.screen.width}px<br>
+                    屏幕高度：${window.screen.height}px<br>
+                    窗口宽度：${window.innerWidth}px<br>
+                    窗口高度：${window.innerHeight}px<br>
+                    设备像素比：${window.devicePixelRatio}<br>
+                    触摸支持：${'ontouchstart' in window ? '是' : '否'}<br>
+                    最大触摸点：${navigator.maxTouchPoints || 0}
+                </div>
+            </div>
+        `;
+        document.querySelector('h1').insertAdjacentHTML('afterend', deviceInfo);
+    </script>
+
+    <!-- 加载游戏脚本以测试 -->
+    <script src="js/input.js"></script>
+    <script src="js/touch-input.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Button Test</title>
+    <style>
+        .btn {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        #overlay.hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Button Test</h1>
+    <button class="btn" id="test1">Test 1</button>
+    <button class="btn" id="test2">Test 2</button>
+    
+    <div id="overlay" class="hidden">
+        <button class="btn" id="overlay-btn">Overlay Button</button>
+    </div>
+    
+    <script>
+        document.getElementById('test1').addEventListener('click', () => {
+            console.log('Test 1 clicked');
+            alert('Test 1 works!');
+        });
+        
+        document.getElementById('test2').addEventListener('click', () => {
+            console.log('Test 2 clicked');
+            alert('Test 2 works!');
+        });
+    </script>
+</body>
+</html>

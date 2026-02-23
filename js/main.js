@@ -12,35 +12,41 @@ if (canvas) {
     canvas.dataset.ready = "0";  // 初始未就绪
 }
 
-// 响应式 Canvas 缩放 (支持 High DPI/Retina)
-// 注意：resize 事件监听已由 responsive.js 统一处理
+/**
+ * 响应式 Canvas 缩放 (支持 High DPI/Retina)
+ * 注意：自适应主要由 responsive.js (transform: scale) 在外层容器处理。
+ * 这里只负责 canvas 内部基于设备像素比 (dpr) 的高清绘图缓冲大小。
+ */
 function resizeCanvas() {
     const container = document.getElementById('game-container');
     if (!container || !canvas) return;
 
-    const rect = container.getBoundingClientRect();
     const ctx = canvas.getContext('2d');
 
     // 获取设备像素比
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2); // 限制最大dpr为2，保护性能
 
-    // 设置画布物理像素尺寸
+    // Canvas 无论在桌面还是移动端，CSS显示尺寸始终固定为 800x600 逻辑像素
+    // 视觉的放大缩小统一由 responsive.js 挂载在 #game-container 上的 transform: scale() 负责
+    canvas.style.width = `${VIRTUAL_WIDTH}px`;
+    canvas.style.height = `${VIRTUAL_HEIGHT}px`;
+
+    // 内部实际缓冲像素，通过倍乘 dpr 来支持高清 Retina 屏
     canvas.width = VIRTUAL_WIDTH * dpr;
     canvas.height = VIRTUAL_HEIGHT * dpr;
-
-    // 设置 CSS 显示尺寸
-    canvas.style.width = rect.width + 'px';
-    canvas.style.height = rect.height + 'px';
 
     // 缩放上下文以匹配基础分辨率坐标系
     if (ctx) {
         ctx.scale(dpr, dpr);
-        // 重新应用平滑度设置（可选）
+        // 应用像素化渲染（像素风格游戏）
         ctx.imageRendering = 'pixelated';
         ctx.webkitImageSmoothingEnabled = false;
         ctx.mozImageSmoothingEnabled = false;
         ctx.imageSmoothingEnabled = false;
     }
+
+    // 调试日志
+    console.log(`[Main] Canvas resized: ${canvas.width}x${canvas.height} (buffer), ${canvas.style.width}x${canvas.style.height} (display), DPR: ${dpr}`);
 }
 
 // 主程序
@@ -116,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
             GameStateMachine.changeState('paused');
             uiPauseScreen.classList.remove('hidden');
             uiPauseScreen.classList.add('active');
-            
+
             // Hide touch controls when paused
             const touchControls = document.getElementById('touch-controls');
             if (touchControls) touchControls.classList.add('hidden');
@@ -128,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
             GameStateMachine.changeState('playing');
             uiPauseScreen.classList.add('hidden');
             uiPauseScreen.classList.remove('active');
-            
+
             // Show touch controls when resumed if it's a touch device
             const touchControls = document.getElementById('touch-controls');
             if (touchControls && Input.isTouchDevice) touchControls.classList.remove('hidden');
@@ -764,90 +770,77 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event Listeners
-    btnStart.addEventListener('click', () => initGame(0, false));
-    btnRestart.addEventListener('click', () => {
+    function setupButton(btn, callback) {
+        if (!btn) return;
+        btn.addEventListener('click', callback);
+        // Add touchstart for faster response on mobile, but don't double trigger
+        btn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            callback();
+            if (typeof TouchInput !== 'undefined' && TouchInput.vibrate) TouchInput.vibrate(10);
+        }, { passive: false });
+    }
+
+    setupButton(btnStart, () => initGame(0, false));
+    setupButton(btnRestart, () => {
         const currentLevel = LevelManager.currentLevelIndex;
-        // 如果是从当前关卡重新开始，则判定为 Retry
         initGame(currentLevel >= 0 ? currentLevel : 0, true);
     });
-    btnPlayAgain.addEventListener('click', () => initGame(0, false));
+    setupButton(btnPlayAgain, () => initGame(0, false));
 
     // menu-btn: Main Menu from Game Over (no init, just reset state)
     const btnMenu = document.getElementById('menu-btn');
-    if (btnMenu) {
-        btnMenu.addEventListener('click', () => {
-            GameStateMachine.changeState('start');
-            uiGameOverScreen.classList.add('hidden');
-            uiGameOverScreen.classList.remove('active');
-            uiHUD.classList.add('hidden');
-            uiStartScreen.classList.remove('hidden');
-            uiStartScreen.classList.add('active');
-        });
-    }
+    setupButton(btnMenu, () => {
+        GameStateMachine.changeState('start');
+        uiGameOverScreen.classList.add('hidden');
+        uiGameOverScreen.classList.remove('active');
+        uiHUD.classList.add('hidden');
+        uiStartScreen.classList.remove('hidden');
+        uiStartScreen.classList.add('active');
+    });
 
     // Pause Menu Listeners
-    btnResume.addEventListener('click', resumeGame);
-    btnQuit.addEventListener('click', quitToMenu);
-    btnMute.addEventListener('click', () => {
+    setupButton(btnResume, resumeGame);
+    setupButton(btnQuit, quitToMenu);
+    setupButton(btnMute, () => {
         const isMuted = AudioManager.toggleMute();
         btnMute.innerText = isMuted ? '🔇 SOUND: OFF' : '🔊 SOUND: ON';
     });
 
     // Help Modal Listeners
-    if (btnHelp) {
-        btnHelp.addEventListener('click', () => {
-            uiHelpModal.classList.remove('hidden');
-            uiHelpModal.classList.add('active');
-            // Hide touch controls when modal is shown
-            const tc = document.getElementById('touch-controls');
-            if (tc) tc.classList.add('hidden');
-        });
-    }
-    if (btnHelpClose) {
-        btnHelpClose.addEventListener('click', () => {
-            uiHelpModal.classList.add('hidden');
-            uiHelpModal.classList.remove('active');
-            // Show touch controls back if on touch device and in play
-            const tc = document.getElementById('touch-controls');
-            if (tc && Input.isTouchDevice && GameStateMachine.is('playing')) tc.classList.remove('hidden');
-        });
-    }
-    // Click backdrop to close help modal
-    if (uiHelpModal) {
-        uiHelpModal.addEventListener('click', (e) => {
-            if (e.target === uiHelpModal) {
-                uiHelpModal.classList.add('hidden');
-                uiHelpModal.classList.remove('active');
-                // Show touch controls back if on touch device and in play
-                const tc = document.getElementById('touch-controls');
-                if (tc && Input.isTouchDevice && GameStateMachine.is('playing')) tc.classList.remove('hidden');
-            }
-        });
-    }
+    setupButton(btnHelp, () => {
+        uiHelpModal.classList.remove('hidden');
+        uiHelpModal.classList.add('active');
+        const tc = document.getElementById('touch-controls');
+        if (tc) tc.classList.add('hidden');
+    });
+
+    setupButton(btnHelpClose, () => {
+        uiHelpModal.classList.add('hidden');
+        uiHelpModal.classList.remove('active');
+        const tc = document.getElementById('touch-controls');
+        if (tc && Input.isTouchDevice && GameStateMachine.is('playing')) tc.classList.remove('hidden');
+    });
 
     // Level Select Listeners
-    if (btnLevelSelect) {
-        btnLevelSelect.addEventListener('click', () => {
-            uiStartScreen.classList.add('hidden');
-            uiStartScreen.classList.remove('active');
-            uiLevelSelectScreen.classList.remove('hidden');
-            uiLevelSelectScreen.classList.add('active');
-            // Hide touch controls when level select is shown
-            const tc = document.getElementById('touch-controls');
-            if (tc) tc.classList.add('hidden');
-        });
-    }
-    if (btnLevelSelectBack) {
-        btnLevelSelectBack.addEventListener('click', () => {
-            uiLevelSelectScreen.classList.add('hidden');
-            uiLevelSelectScreen.classList.remove('active');
-            uiStartScreen.classList.remove('hidden');
-            uiStartScreen.classList.add('active');
-            // Keep touch controls hidden on start screen
-        });
-    }
+    setupButton(btnLevelSelect, () => {
+        uiStartScreen.classList.add('hidden');
+        uiStartScreen.classList.remove('active');
+        uiLevelSelectScreen.classList.remove('hidden');
+        uiLevelSelectScreen.classList.add('active');
+        const tc = document.getElementById('touch-controls');
+        if (tc) tc.classList.add('hidden');
+    });
+
+    setupButton(btnLevelSelectBack, () => {
+        uiLevelSelectScreen.classList.add('hidden');
+        uiLevelSelectScreen.classList.remove('active');
+        uiStartScreen.classList.remove('hidden');
+        uiStartScreen.classList.add('active');
+    });
+
     levelCards.forEach(card => {
-        card.addEventListener('click', () => {
+        setupButton(card, () => {
             const levelIndex = parseInt(card.dataset.level, 10);
             initGame(levelIndex, false);
         });
@@ -879,7 +872,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const cell = document.createElement('div');
             cell.className = 'tictactoe-cell';
             cell.dataset.index = i;
-            cell.addEventListener('click', () => handleTicTacToeCellClick(i));
+            setupButton(cell, () => handleTicTacToeCellClick(i));
             tttBoard.appendChild(cell);
         }
     }
@@ -1059,15 +1052,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 井字棋按钮事件监听
-    if (btnTicTacToeAccept) {
-        btnTicTacToeAccept.addEventListener('click', acceptTicTacToeChallenge);
-    }
-    if (btnTicTacToeDecline) {
-        btnTicTacToeDecline.addEventListener('click', declineTicTacToeChallenge);
-    }
-    if (btnTicTacToeCollect) {
-        btnTicTacToeCollect.addEventListener('click', collectTicTacToeReward);
-    }
+    setupButton(btnTicTacToeAccept, acceptTicTacToeChallenge);
+    setupButton(btnTicTacToeDecline, declineTicTacToeChallenge);
+    setupButton(btnTicTacToeCollect, collectTicTacToeReward);
 
     // 初始化棋盘
     initTicTacToeBoard();

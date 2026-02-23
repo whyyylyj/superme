@@ -52,22 +52,18 @@ class Level2Nether extends LevelBase {
         this.generatePowerups();
         this.generateBoss();
 
-        // 井字棋触发点系统
-        this.addPossibleTriggerLocation({ 
-            x: 600, y: 420,
-            hint: '岩浆边的神秘符文！'
-        });
-        this.addPossibleTriggerLocation({ 
-            x: 2000, y: 420,
-            hint: '火焰峡谷的金色光芒！'
-        });
-        this.addPossibleTriggerLocation({ 
-            x: 3500, y: 420,
-            hint: '地狱深处的古老祭坛！'
-        });
-        this.activateRandomTriggers(2);
+        // 井字棋精灵 - 彩蛋游戏触发者（2 个显眼的位置）
+        if (typeof EnemyTicTacToe !== 'undefined') {
+            const enemy1 = new EnemyTicTacToe(800, 380);
+            enemy1.levelNumber = 2;
+            this.enemies.push(enemy1);
+            
+            const enemy2 = new EnemyTicTacToe(2500, 380);
+            enemy2.levelNumber = 2;
+            this.enemies.push(enemy2);
+        }
 
-        console.log(`✅ 第二关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.geysers.length} 喷泉, ${this.ticTacToeTriggers.length} 井字棋触发点`);
+        console.log(`✅ 第二关初始化完成：${this.platforms.length} 平台，${this.enemies.length} 敌人，${this.geysers.length} 喷泉`);
     }
 
     /**

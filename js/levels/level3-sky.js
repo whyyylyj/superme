@@ -52,22 +52,18 @@ class Level3Sky extends LevelBase {
         this.generatePowerups();
         this.generateBoss();
 
-        // 井字棋触发点系统
-        this.addPossibleTriggerLocation({ 
-            x: 400, y: 280,
-            hint: '云端的神秘书符！'
-        });
-        this.addPossibleTriggerLocation({ 
-            x: 1500, y: 280,
-            hint: '天空神殿的试炼！'
-        });
-        this.addPossibleTriggerLocation({ 
-            x: 3000, y: 280,
-            hint: '神圣的井字棋盘！'
-        });
-        this.activateRandomTriggers(2);
+        // 井字棋精灵 - 彩蛋游戏触发者（2 个显眼的位置）
+        if (typeof EnemyTicTacToe !== 'undefined') {
+            const enemy1 = new EnemyTicTacToe(1000, 350);
+            enemy1.levelNumber = 3;
+            this.enemies.push(enemy1);
+            
+            const enemy2 = new EnemyTicTacToe(3000, 350);
+            enemy2.levelNumber = 3;
+            this.enemies.push(enemy2);
+        }
 
-        console.log(`✅ 第三关初始化完成: ${this.movingPlatforms.length} 移动平台, ${this.enemies.length} 敌人, ${this.lightPillars.length} 光柱, ${this.ticTacToeTriggers.length} 井字棋触发点`);
+        console.log(`✅ 第三关初始化完成：${this.movingPlatforms.length} 移动平台，${this.enemies.length} 敌人，${this.lightPillars.length} 光柱`);
     }
 
     /**

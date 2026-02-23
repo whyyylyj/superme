@@ -19,15 +19,23 @@ body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: 'Press Start 2P', cursive, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin: 0;
+    padding: 0;
     height: 100vh;
+    width: 100vw;
     overflow: hidden;
+    position: relative;
+    /* Base for absolute game container */
+    /* 防止移动端双击缩放 */
+    touch-action: none;
 }
 
 #game-container {
-    position: relative;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* 核心：永远保持物理 800x600 大小，通过 transform: translate 居中，由 responsive.js 动态叠加 scale */
+    transform: translate(-50%, -50%);
     width: 800px;
     height: 600px;
     box-shadow: 0 0 50px rgba(0, 255, 204, 0.4);
@@ -35,6 +43,9 @@ body {
     border-radius: 4px;
     overflow: hidden;
 }
+
+/* 移除强制的 desktop-device / mobile-device game-container 尺寸覆盖 */
+/* 所有设备统一由上方的基准属性 + responsive.js 进行完美的等比缩放匹配 */
 
 /* CRT & Visual Overlays */
 .overlay-full {
@@ -503,6 +514,27 @@ canvas {
     }
 }
 
+/* Device-specific text visibility */
+.mobile-only-text {
+    display: none;
+}
+
+body.mobile-device .mobile-only-text {
+    display: block;
+}
+
+body.mobile-device .desktop-only-text {
+    display: none;
+}
+
+body.desktop-device .mobile-only-text {
+    display: none;
+}
+
+body.desktop-device .desktop-only-text {
+    display: block;
+}
+
 /* =============================================
    Start Screen Improvements
    ============================================= */
@@ -881,8 +913,8 @@ canvas {
     display: none;
 }
 
-#touch-controls.hidden {
-    display: none;
+#touch-controls:not(.hidden) {
+    display: block;
 }
 
 /* Virtual Joystick */
@@ -909,9 +941,12 @@ canvas {
 }
 
 @keyframes sit-pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
     }
+
     50% {
         box-shadow: 0 0 30px rgba(255, 200, 0, 0.7);
     }
@@ -1077,212 +1112,211 @@ canvas {
 }
 
 /* =============================================
-   Responsive Design (Mobile)
+   Responsive Design (Mobile Only)
+   仅在移动设备上应用这些样式
    ============================================= */
-@media (max-width: 801px) {
-    body {
+@media (max-width: 800px) {
+
+    /* 移动端 body 样式 */
+    body.mobile-device {
         height: 100vh;
         width: 100vw;
         overflow: hidden;
     }
 
-    #game-container {
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
+    /* 移动端游戏容器：保持 800x600 布局，去除边框，由 responsive.js 统一处理缩放和居中 */
+    body.mobile-device #game-container {
         border: none;
         border-radius: 0;
         box-shadow: none;
     }
 
-    canvas {
-        width: 100%;
-        height: 100%;
+    /* 移动端 Canvas：去除强制 100% */
+    body.mobile-device canvas {
         object-fit: contain;
     }
 
-    /* Touch controls visible on touch devices */
-    #touch-controls {
+    /* 移动端触摸控制显示 */
+    body.mobile-device #touch-controls {
         display: block;
     }
 
-    /* Adjust HUD for mobile */
-    #hud {
+    /* 移动端 HUD 调整 */
+    body.mobile-device #hud {
         padding: 8px 12px;
         font-size: 0.5rem;
         flex-wrap: wrap;
         gap: 8px;
     }
 
-    .hud-item {
+    body.mobile-device .hud-item {
         font-size: 0.5rem;
     }
 
-    .hp-bar-container {
+    body.mobile-device .hp-bar-container {
         width: 100px;
         height: 10px;
     }
 
-    #hp-val {
+    body.mobile-device #hp-val {
         font-size: 0.4rem;
     }
 
-    #score-val {
+    body.mobile-device #score-val {
         font-size: 0.7rem;
         min-width: 80px;
     }
 
-    /* 移动端摇杆位置优化 */
-    .virtual-joystick {
+    /* 移动端摇杆优化 */
+    body.mobile-device .virtual-joystick {
         bottom: 20px;
         left: 20px;
         width: 100px;
         height: 100px;
     }
 
-    .joystick-knob {
+    body.mobile-device .joystick-knob {
         width: 40px;
         height: 40px;
     }
 
     /* 移动端按钮优化 */
-    .action-buttons-container {
+    body.mobile-device .action-buttons-container {
         bottom: 20px;
         right: 20px;
     }
 
-    .action-btn {
+    body.mobile-device .action-btn {
         min-width: 50px;
         height: 50px;
         font-size: 0.45rem;
     }
 
-    .action-btn.small {
+    body.mobile-device .action-btn.small {
         min-width: 40px;
         height: 40px;
         font-size: 0.4rem;
     }
 
     /* 暂停按钮位置调整 */
-    .touch-top-right {
+    body.mobile-device .touch-top-right {
         top: 10px;
         right: 10px;
     }
 
-    .pause-btn {
+    body.mobile-device .pause-btn {
         width: 40px;
         height: 40px;
         font-size: 0.7rem;
     }
 
     /* 底部左侧按钮 */
-    .touch-bottom-left {
+    body.mobile-device .touch-bottom-left {
         bottom: 20px;
         left: 150px;
     }
 
-    /* Adjust boss HUD */
-    #boss-hud {
+    /* 移动端 Boss HUD */
+    body.mobile-device #boss-hud {
         bottom: 100px;
         left: 5%;
         width: 90%;
     }
 
-    .boss-hp-bar-container {
+    body.mobile-device .boss-hp-bar-container {
         height: 12px;
     }
 
-    /* Adjust level cards for mobile */
-    .level-cards {
+    /* 移动端关卡卡片 */
+    body.mobile-device .level-cards {
         flex-direction: column;
         align-items: center;
     }
 
-    .level-card {
+    body.mobile-device .level-card {
         width: 280px;
     }
 
-    /* Modal responsive */
-    .modal-box {
+    /* 移动端模态框 */
+    body.mobile-device .modal-box {
         width: 95%;
         max-height: 90vh;
         overflow-y: auto;
     }
 
-    .modal-body {
+    body.mobile-device .modal-body {
         max-height: 60vh;
         overflow-y: auto;
     }
 
-    /* Start screen buttons */
-    .start-buttons {
+    /* 移动端开始屏幕按钮 */
+    body.mobile-device .start-buttons {
         gap: 10px;
     }
 
-    .btn-primary-glow {
+    body.mobile-device .btn-primary-glow {
         padding: 12px 30px;
         font-size: 0.8rem;
     }
 
-    .btn-secondary {
+    body.mobile-device .btn-secondary {
         padding: 10px 24px;
         font-size: 0.65rem;
     }
 
-    /* Big text adjustments */
-    .big-text {
+    /* 移动端文字大小调整 */
+    body.mobile-device .big-text {
         font-size: 3rem;
         letter-spacing: 5px;
     }
 
-    .glow-secondary {
+    body.mobile-device .glow-secondary {
         font-size: 0.9rem;
     }
 }
 
-/* Landscape orientation optimization */
-@media (max-width: 801px) and (orientation: landscape) {
-    #hud {
+/* 横屏模式优化 */
+@media (max-width: 800px) and (orientation: landscape) {
+    body.mobile-device #hud {
         font-size: 0.45rem;
         padding: 5px 10px;
     }
 
-    .hp-bar-container {
+    body.mobile-device .hp-bar-container {
         width: 80px;
         height: 8px;
     }
 
-    /* Adjust joystick position for landscape */
-    .virtual-joystick {
+    /* 横屏模式摇杆位置 */
+    body.mobile-device .virtual-joystick {
         bottom: 15px;
         left: 15px;
         width: 90px;
         height: 90px;
     }
 
-    .joystick-knob {
+    body.mobile-device .joystick-knob {
         width: 35px;
         height: 35px;
     }
 
-    .action-buttons-container {
+    body.mobile-device .action-buttons-container {
         bottom: 15px;
         right: 15px;
     }
 
-    .action-btn {
+    body.mobile-device .action-btn {
         min-width: 45px;
         height: 45px;
     }
 
-    .action-btn.small {
+    body.mobile-device .action-btn.small {
         min-width: 35px;
         height: 35px;
     }
-    
+
     /* 横屏模式下 SIT 按钮隐藏（使用长按替代） */
-    .touch-bottom-left {
+    body.mobile-device .touch-bottom-left {
         display: none;
     }
 }
@@ -1304,12 +1338,13 @@ canvas {
         right: calc(20px + env(safe-area-inset-right));
         bottom: calc(20px + env(safe-area-inset-bottom));
     }
-    
+
     .touch-top-right {
         top: calc(10px + env(safe-area-inset-top));
         right: calc(10px + env(safe-area-inset-right));
     }
 }
+
 /* =============================================
    Tic Tac Toe Minigame
    ============================================= */
@@ -1334,6 +1369,7 @@ canvas {
         transform: scale(0.9) translateY(-30px);
         opacity: 0;
     }
+
     to {
         transform: scale(1) translateY(0);
         opacity: 1;
@@ -1407,10 +1443,13 @@ canvas {
 }
 
 @keyframes winnerPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
         transform: scale(1);
     }
+
     50% {
         box-shadow: 0 0 40px rgba(255, 215, 0, 0.9);
         transform: scale(1.08);
@@ -1432,6 +1471,7 @@ canvas {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -1467,9 +1507,12 @@ canvas {
 }
 
 @keyframes rewardGlow {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: scale(1);
     }
+
     50% {
         transform: scale(1.05);
     }
@@ -1485,29 +1528,32 @@ canvas {
 }
 
 @keyframes rewardPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
     }
+
     50% {
         box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), inset 0 0 30px rgba(255, 215, 0, 0.3);
     }
 }
 
-/* 响应式调整 */
-@media (max-width: 801px) {
-    .tictactoe-container {
+/* 井字棋响应式调整 */
+@media (max-width: 800px) {
+    body.mobile-device .tictactoe-container {
         padding: 20px;
         min-width: auto;
         width: 90%;
     }
 
-    .tictactoe-cell {
+    body.mobile-device .tictactoe-cell {
         width: 55px;
         height: 55px;
         font-size: 1.5rem;
     }
 
-    .tictactoe-board {
+    body.mobile-device .tictactoe-board {
         gap: 6px;
         margin: 15px 0;
     }

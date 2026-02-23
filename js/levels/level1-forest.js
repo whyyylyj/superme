@@ -66,22 +66,18 @@ class Level1Forest extends LevelBase {
         // 生成Boss
         this.generateBoss();
 
-        // 井字棋触发点系统
-        this.addPossibleTriggerLocation({ 
-            x: 500, y: 420,
-            hint: '森林地面上的金色符文！'
-        });
-        this.addPossibleTriggerLocation({ 
-            x: 1200, y: 420,
-            hint: '神秘的光芒闪烁...'
-        });
-        this.addPossibleTriggerLocation({ 
-            x: 2000, y: 420,
-            hint: '古老的森林祭坛'
-        });
-        this.activateRandomTriggers(2);
+        // 井字棋精灵 - 彩蛋游戏触发者（2 个显眼的位置）
+        if (typeof EnemyTicTacToe !== 'undefined') {
+            const enemy1 = new EnemyTicTacToe(500, 420);
+            enemy1.levelNumber = 1;
+            this.enemies.push(enemy1);
+            
+            const enemy2 = new EnemyTicTacToe(2000, 420);
+            enemy2.levelNumber = 1;
+            this.enemies.push(enemy2);
+        }
 
-        console.log(`✅ 第一关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.powerups.length} 道具, ${this.ticTacToeTriggers.length} 井字棋触发点`);
+        console.log(`✅ 第一关初始化完成：${this.platforms.length} 平台，${this.enemies.length} 敌人，${this.powerups.length} 道具`);
     }
 
     /**

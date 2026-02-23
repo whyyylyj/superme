@@ -77,8 +77,8 @@
                     <button id="level-select-btn" class="btn btn-secondary">☰ SELECT STAGE</button>
                     <button id="help-btn" class="btn btn-small btn-outline">❓ HELP</button>
                 </div>
-                <div class="blink-text" style="margin-top: 20px; font-size: 0.7rem; color: var(--primary-color);">—
-                    PRESS START —</div>
+                <div class="blink-text mobile-only-text" style="margin-top: 20px; font-size: 0.7rem; color: var(--primary-color);">— TAP SCREEN TO START —</div>
+                <div class="blink-text desktop-only-text" style="margin-top: 20px; font-size: 0.7rem; color: var(--primary-color);">— PRESS START —</div>
                 <div style="margin-top: 15px; font-size: 0.55rem; color: #444;">v1.0 | 2026</div>
             </div>
 
@@ -218,35 +218,37 @@
                             <div id="ttt-reward-icon" style="font-size: 3rem; margin-bottom: 10px;">🎁</div>
                             <div id="ttt-reward-text" style="font-size: 0.9rem; color: #ffd700;"></div>
                         </div>
-                        <button id="ttt-collect-btn" class="btn btn-primary-glow" style="margin-top: 20px;">领取奖励</button>
+                        <button id="ttt-collect-btn" class="btn btn-primary-glow"
+                            style="margin-top: 20px;">领取奖励</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Touch Controls -->
-            <div id="touch-controls" class="hidden">
-                <div class="virtual-joystick" id="virtual-joystick">
-                    <div class="joystick-knob" id="joystick-knob"></div>
-                </div>
+        </div>
 
-                <div class="action-buttons-container">
-                    <div class="action-btn-row">
-                        <div class="action-btn small btn-k" data-key="transform">K</div>
-                        <div class="action-btn btn-jump" data-key="jump">JUMP</div>
-                    </div>
-                    <div class="action-btn-row">
-                        <div class="action-btn small btn-m" data-key="homing">M</div>
-                        <div class="action-btn btn-shoot" data-key="shoot">FIRE</div>
-                    </div>
-                </div>
+        <!-- Touch Controls Moved INSIDE game-container to scale with game -->
+        <div id="touch-controls" class="hidden">
+            <div class="virtual-joystick" id="virtual-joystick">
+                <div class="joystick-knob" id="joystick-knob"></div>
+            </div>
 
-                <div class="touch-bottom-left">
-                    <div class="action-btn small btn-sit" data-key="sit">SIT</div>
+            <div class="action-buttons-container">
+                <div class="action-btn-row">
+                    <div class="action-btn small btn-k" data-key="transform">K</div>
+                    <div class="action-btn btn-jump" data-key="jump">JUMP</div>
                 </div>
+                <div class="action-btn-row">
+                    <div class="action-btn small btn-m" data-key="homing">M</div>
+                    <div class="action-btn btn-shoot" data-key="shoot">FIRE</div>
+                </div>
+            </div>
 
-                <div class="touch-top-right">
-                    <div class="pause-btn" data-key="pause">⏸</div>
-                </div>
+            <div class="touch-bottom-left">
+                <div class="action-btn small btn-sit" data-key="sit">SIT</div>
+            </div>
+
+            <div class="touch-top-right">
+                <div class="pause-btn" data-key="pause">⏸</div>
             </div>
         </div>
     </div>
@@ -288,6 +290,9 @@
     <script src="js/player.js"></script>
     <script src="js/enemy.js"></script>
     <script src="js/boss.js"></script>
+    
+    <!-- 4.2 特殊敌人 -->
+    <script src="js/enemies/enemy-tictactoe.js"></script>
 
     <!-- 4.5 敌人系统 (Track C) -->
     <script src="js/core/boss-config.js"></script>

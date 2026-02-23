@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0a0a1a">
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="x5-fullscreen" content="true">
+    <title>Superme - The Ultimate Adventure!</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div id="game-container">
+        <!-- Visual Effects Layer -->
+        <div id="crt-overlay" class="overlay-full"></div>
+        <div id="screen-glitch" class="overlay-full hidden"></div>
+
+        <!-- Main Game Canvas -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- UI Overlays -->
+        <div id="ui-layer">
+            <!-- HUD -->
+            <div id="hud" class="hidden">
+                <div class="hud-item title">SUPERME</div>
+                <div class="hud-item stats-group">
+                    <div class="stat-item">
+                        <span class="label">HP</span>
+                        <div class="hp-bar-container">
+                            <div id="hp-bar-fill" class="hp-bar-fill"></div>
+                            <span id="hp-val">100</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <span class="label">SCORE</span>
+                        <span id="score-val">000000</span>
+                    </div>
+                </div>
+                <div class="hud-item">
+                    <span id="wpn-val" class="weapon-indicator">Normal</span>
+                </div>
+                <div class="hud-item powerup">
+                    <span id="powerup-val"></span>
+                </div>
+                <div class="hud-item">
+                    <div class="transform-bar" id="transform-bar" style="display:none">
+                        <div class="transform-bar-fill" id="transform-bar-fill"></div>
+                    </div>
+                    <span id="form-val" class="form-indicator"></span>
+                </div>
+                <div class="hud-item">LV<span id="level-val">1</span></div>
+                <div id="bullets-count"
+                    style="position: absolute; right: 10px; bottom: -570px; font-size: 8px; color: rgba(255,255,255,0.3);">
+                </div>
+            </div>
+
+            <!-- Level Message -->
+            <div id="level-message" class="overlay hidden no-bg">
+                <h1 id="level-message-text" class="glow big-text">STAGE 1</h1>
+                <p id="level-subtitle-text" class="glow-secondary">PREPARE TO FIGHT</p>
+            </div>
+
+            <!-- 竖屏提示 - 建议横屏游玩 -->
+            <div id="orientation-hint" class="overlay hidden">
+                <div class="orientation-hint-content">
+                    <div class="rotate-icon">📱➡️📱</div>
+                    <p class="hint-text">请旋转设备至横屏</p>
+                    <p class="hint-sub">获得最佳游戏体验</p>
+                    <button id="orientation-continue-btn" class="btn btn-outline" style="margin-top: 20px; font-size: 0.5rem;">继续游玩</button>
+                </div>
+            </div>
+
+            <!-- Start Screen -->
+            <div id="start-screen" class="overlay active">
+                <h1 class="logo glow">SUPERME</h1>
+                <p class="start-subtitle">━━ An Epic Bullet Hell Journey ━━</p>
+                <div class="start-badges">
+                    <span class="badge">3 LEVELS</span>
+                    <span class="badge">4 FORMS</span>
+                    <span class="badge">DANMAKU</span>
+                </div>
+                <div class="start-buttons">
+                    <button id="start-btn" class="btn btn-primary-glow">▶ START GAME</button>
+                    <button id="level-select-btn" class="btn btn-secondary">☰ SELECT STAGE</button>
+                    <button id="help-btn" class="btn btn-small btn-outline">❓ HELP</button>
+                </div>
+                <div class="blink-text mobile-only-text" style="margin-top: 20px; font-size: 0.7rem; color: var(--primary-color);">— TAP SCREEN TO START —</div>
+                <div class="blink-text desktop-only-text" style="margin-top: 20px; font-size: 0.7rem; color: var(--primary-color);">— PRESS START —</div>
+                <div style="margin-top: 15px; font-size: 0.55rem; color: #444;">v1.0 | 2026</div>
+            </div>
+
+            <!-- Help Modal -->
+            <div id="help-modal" class="overlay hidden">
+                <div class="modal-box">
+                    <div class="modal-header">
+                        <h2 class="modal-title">❓ HOW TO PLAY</h2>
+                        <button id="help-close-btn" class="modal-close">✕</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="help-section">
+                            <div class="help-section-title">🎮 MOVEMENT</div>
+                            <div class="help-row"><span class="key">WASD</span><span class="help-sep">/</span><span
+                                    class="key">← ↑ ↓ →</span><span class="help-desc">Move</span></div>
+                            <div class="help-row"><span class="key">Space</span><span class="help-desc">Jump</span>
+                            </div>
+                        </div>
+                        <div class="help-section">
+                            <div class="help-section-title">⚔️ COMBAT</div>
+                            <div class="help-row"><span class="key">J</span><span class="help-sep">/</span><span
+                                    class="key">Z</span><span class="help-desc">Shoot</span></div>
+                            <div class="help-row"><span class="key">K</span><span class="help-sep">/</span><span
+                                    class="key">X</span><span class="help-desc">Transform Form</span></div>
+                            <div class="help-row"><span class="key">M</span><span class="help-desc">Toggle Homing
+                                    Mode</span></div>
+                        </div>
+                        <div class="help-section">
+                            <div class="help-section-title">⚙️ SYSTEM</div>
+                            <div class="help-row"><span class="key">Esc</span><span class="help-desc">Pause /
+                                    Resume</span></div>
+                        </div>
+                        <div class="help-hint">💡 Collect power-ups to gain new weapons &amp; abilities!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Level Select Screen -->
+            <div id="level-select-screen" class="overlay hidden">
+                <h2 class="glow" style="margin-bottom: 8px; font-size: 1.2rem; letter-spacing: 4px;">SELECT STAGE</h2>
+                <p style="font-size: 0.6rem; color: #888; margin-bottom: 24px;">Choose your starting point</p>
+                <div class="level-cards">
+                    <div class="level-card" id="level-card-1" data-level="0">
+                        <div class="level-card-num">01</div>
+                        <div class="level-card-icon">🌲</div>
+                        <div class="level-card-name">FOREST</div>
+                        <div class="level-card-desc">Green woods &amp; ancient ruins.<br>Where the journey begins.</div>
+                        <div class="level-card-tag">STAGE 1</div>
+                    </div>
+                    <div class="level-card" id="level-card-2" data-level="1">
+                        <div class="level-card-num">02</div>
+                        <div class="level-card-icon">🔥</div>
+                        <div class="level-card-name">NETHER</div>
+                        <div class="level-card-desc">Lava rivers &amp; shadow demons.<br>Trial by fire awaits.</div>
+                        <div class="level-card-tag">STAGE 2</div>
+                    </div>
+                    <div class="level-card" id="level-card-3" data-level="2">
+                        <div class="level-card-num">03</div>
+                        <div class="level-card-icon">🌌</div>
+                        <div class="level-card-name">SKY CITADEL</div>
+                        <div class="level-card-desc">Clouds &amp; the Sky Tyrant.<br>The final reckoning.</div>
+                        <div class="level-card-tag">STAGE 3</div>
+                    </div>
+                </div>
+                <button id="level-select-back-btn" class="btn btn-outline"
+                    style="margin-top: 24px; font-size: 0.6rem;">◀ BACK</button>
+            </div>
+
+            <!-- Boss HUD -->
+            <div id="boss-hud" class="hidden">
+                <div class="boss-name">
+                    <span class="boss-star">★</span>
+                    <span id="boss-name-text">BOSS</span>
+                    <span class="boss-star">★</span>
+                </div>
+                <div class="boss-hp-bar-container">
+                    <div id="boss-hp-bar" class="boss-hp-fill"></div>
+                </div>
+                <div class="boss-phase" id="boss-phase" style="font-size: 0.6rem; color: #fff; margin-top: 5px;">Phase 1
+                </div>
+            </div>
+
+            <!-- Game Over Screen -->
+            <div id="game-over-screen" class="overlay hidden">
+                <h1 class="text-danger game-over-text">G A M E O V E R</h1>
+                <p id="game-over-quote" style="font-style: italic; color: #aaa;">"The darkness consumed you..."</p>
+                <div style="display: flex; gap: 20px;">
+                    <button id="restart-btn" class="btn">▶ TRY AGAIN</button>
+                    <button id="menu-btn" class="btn">◀ MAIN MENU</button>
+                </div>
+            </div>
+
+            <!-- Win Screen -->
+            <div id="win-screen" class="overlay hidden">
+                <div class="fireworks-container" style="z-index: 1;"></div>
+                <h1 class="text-success victory-text" style="z-index: 2;">★ C O N G R A T S ★</h1>
+                <p style="z-index: 2;">You defeated the Sky Tyrant<br>and saved the world! ✨</p>
+                <button id="play-again-btn" class="btn" style="z-index: 2;">▶ PLAY AGAIN</button>
+            </div>
+
+            <!-- Pause Screen -->
+            <div id="pause-screen" class="overlay hidden">
+                <h1 class="glow">PAUSED</h1>
+                <p>Take a breather, hero.</p>
+                <button id="resume-btn" class="btn" style="margin-bottom: 15px;">RESUME</button>
+                <button id="mute-btn" class="btn btn-small" style="margin-bottom: 15px;">🔊 SOUND: ON</button>
+                <button id="quit-btn" class="btn btn-danger">QUIT TO MENU</button>
+            </div>
+
+            <!-- Tic Tac Toe Minigame Screen -->
+            <div id="tictactoe-screen" class="overlay hidden">
+                <div class="tictactoe-container">
+                    <h2 class="glow" style="font-size: 1.2rem; margin-bottom: 10px;">井字棋挑战</h2>
+                    <p style="font-size: 0.7rem; color: #aaa; margin-bottom: 20px;">击败AI获得随机奖励！</p>
+
+                    <!-- 确认对话框 -->
+                    <div id="ttt-confirm-dialog" class="tictactoe-confirm">
+                        <p style="margin-bottom: 20px; color: #ffd700;">是否接受井字棋挑战？</p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="ttt-accept-btn" class="btn btn-primary-glow">接受挑战</button>
+                            <button id="ttt-decline-btn" class="btn btn-outline">拒绝</button>
+                        </div>
+                    </div>
+
+                    <!-- 3x3 棋盘 -->
+                    <div id="ttt-board-container" class="tictactoe-board-container hidden">
+                        <div id="ttt-status" style="margin-bottom: 15px; font-size: 0.8rem; color: #fff;">你的回合</div>
+                        <div id="ttt-board" class="tictactoe-board">
+                            <!-- 9个格子将由JavaScript生成 -->
+                        </div>
+                        <div id="ttt-result" class="tictactoe-result hidden"></div>
+                    </div>
+
+                    <!-- 奖励展示 -->
+                    <div id="ttt-reward-container" class="tictactoe-reward hidden">
+                        <div class="reward-glow">
+                            <div id="ttt-reward-icon" style="font-size: 3rem; margin-bottom: 10px;">🎁</div>
+                            <div id="ttt-reward-text" style="font-size: 0.9rem; color: #ffd700;"></div>
+                        </div>
+                        <button id="ttt-collect-btn" class="btn btn-primary-glow"
+                            style="margin-top: 20px;">领取奖励</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Touch Controls Moved INSIDE game-container to scale with game -->
+        <div id="touch-controls" class="hidden">
+            <!-- Invisible joystick zone is dynamically created by touch-input.js -->
+            <!-- Visual joystick knob (hidden by default, for debug mode) -->
+            <div class="virtual-joystick" id="virtual-joystick">
+                <div class="joystick-knob" id="joystick-knob"></div>
+            </div>
+
+            <!-- 主要战斗按钮（右下角） -->
+            <div class="action-buttons-container">
+                <div class="action-btn btn-jump" data-key="jump">⬆️</div>
+                <div class="action-btn btn-shoot" data-key="shoot">🔥</div>
+                <div class="action-btn btn-transform" data-key="transform">🌟</div>
+            </div>
+
+            <!-- 辅助功能按钮（右上角） -->
+            <div class="touch-top-right">
+                <div class="auxiliary-buttons">
+                    <div class="aux-btn-row">
+                        <div class="aux-btn btn-m" data-key="homing" title="追踪">🎯</div>
+                        <div class="aux-btn btn-sit" data-key="sit" title="休息">💤</div>
+                        <div class="aux-btn btn-auto" data-key="autofire" title="连射">🔄</div>
+                        <div class="pause-btn" data-key="pause" title="暂停">⏸</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <!-- 1. 核心基础 -->
+    <script src="js/core/event-bus.js"></script>
+    <script src="js/core/asset-manager.js"></script>
+    <script src="js/core/screen-effects.js"></script>
+    <script src="js/core/audio-manager.js"></script>
+    <script src="js/responsive.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/touch-input.js"></script>
+    <script src="js/entity.js"></script>
+    <script src="js/particle.js"></script>
+
+    <!-- 2. 变身系统 -->
+    <script src="js/transform/form-normal.js"></script>
+    <script src="js/transform/form-mecha.js"></script>
+    <script src="js/transform/form-dragon.js"></script>
+    <script src="js/transform/form-phantom.js"></script>
+    <script src="js/transform/transform-system.js"></script>
+
+    <!-- 2.5 小游戏系统 -->
+    <script src="js/minigame/tic-tac-toe.js"></script>
+    <script src="js/minigame/reward-system.js"></script>
+
+    <!-- 3. 弹幕系统 -->
+    <script src="js/danmaku/bullet-pool.js"></script>
+    <script src="js/danmaku/patterns.js"></script>
+    <script src="js/danmaku/danmaku-engine.js"></script>
+    <script src="js/danmaku/bullet-genes.js"></script>
+    <script src="js/danmaku/pattern-weaver.js"></script>
+    <script src="js/bullet.js"></script>
+
+    <!-- 4. 游戏对象 -->
+    <script src="js/powerup.js"></script>
+    <script src="js/player.js"></script>
+    <script src="js/enemy.js"></script>
+    <script src="js/boss.js"></script>
+    
+    <!-- 4.2 特殊敌人 -->
+    <script src="js/enemies/enemy-tictactoe.js"></script>
+
+    <!-- 4.5 敌人系统 (Track C) -->
+    <script src="js/core/boss-config.js"></script>
+    <script src="js/core/boss-config-helper.js"></script>
+    <script src="js/enemies/enemy-base.js"></script>
+    <script src="js/enemies/boss-base.js"></script>
+    <script src="js/enemies/boss-level1.js"></script>
+    <script src="js/enemies/boss-level2.js"></script>
+    <script src="js/enemies/boss-level3.js"></script>
+    <script src="js/enemies/enemy-types.js"></script>
+
+    <!-- 5. 关卡 -->
+    <script src="js/level.js"></script>
+    <script src="js/levels/level-base.js"></script>
+
+    <!-- 5.5 程序化生成系统 -->
+    <script src="js/procedural/segment-library.js"></script>
+    <script src="js/procedural/segment-builder.js"></script>
+
+    <script src="js/levels/level1-forest.js"></script>
+    <script src="js/levels/level2-nether.js"></script>
+    <script src="js/levels/level3-sky.js"></script>
+
+    <!-- 6. 核心管理 + 主循环 -->
+    <script src="js/core/level-manager.js"></script>
+    <script src="js/core/game-state.js"></script>
+    <script src="js/main.js?v=20260223"></script>
+</body>
+
+</html>

@@ -1,0 +1,1838 @@
+/* CSS Variables for our glowing, vibrant theme */
+:root {
+    --bg-color: #0a0a1a;
+    --text-color: #ffffff;
+    --primary-color: #00ffcc;
+    --secondary-color: #ff00ff;
+    --danger-color: #ff3333;
+    --success-color: #00ff66;
+    --hud-bg: rgba(0, 0, 0, 0.7);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Press Start 2P', cursive, sans-serif;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: relative;
+    /* Base for absolute game container */
+    /* 防止移动端双击缩放 */
+    touch-action: none;
+}
+
+#game-container {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    /* 核心：永远保持物理 800x600 大小，通过 transform: translate 居中，由 responsive.js 动态叠加 scale */
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 600px;
+    box-shadow: 0 0 50px rgba(0, 255, 204, 0.4);
+    border: 4px solid var(--primary-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* 移除强制的 desktop-device / mobile-device game-container 尺寸覆盖 */
+/* 所有设备统一由上方的基准属性 + responsive.js 进行完美的等比缩放匹配 */
+
+/* CRT & Visual Overlays */
+.overlay-full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#crt-overlay {
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg,
+            rgba(255, 0, 0, 0.03),
+            rgba(0, 255, 0, 0.01),
+            rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%;
+    animation: flicker 0.15s infinite;
+}
+
+#screen-glitch {
+    background: rgba(255, 0, 255, 0.05);
+    z-index: 11;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.95;
+    }
+
+    5% {
+        opacity: 0.85;
+    }
+
+    10% {
+        opacity: 0.95;
+    }
+
+    15% {
+        opacity: 0.9;
+    }
+
+    25% {
+        opacity: 0.85;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.9;
+    }
+}
+
+canvas {
+    display: block;
+    image-rendering: pixelated;
+    filter: brightness(1.2) contrast(1.1);
+}
+
+/* UI Layer Overlays */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 26, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    text-align: center;
+    transition: opacity 0.5s ease;
+    z-index: 50;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.overlay.no-bg {
+    background: transparent !important;
+    pointer-events: none;
+}
+
+/* Level Messages */
+.big-text {
+    font-size: 5rem;
+    margin-bottom: 10px;
+    letter-spacing: 10px;
+    animation: textZoom 2.5s ease-out forwards;
+    color: #fff;
+    text-shadow: 0 0 20px var(--primary-color), 0 0 40px var(--primary-color);
+}
+
+.glow-secondary {
+    color: var(--secondary-color);
+    text-shadow: 0 0 10px var(--secondary-color);
+    letter-spacing: 5px;
+    font-size: 1.2rem;
+    animation: slideIn 2s ease-out forwards;
+}
+
+@keyframes textZoom {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+        filter: blur(10px);
+    }
+
+    20% {
+        transform: scale(1.1);
+        opacity: 1;
+        filter: blur(0);
+    }
+
+    80% {
+        transform: scale(1.0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+
+    20% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    80% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(100px);
+        opacity: 0;
+    }
+}
+
+/* HUD System */
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    padding: 15px 25px;
+    pointer-events: none;
+    font-size: 0.7rem;
+    z-index: 20;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+}
+
+.stats-group {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-item .label {
+    font-size: 0.5rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+}
+
+.hp-bar-container {
+    position: relative;
+    width: 150px;
+    height: 14px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid var(--danger-color);
+    border-radius: 2px;
+}
+
+.hp-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ff3333, #ff6666);
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+    transition: width 0.3s ease-out;
+}
+
+#hp-val {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.5rem;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+#score-val {
+    font-size: 1rem;
+    color: #fff;
+    text-shadow: 0 0 10px var(--primary-color);
+    min-width: 120px;
+    display: inline-block;
+}
+
+.hud-item {
+    display: flex;
+    align-items: center;
+}
+
+.hud-item.title {
+    color: var(--primary-color);
+    text-shadow: 0 0 5px var(--primary-color);
+}
+
+.hud-item.powerup span {
+    color: var(--secondary-color);
+    animation: pulse 1s infinite alternate;
+}
+
+/* Boss HUD */
+#boss-hud {
+    position: absolute;
+    bottom: 20px;
+    left: 10%;
+    width: 80%;
+    text-align: center;
+}
+
+.boss-name {
+    font-size: 0.8rem;
+    color: var(--danger-color);
+    margin-bottom: 5px;
+    text-shadow: 0 0 5px var(--danger-color);
+    text-transform: uppercase;
+}
+
+.boss-hp-bar-container {
+    width: 100%;
+    height: 15px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 2px solid var(--danger-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.boss-hp-fill {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, #ff0000, #ff6666);
+    box-shadow: 0 0 10px #ff0000;
+    transition: width 0.2s ease-out;
+}
+
+/* Animations */
+.blink-text {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1.1);
+        opacity: 1;
+        text-shadow: 0 0 10px var(--secondary-color);
+    }
+}
+
+/* Fireworks Container - visual effects rendered via canvas are mapped over it */
+.fireworks-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+/* HP 心形 */
+.hp-hearts {
+    display: flex;
+    gap: 4px;
+}
+
+.hp-heart {
+    width: 16px;
+    height: 16px;
+    position: relative;
+    display: inline-block;
+}
+
+.hp-heart.full::before {
+    content: '♥';
+    color: #ff3333;
+    text-shadow: 0 0 5px #ff3333;
+    font-size: 14px;
+}
+
+.hp-heart.empty::before {
+    content: '♥';
+    color: #333333;
+    font-size: 14px;
+}
+
+/* 变身进度条 */
+.transform-bar {
+    width: 120px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.transform-bar-fill {
+    height: 100%;
+    width: 0%;
+    background-color: var(--primary-color);
+    transition: width 0.1s linear, background-color 0.3s;
+    border-radius: 4px;
+}
+
+.form-indicator {
+    vertical-align: middle;
+}
+
+/* Animations added */
+.logo {
+    animation: logoGlow 2s ease-in-out infinite alternate,
+        logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoGlow {
+    0% {
+        text-shadow:
+            0 0 10px var(--primary-color),
+            0 0 20px var(--primary-color),
+            0 0 30px var(--secondary-color);
+    }
+
+    100% {
+        text-shadow:
+            0 0 20px var(--primary-color),
+            0 0 40px var(--primary-color),
+            0 0 60px var(--secondary-color),
+            0 0 80px var(--secondary-color);
+    }
+}
+
+@keyframes logoPulse {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.02);
+    }
+}
+
+.btn {
+    animation: btnBreathe 2s ease-in-out infinite;
+}
+
+@keyframes btnBreathe {
+
+    0%,
+    100% {
+        box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2),
+            0 0 5px rgba(0, 255, 204, 0.1);
+    }
+
+    50% {
+        box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.4),
+            0 0 15px rgba(0, 255, 204, 0.3);
+    }
+}
+
+.game-over-text {
+    animation: textShake 0.5s ease-in-out infinite;
+}
+
+@keyframes textShake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-3px) rotate(-0.5deg);
+    }
+
+    75% {
+        transform: translateX(3px) rotate(0.5deg);
+    }
+}
+
+.victory-text {
+    background: linear-gradient(90deg,
+            #ff0000, #ff8800, #ffff00,
+            #00ff00, #0088ff, #aa00ff);
+    background-size: 400% 100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: rainbowMove 2s linear infinite;
+}
+
+@keyframes rainbowMove {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    100% {
+        background-position: 400% 50%;
+    }
+}
+
+/* Device-specific text visibility */
+.mobile-only-text {
+    display: none;
+}
+
+body.mobile-device .mobile-only-text {
+    display: block;
+}
+
+body.mobile-device .desktop-only-text {
+    display: none;
+}
+
+body.desktop-device .mobile-only-text {
+    display: none;
+}
+
+body.desktop-device .desktop-only-text {
+    display: block;
+}
+
+/* =============================================
+   Start Screen Improvements
+   ============================================= */
+.start-subtitle {
+    font-size: 0.65rem;
+    color: var(--primary-color);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.start-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    font-size: 0.5rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+    background: rgba(0, 255, 204, 0.07);
+    text-shadow: 0 0 6px var(--primary-color);
+}
+
+.start-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.btn-primary-glow {
+    font-size: 0.9rem;
+    padding: 14px 40px;
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.15), rgba(0, 255, 204, 0.05));
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    text-shadow: 0 0 8px var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.25), inset 0 0 20px rgba(0, 255, 204, 0.05);
+    transition: all 0.3s ease;
+}
+
+.btn-primary-glow:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5), inset 0 0 20px rgba(0, 255, 204, 0.1);
+}
+
+.btn-secondary {
+    font-size: 0.7rem;
+    padding: 10px 28px;
+    background: rgba(255, 0, 255, 0.08);
+    border: 1.5px solid var(--secondary-color);
+    color: var(--secondary-color);
+    text-shadow: 0 0 6px var(--secondary-color);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 0, 255, 0.18);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+
+.btn-outline {
+    font-size: 0.6rem;
+    padding: 8px 22px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.55);
+    transition: all 0.25s ease;
+}
+
+.btn-outline:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Common btn base reset for new variants */
+.btn-primary-glow,
+.btn-secondary,
+.btn-outline {
+    font-family: 'Press Start 2P', cursive;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    animation: none;
+}
+
+/* =============================================
+   Help Modal
+   ============================================= */
+#help-modal {
+    background: rgba(5, 5, 18, 0.92);
+    backdrop-filter: blur(6px);
+    z-index: 60;
+}
+
+.modal-box {
+    background: rgba(10, 10, 30, 0.98);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    box-shadow: 0 0 40px rgba(0, 255, 204, 0.3), inset 0 0 30px rgba(0, 255, 204, 0.03);
+    width: 480px;
+    max-width: 90%;
+    padding: 0;
+    overflow: hidden;
+    animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: scale(0.88) translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 22px;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+    background: rgba(0, 255, 204, 0.05);
+}
+
+.modal-title {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 8px var(--primary-color);
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    background: rgba(255, 51, 51, 0.1);
+}
+
+.modal-body {
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.help-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.help-section-title {
+    font-size: 0.55rem;
+    color: var(--secondary-color);
+    text-shadow: 0 0 6px var(--secondary-color);
+    letter-spacing: 2px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 0, 255, 0.2);
+}
+
+.help-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    background: rgba(0, 255, 204, 0.1);
+    border: 1px solid rgba(0, 255, 204, 0.4);
+    border-radius: 3px;
+    font-size: 0.5rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+    min-width: 28px;
+    text-align: center;
+    box-shadow: 0 2px 0 rgba(0, 255, 204, 0.3);
+}
+
+.help-sep {
+    color: #555;
+    font-size: 0.5rem;
+}
+
+.help-desc {
+    font-size: 0.5rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin-left: 6px;
+}
+
+.help-hint {
+    font-size: 0.45rem;
+    color: #666;
+    text-align: center;
+    padding: 10px;
+    border: 1px dashed #333;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* =============================================
+   Level Select Screen
+   ============================================= */
+#level-select-screen {
+    background: rgba(5, 5, 18, 0.95);
+    z-index: 55;
+}
+
+.level-cards {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.level-card {
+    width: 170px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 20px 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.level-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 7px;
+}
+
+#level-card-1::before {
+    background: radial-gradient(ellipse at top, rgba(0, 200, 100, 0.12), transparent 70%);
+}
+
+#level-card-2::before {
+    background: radial-gradient(ellipse at top, rgba(255, 80, 0, 0.14), transparent 70%);
+}
+
+#level-card-3::before {
+    background: radial-gradient(ellipse at top, rgba(100, 100, 255, 0.14), transparent 70%);
+}
+
+.level-card:hover::before {
+    opacity: 1;
+}
+
+#level-card-1:hover {
+    border-color: #00cc66;
+    box-shadow: 0 0 20px rgba(0, 200, 100, 0.3);
+    transform: translateY(-4px);
+}
+
+#level-card-2:hover {
+    border-color: #ff5500;
+    box-shadow: 0 0 20px rgba(255, 80, 0, 0.3);
+    transform: translateY(-4px);
+}
+
+#level-card-3:hover {
+    border-color: #6666ff;
+    box-shadow: 0 0 20px rgba(100, 100, 255, 0.3);
+    transform: translateY(-4px);
+}
+
+.level-card-num {
+    font-size: 0.5rem;
+    color: #555;
+    letter-spacing: 2px;
+}
+
+.level-card-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.level-card-name {
+    font-size: 0.65rem;
+    color: #fff;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.level-card-desc {
+    font-size: 0.42rem;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+}
+
+.level-card-tag {
+    margin-top: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.45rem;
+    letter-spacing: 1px;
+    border: 1px solid currentColor;
+}
+
+#level-card-1 .level-card-tag {
+    color: #00cc66;
+    border-color: #00cc66;
+    background: rgba(0, 204, 102, 0.1);
+}
+
+#level-card-2 .level-card-tag {
+    color: #ff6600;
+    border-color: #ff6600;
+    background: rgba(255, 102, 0, 0.1);
+}
+
+#level-card-3 .level-card-tag {
+    color: #8888ff;
+    border-color: #8888ff;
+    background: rgba(136, 136, 255, 0.1);
+}
+
+.level-card:active {
+    transform: scale(0.97) translateY(-2px);
+}
+
+/* =============================================
+   Touch Controls (Mobile)
+   ============================================= */
+#touch-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+}
+
+#touch-controls:not(.hidden) {
+    display: block;
+}
+
+/* =============================================
+   Invisible Full Left Screen Joystick Zone
+   整个左半屏都是摇杆操作区域（不可见）
+   ============================================= */
+.joystick-zone {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50%;
+    height: 100%;
+    /* 完全不可见，但接收触摸事件 */
+    background: transparent;
+    pointer-events: auto;
+    touch-action: none;
+    z-index: 50; /* 降低 z-index，避免覆盖 UI 界面 */
+}
+
+/* 游戏进行时才启用 pointer-events */
+#touch-controls.playing .joystick-zone {
+    pointer-events: auto;
+}
+
+/* 游戏暂停/结束时禁用 pointer-events，让按钮可以被点击 */
+#touch-controls:not(.playing) .joystick-zone {
+    pointer-events: none;
+}
+
+/* 原有的摇杆样式保留（可用于调试或可选显示） */
+.virtual-joystick {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-250%);
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(0, 255, 204, 0.1);
+    border-radius: 50%;
+    pointer-events: none; /* 不再接收触摸，由 joystick-zone 处理 */
+    touch-action: none;
+    transition: all 0.3s ease;
+    opacity: 0; /* 默认完全隐藏 */
+}
+
+/* 调试模式可显示摇杆（添加 debug 类时） */
+body.debug-mode .virtual-joystick {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 204, 0.3);
+}
+
+/* 摇杆按钮也隐藏（仅用于视觉反馈） */
+.joystick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 204, 0.3);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
+    transition: transform 0.05s, background 0.3s;
+    opacity: 0; /* 默认隐藏 */
+}
+
+body.debug-mode .joystick-knob {
+    opacity: 1;
+}
+
+/* =============================================
+   Touch Controls (Mobile)
+   重新设计：弧形布局 (Arc Layout)
+   ============================================= */
+
+/* 主要战斗按钮容器（右下角） */
+.action-buttons-container {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
+    width: 220px;
+    height: 220px;
+    pointer-events: none;
+}
+
+/* 主战斗按钮样式 - 默认弧形定位 */
+.action-btn {
+    position: absolute;
+    width: 75px;
+    height: 75px;
+    background: rgba(255, 0, 255, 0.2);
+    border: 3px solid var(--secondary-color);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
+    transition: all 0.1s;
+    pointer-events: auto;
+}
+
+/* 按钮位置 - 基于拇指弧线 (以右下角为原点向外扩展) */
+.action-btn.btn-shoot {
+    bottom: 0;
+    right: 60px; /* 主射击键 */
+    background: rgba(255, 51, 51, 0.3);
+    border-color: var(--danger-color);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+}
+
+.action-btn.btn-jump {
+    bottom: 80px;
+    right: 0; /* 跳跃键 - 在射击键右上方，符合大部分平台跳跃逻辑 */
+    background: rgba(0, 255, 102, 0.2);
+    border-color: var(--success-color);
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+}
+
+.action-btn.btn-transform {
+    bottom: 120px;
+    right: 90px; /* 变身键 - 在左上方，稍远一些，防止误触 */
+    width: 65px; /* 变身键稍小 */
+    height: 65px;
+    font-size: 1.5rem;
+    background: rgba(255, 0, 255, 0.2);
+    border-color: var(--secondary-color);
+}
+
+.action-btn::before {
+    content: '';
+    position: absolute;
+    inset: -15px; /* 增加热区 */
+    border-radius: 50%;
+}
+
+.action-btn.active {
+    transform: scale(0.92);
+    filter: brightness(1.5);
+    box-shadow: 0 0 25px currentColor;
+}
+
+.action-btn.btn-shoot.active {
+    background: rgba(255, 51, 51, 0.6);
+}
+
+.action-btn.btn-jump.active {
+    background: rgba(0, 255, 102, 0.5);
+}
+
+/* =============================================
+   辅助功能按钮区域（右上角）
+   ============================================= */
+.touch-top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    pointer-events: auto;
+    z-index: 110;
+}
+
+.auxiliary-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.aux-btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* 辅助按钮 - 增大并增加间距，方便移动端点击 */
+.aux-btn {
+    width: 46px;
+    height: 46px;
+    background: rgba(100, 100, 100, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-radius: 10px; /* 方形圆角 */
+    color: #fff;
+    font-size: 1.1rem; /* 增大 Emoji 图标 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+    transition: all 0.15s;
+}
+
+.aux-btn.active {
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    transform: scale(0.92);
+}
+
+/* 辅助按钮颜色 - 更加鲜明 */
+.aux-btn.btn-k {
+    background: rgba(255, 165, 0, 0.4);
+    border-color: orange;
+}
+
+.aux-btn.btn-m {
+    background: rgba(50, 150, 255, 0.4);
+    border-color: #0088ff;
+    box-shadow: 0 0 10px rgba(0, 136, 255, 0.3);
+}
+
+.aux-btn.btn-m.active {
+    background: rgba(50, 150, 255, 0.7);
+}
+
+.aux-btn.btn-sit {
+    background: rgba(180, 180, 180, 0.4);
+    border-color: #ccc;
+    box-shadow: 0 0 10px rgba(200, 200, 200, 0.2);
+}
+
+.aux-btn.btn-sit.active {
+    background: rgba(180, 180, 180, 0.7);
+}
+
+/* 连射按钮 */
+.aux-btn.btn-auto {
+    background: rgba(255, 80, 80, 0.4);
+    border-color: #ff4444;
+    box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+}
+
+.aux-btn.btn-auto.active {
+    background: rgba(255, 80, 80, 0.7);
+    box-shadow: 0 0 15px rgba(255, 80, 80, 0.6);
+    animation: autofire-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes autofire-pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 80, 80, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 80, 80, 0.9);
+    }
+}
+
+/* 暂停按钮 - 与辅助按钮保持一致风格但颜色区分 */
+.pause-btn {
+    width: 46px;
+    height: 46px;
+    background: rgba(255, 255, 0, 0.3);
+    border: 2px solid #ffd700;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.3);
+    transition: all 0.15s;
+}
+
+.pause-btn:active, .pause-btn.active {
+    background: rgba(255, 255, 0, 0.6);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+    transform: scale(0.92);
+}
+
+.touch-top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    pointer-events: auto;
+}
+
+/* =============================================
+   Responsive Design (Mobile Only)
+   仅在移动设备上应用这些样式
+   ============================================= */
+@media (max-width: 800px) {
+
+    /* 移动端 body 样式 */
+    body.mobile-device {
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    /* 移动端游戏容器：保持 800x600 布局，去除边框，由 responsive.js 统一处理缩放和居中 */
+    body.mobile-device #game-container {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    /* 移动端 Canvas：去除强制 100% */
+    body.mobile-device canvas {
+        object-fit: contain;
+    }
+
+    /* 移动端触摸控制显示 */
+    body.mobile-device #touch-controls {
+        display: block;
+    }
+
+    /* 移动端 HUD 调整 */
+    body.mobile-device #hud {
+        padding: 8px 12px;
+        font-size: 0.5rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    body.mobile-device .hud-item {
+        font-size: 0.5rem;
+    }
+
+    body.mobile-device .hp-bar-container {
+        width: 100px;
+        height: 10px;
+    }
+
+    body.mobile-device #hp-val {
+        font-size: 0.4rem;
+    }
+
+    body.mobile-device #score-val {
+        font-size: 0.7rem;
+        min-width: 80px;
+    }
+
+    /* 移动端摇杆已隐藏，整个左半屏为操作区域 */
+    /* 调试模式下可显示摇杆位置 */
+    body.mobile-device .virtual-joystick {
+        opacity: 0;
+    }
+
+    body.mobile-device .joystick-knob {
+        opacity: 0;
+    }
+
+    /* 移动端按钮优化 - 保持弧形布局并缩放 */
+    body.mobile-device .action-buttons-container {
+        bottom: 25px;
+        right: 25px;
+        width: 180px;
+        height: 180px;
+    }
+
+    body.mobile-device .action-btn {
+        width: 65px;
+        height: 65px;
+        font-size: 1.6rem;
+    }
+
+    body.mobile-device .action-btn.btn-shoot {
+        bottom: 0;
+        right: 50px;
+    }
+
+    body.mobile-device .action-btn.btn-jump {
+        bottom: 70px;
+        right: 0;
+    }
+
+    body.mobile-device .action-btn.btn-transform {
+        bottom: 110px;
+        right: 80px;
+        width: 55px;
+        height: 55px;
+        font-size: 1.3rem;
+    }
+
+    body.mobile-device .action-btn::before {
+        inset: -12px;
+    }
+
+    /* 移动端辅助按钮区域 */
+    body.mobile-device .touch-top-right {
+        top: 15px;
+        right: 15px;
+    }
+
+    body.mobile-device .auxiliary-buttons {
+        gap: 8px;
+    }
+
+    body.mobile-device .aux-btn-row {
+        gap: 8px;
+    }
+
+    body.mobile-device .aux-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.65rem;
+    }
+
+    body.mobile-device .aux-btn.small {
+        width: 36px;
+        height: 36px;
+        font-size: 0.55rem;
+    }
+
+    body.mobile-device .aux-btn-row .pause-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.7rem;
+    }
+
+    /* 暂停按钮位置调整 */
+    body.mobile-device .pause-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.7rem;
+    }
+
+    /* 移动端 Boss HUD */
+    body.mobile-device #boss-hud {
+        bottom: 100px;
+        left: 5%;
+        width: 90%;
+    }
+
+    body.mobile-device .boss-hp-bar-container {
+        height: 12px;
+    }
+
+    /* 移动端关卡卡片 */
+    body.mobile-device .level-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    body.mobile-device .level-card {
+        width: 280px;
+    }
+
+    /* 移动端模态框 */
+    body.mobile-device .modal-box {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    body.mobile-device .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    /* 移动端开始屏幕按钮 */
+    body.mobile-device .start-buttons {
+        gap: 10px;
+    }
+
+    body.mobile-device .btn-primary-glow {
+        padding: 12px 30px;
+        font-size: 0.8rem;
+    }
+
+    body.mobile-device .btn-secondary {
+        padding: 10px 24px;
+        font-size: 0.65rem;
+    }
+
+    /* 移动端文字大小调整 */
+    body.mobile-device .big-text {
+        font-size: 3rem;
+        letter-spacing: 5px;
+    }
+
+    body.mobile-device .glow-secondary {
+        font-size: 0.9rem;
+    }
+}
+
+/* =============================================
+   横屏模式优化 - Landscape
+   ============================================= */
+@media (max-width: 900px) and (orientation: landscape) {
+    /* 横屏 HUD 更紧凑 */
+    body.mobile-device #hud {
+        font-size: 0.42rem;
+        padding: 5px 10px;
+        gap: 6px;
+    }
+
+    body.mobile-device .hp-bar-container {
+        width: 70px;
+        height: 8px;
+    }
+
+    body.mobile-device #score-val {
+        font-size: 0.6rem;
+        min-width: 60px;
+    }
+
+    /* 横屏模式摇杆已隐藏，整个左半屏为操作区域 */
+    body.mobile-device .virtual-joystick {
+        opacity: 0;
+    }
+
+    body.mobile-device .joystick-knob {
+        opacity: 0;
+    }
+
+    /* 横屏模式主战斗按钮 - 弧形布局更紧凑 */
+    body.mobile-device .action-buttons-container {
+        bottom: 15px;
+        right: 15px;
+        width: 150px;
+        height: 150px;
+    }
+
+    body.mobile-device .action-btn {
+        width: 55px;
+        height: 55px;
+        font-size: 1.4rem;
+    }
+
+    body.mobile-device .action-btn.btn-shoot {
+        bottom: 0;
+        right: 45px;
+    }
+
+    body.mobile-device .action-btn.btn-jump {
+        bottom: 60px;
+        right: 0;
+    }
+
+    body.mobile-device .action-btn.btn-transform {
+        bottom: 90px;
+        right: 70px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.1rem;
+    }
+
+    body.mobile-device .action-btn::before {
+        inset: -8px;
+    }
+
+    /* 横屏模式辅助按钮 - 右上角 */
+    body.mobile-device .touch-top-right {
+        top: 10px;
+        right: 10px;
+    }
+
+    body.mobile-device .auxiliary-buttons {
+        gap: 6px;
+    }
+
+    body.mobile-device .aux-btn-row {
+        gap: 6px;
+    }
+
+    body.mobile-device .aux-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.55rem;
+    }
+
+    body.mobile-device .pause-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 0.6rem;
+    }
+
+    /* 横屏 Boss HUD */
+    body.mobile-device #boss-hud {
+        bottom: 80px;
+    }
+
+    body.mobile-device .boss-hp-bar-container {
+        height: 10px;
+    }
+
+    /* 横屏关卡选择 */
+    body.mobile-device .level-cards {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    body.mobile-device .level-card {
+        width: 140px;
+        padding: 12px 8px;
+    }
+
+    body.mobile-device .level-card-icon {
+        font-size: 1.8rem;
+    }
+
+    body.mobile-device .level-card-name {
+        font-size: 0.55rem;
+    }
+
+    body.mobile-device .level-card-desc {
+        font-size: 0.35rem;
+    }
+}
+
+/* =============================================
+   iPhone Notch / 安全区域支持
+   ============================================= */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    #touch-controls {
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    /* 竖屏安全区域 - 摇杆已隐藏 */
+    .virtual-joystick {
+        opacity: 0;
+    }
+
+    .action-buttons-container {
+        right: calc(20px + env(safe-area-inset-right));
+        bottom: calc(25px + env(safe-area-inset-bottom));
+    }
+
+    .touch-top-right {
+        top: calc(15px + env(safe-area-inset-top));
+        right: calc(15px + env(safe-area-inset-right));
+    }
+
+    /* 横屏安全区域 - 使用更小的基础值 */
+    @media (orientation: landscape) {
+        .virtual-joystick {
+            opacity: 0;
+        }
+
+        .action-buttons-container {
+            right: calc(15px + env(safe-area-inset-right));
+            bottom: calc(15px + env(safe-area-inset-bottom));
+        }
+
+        .touch-top-right {
+            top: calc(10px + env(safe-area-inset-top));
+            right: calc(10px + env(safe-area-inset-right));
+        }
+    }
+}
+
+/* =============================================
+   竖屏提示 - Orientation Hint
+   ============================================= */
+#orientation-hint {
+    background: rgba(10, 10, 26, 0.95);
+    z-index: 200;
+    display: none;
+}
+
+#orientation-hint.active {
+    display: flex;
+}
+
+.orientation-hint-content {
+    text-align: center;
+    padding: 30px;
+}
+
+.rotate-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    animation: rotateHint 2s ease-in-out infinite;
+}
+
+@keyframes rotateHint {
+    0%, 100% {
+        transform: rotate(0deg);
+    }
+    50% {
+        transform: rotate(90deg);
+    }
+}
+
+.hint-text {
+    font-size: 1rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.hint-sub {
+    font-size: 0.6rem;
+    color: #888;
+}
+
+/* 仅在移动端竖屏时显示提示 */
+@media (max-width: 800px) and (orientation: portrait) {
+    body.mobile-device #orientation-hint:not(.hidden) {
+        display: flex;
+    }
+}
+
+/* =============================================
+   Tic Tac Toe Minigame
+   ============================================= */
+#tictactoe-screen {
+    background: rgba(5, 5, 18, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 65;
+}
+
+.tictactoe-container {
+    background: rgba(10, 10, 30, 0.98);
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), inset 0 0 30px rgba(255, 215, 0, 0.05);
+    padding: 30px 40px;
+    min-width: 320px;
+    animation: tictactoeSlideIn 0.3s ease-out;
+}
+
+@keyframes tictactoeSlideIn {
+    from {
+        transform: scale(0.9) translateY(-30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 确认对话框 */
+.tictactoe-confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 3x3 棋盘 */
+.tictactoe-board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tictactoe-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.tictactoe-cell {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.tictactoe-cell:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.tictactoe-cell.disabled {
+    cursor: not-allowed;
+}
+
+/* 粉色X - 玩家 */
+.tictactoe-cell.cell-x {
+    color: #ff6b9d;
+    text-shadow: 0 0 15px #ff6b9d, 0 0 30px #ff6b9d;
+}
+
+/* 青色O - AI */
+.tictactoe-cell.cell-o {
+    color: #00e5ff;
+    text-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff;
+}
+
+/* 获胜格子高亮 */
+.tictactoe-cell.cell-winner {
+    animation: winnerPulse 0.6s ease-in-out infinite;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+@keyframes winnerPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        transform: scale(1);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.9);
+        transform: scale(1.08);
+    }
+}
+
+/* 游戏结果 */
+.tictactoe-result {
+    margin-top: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    animation: resultFadeIn 0.5s ease-out;
+}
+
+@keyframes resultFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tictactoe-result.result-win {
+    background: rgba(0, 255, 102, 0.2);
+    border: 2px solid #00ff66;
+    color: #00ff66;
+    text-shadow: 0 0 10px #00ff66;
+}
+
+.tictactoe-result.result-lose {
+    background: rgba(255, 51, 51, 0.2);
+    border: 2px solid #ff3333;
+    color: #ff3333;
+    text-shadow: 0 0 10px #ff3333;
+}
+
+.tictactoe-result.result-draw {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #aaa;
+    color: #aaa;
+}
+
+/* 奖励展示 */
+.tictactoe-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: rewardGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes rewardGlow {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.reward-glow {
+    padding: 30px 40px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 3px solid #ffd700;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+    animation: rewardPulse 2s ease-in-out infinite;
+}
+
+@keyframes rewardPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), inset 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+}
+
+/* 井字棋响应式调整 */
+@media (max-width: 800px) {
+    body.mobile-device .tictactoe-container {
+        padding: 20px;
+        min-width: auto;
+        width: 90%;
+    }
+
+    body.mobile-device .tictactoe-cell {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+    }
+
+    body.mobile-device .tictactoe-board {
+        gap: 6px;
+        margin: 15px 0;
+    }
+}

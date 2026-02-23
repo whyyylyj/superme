@@ -188,6 +188,41 @@
                 <button id="quit-btn" class="btn btn-danger">QUIT TO MENU</button>
             </div>
 
+            <!-- Tic Tac Toe Minigame Screen -->
+            <div id="tictactoe-screen" class="overlay hidden">
+                <div class="tictactoe-container">
+                    <h2 class="glow" style="font-size: 1.2rem; margin-bottom: 10px;">井字棋挑战</h2>
+                    <p style="font-size: 0.7rem; color: #aaa; margin-bottom: 20px;">击败AI获得随机奖励！</p>
+
+                    <!-- 确认对话框 -->
+                    <div id="ttt-confirm-dialog" class="tictactoe-confirm">
+                        <p style="margin-bottom: 20px; color: #ffd700;">是否接受井字棋挑战？</p>
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <button id="ttt-accept-btn" class="btn btn-primary-glow">接受挑战</button>
+                            <button id="ttt-decline-btn" class="btn btn-outline">拒绝</button>
+                        </div>
+                    </div>
+
+                    <!-- 3x3 棋盘 -->
+                    <div id="ttt-board-container" class="tictactoe-board-container hidden">
+                        <div id="ttt-status" style="margin-bottom: 15px; font-size: 0.8rem; color: #fff;">你的回合</div>
+                        <div id="ttt-board" class="tictactoe-board">
+                            <!-- 9个格子将由JavaScript生成 -->
+                        </div>
+                        <div id="ttt-result" class="tictactoe-result hidden"></div>
+                    </div>
+
+                    <!-- 奖励展示 -->
+                    <div id="ttt-reward-container" class="tictactoe-reward hidden">
+                        <div class="reward-glow">
+                            <div id="ttt-reward-icon" style="font-size: 3rem; margin-bottom: 10px;">🎁</div>
+                            <div id="ttt-reward-text" style="font-size: 0.9rem; color: #ffd700;"></div>
+                        </div>
+                        <button id="ttt-collect-btn" class="btn btn-primary-glow" style="margin-top: 20px;">领取奖励</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Touch Controls -->
             <div id="touch-controls" class="hidden">
                 <div class="virtual-joystick" id="virtual-joystick">
@@ -222,6 +257,7 @@
     <script src="js/core/asset-manager.js"></script>
     <script src="js/core/screen-effects.js"></script>
     <script src="js/core/audio-manager.js"></script>
+    <script src="js/responsive.js"></script>
     <script src="js/physics.js"></script>
     <script src="js/input.js"></script>
     <script src="js/touch-input.js"></script>

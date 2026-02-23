@@ -5,8 +5,42 @@
 
 // 标记 Canvas 就绪
 const canvas = document.getElementById('gameCanvas');
+const VIRTUAL_WIDTH = 800;
+const VIRTUAL_HEIGHT = 600;
+
 if (canvas) {
     canvas.dataset.ready = "0";  // 初始未就绪
+}
+
+// 响应式 Canvas 缩放 (支持 High DPI/Retina)
+// 注意：resize 事件监听已由 responsive.js 统一处理
+function resizeCanvas() {
+    const container = document.getElementById('game-container');
+    if (!container || !canvas) return;
+
+    const rect = container.getBoundingClientRect();
+    const ctx = canvas.getContext('2d');
+
+    // 获取设备像素比
+    const dpr = window.devicePixelRatio || 1;
+
+    // 设置画布物理像素尺寸
+    canvas.width = VIRTUAL_WIDTH * dpr;
+    canvas.height = VIRTUAL_HEIGHT * dpr;
+
+    // 设置 CSS 显示尺寸
+    canvas.style.width = rect.width + 'px';
+    canvas.style.height = rect.height + 'px';
+
+    // 缩放上下文以匹配基础分辨率坐标系
+    if (ctx) {
+        ctx.scale(dpr, dpr);
+        // 重新应用平滑度设置（可选）
+        ctx.imageRendering = 'pixelated';
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.imageSmoothingEnabled = false;
+    }
 }
 
 // 主程序
@@ -15,6 +49,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // canvas 已在全局作用域声明
     const ctx = canvas.getContext('2d');
+
+    // 初始化 Canvas 尺寸
+    resizeCanvas();
 
     // UI Elements
     const uiHUD = document.getElementById('hud');
@@ -79,6 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
             GameStateMachine.changeState('paused');
             uiPauseScreen.classList.remove('hidden');
             uiPauseScreen.classList.add('active');
+            
+            // Hide touch controls when paused
+            const touchControls = document.getElementById('touch-controls');
+            if (touchControls) touchControls.classList.add('hidden');
         }
     }
 
@@ -87,6 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
             GameStateMachine.changeState('playing');
             uiPauseScreen.classList.add('hidden');
             uiPauseScreen.classList.remove('active');
+            
+            // Show touch controls when resumed if it's a touch device
+            const touchControls = document.getElementById('touch-controls');
+            if (touchControls && Input.isTouchDevice) touchControls.classList.remove('hidden');
         }
     }
 
@@ -147,8 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
             player.x = LevelManager.checkpoint.x;
             player.y = LevelManager.checkpoint.y;
             // Center the camera on the player
-            const targetCamX = player.x - canvas.width / 2 + player.width / 2;
-            cameraX = Math.max(0, Math.min(targetCamX, LevelManager.currentLevel.width - canvas.width));
+            const targetCamX = player.x - VIRTUAL_WIDTH / 2 + player.width / 2;
+            cameraX = Math.max(0, Math.min(targetCamX, LevelManager.currentLevel.width - VIRTUAL_WIDTH));
         }
 
         // UI 更新
@@ -167,6 +212,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         uiHUD.classList.remove('hidden');
         uiBossHud.classList.add('hidden');
+
+        // Show touch controls if on mobile
+        if (Input.isTouchDevice) {
+            const tc = document.getElementById('touch-controls');
+            if (tc) tc.classList.remove('hidden');
+        }
 
         // Show Level Start Message
         showLevelMessage(`STAGE ${LevelManager.currentLevelIndex + 1}`, 'PREPARE TO FIGHT');
@@ -504,8 +555,8 @@ document.addEventListener('DOMContentLoaded', () => {
         player.update(dt, LevelManager.currentLevel.platforms, LevelManager.currentLevel.width);
 
         // Smooth Camera Follow
-        const targetCamX = player.x - canvas.width / 2 + player.width / 2;
-        cameraX += (Math.max(0, Math.min(targetCamX, LevelManager.currentLevel.width - canvas.width)) - cameraX) * 5 * dt;
+        const targetCamX = player.x - VIRTUAL_WIDTH / 2 + player.width / 2;
+        cameraX += (Math.max(0, Math.min(targetCamX, LevelManager.currentLevel.width - VIRTUAL_WIDTH)) - cameraX) * 5 * dt;
 
         // 更新关卡
         LevelManager.currentLevel.update(dt, player, bullets);
@@ -640,8 +691,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // 胜利烟花
                 if (Math.random() < 0.1) {
                     ParticleSystem.createFirework(
-                        cameraX + Math.random() * canvas.width,
-                        cameraY + Math.random() * canvas.height * 0.5
+                        cameraX + Math.random() * 800,
+                        cameraY + Math.random() * 600 * 0.5
                     );
                 }
                 ParticleSystem.update(dt);
@@ -650,13 +701,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
             case 'start':
             case 'paused':
+            case 'tictactoe':
                 // 静态状态，无需更新
                 break;
         }
     }
 
     function draw() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, 800, 600);
 
         // Apply Screen Shake
         ScreenEffects.applyPreDraw(ctx);
@@ -708,7 +760,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         // 默认深色背景
         ctx.fillStyle = '#0a0a1a';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, VIRTUAL_WIDTH, VIRTUAL_HEIGHT);
     }
 
     // Event Listeners
@@ -746,12 +798,18 @@ document.addEventListener('DOMContentLoaded', () => {
         btnHelp.addEventListener('click', () => {
             uiHelpModal.classList.remove('hidden');
             uiHelpModal.classList.add('active');
+            // Hide touch controls when modal is shown
+            const tc = document.getElementById('touch-controls');
+            if (tc) tc.classList.add('hidden');
         });
     }
     if (btnHelpClose) {
         btnHelpClose.addEventListener('click', () => {
             uiHelpModal.classList.add('hidden');
             uiHelpModal.classList.remove('active');
+            // Show touch controls back if on touch device and in play
+            const tc = document.getElementById('touch-controls');
+            if (tc && Input.isTouchDevice && GameStateMachine.is('playing')) tc.classList.remove('hidden');
         });
     }
     // Click backdrop to close help modal
@@ -760,6 +818,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (e.target === uiHelpModal) {
                 uiHelpModal.classList.add('hidden');
                 uiHelpModal.classList.remove('active');
+                // Show touch controls back if on touch device and in play
+                const tc = document.getElementById('touch-controls');
+                if (tc && Input.isTouchDevice && GameStateMachine.is('playing')) tc.classList.remove('hidden');
             }
         });
     }
@@ -771,6 +832,9 @@ document.addEventListener('DOMContentLoaded', () => {
             uiStartScreen.classList.remove('active');
             uiLevelSelectScreen.classList.remove('hidden');
             uiLevelSelectScreen.classList.add('active');
+            // Hide touch controls when level select is shown
+            const tc = document.getElementById('touch-controls');
+            if (tc) tc.classList.add('hidden');
         });
     }
     if (btnLevelSelectBack) {
@@ -779,6 +843,7 @@ document.addEventListener('DOMContentLoaded', () => {
             uiLevelSelectScreen.classList.remove('active');
             uiStartScreen.classList.remove('hidden');
             uiStartScreen.classList.add('active');
+            // Keep touch controls hidden on start screen
         });
     }
     levelCards.forEach(card => {
@@ -787,6 +852,244 @@ document.addEventListener('DOMContentLoaded', () => {
             initGame(levelIndex, false);
         });
     });
+
+    // ============================================
+    // 井字棋小游戏 UI 交互
+    // ============================================
+    const uiTicTacToeScreen = document.getElementById('tictactoe-screen');
+    const tttConfirmDialog = document.getElementById('ttt-confirm-dialog');
+    const tttBoardContainer = document.getElementById('ttt-board-container');
+    const tttBoard = document.getElementById('ttt-board');
+    const tttStatus = document.getElementById('ttt-status');
+    const tttResult = document.getElementById('ttt-result');
+    const tttRewardContainer = document.getElementById('ttt-reward-container');
+    const tttRewardText = document.getElementById('ttt-reward-text');
+
+    const btnTicTacToeAccept = document.getElementById('ttt-accept-btn');
+    const btnTicTacToeDecline = document.getElementById('ttt-decline-btn');
+    const btnTicTacToeCollect = document.getElementById('ttt-collect-btn');
+
+    let tttTriggerData = null; // 存储触发点数据
+    let tttCurrentReward = null; // 存储当前奖励
+
+    // 初始化3x3棋盘
+    function initTicTacToeBoard() {
+        tttBoard.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'tictactoe-cell';
+            cell.dataset.index = i;
+            cell.addEventListener('click', () => handleTicTacToeCellClick(i));
+            tttBoard.appendChild(cell);
+        }
+    }
+
+    // 处理格子点击
+    function handleTicTacToeCellClick(index) {
+        if (!TicTacToeInstance.isPlayerTurn()) return;
+
+        // 玩家下棋
+        const success = TicTacToeInstance.makeMove(index);
+        if (!success) return;
+
+        // 更新棋盘显示
+        updateTicTacToeBoard();
+
+        // 检查游戏是否结束
+        if (TicTacToeInstance.getGameState() !== 'playing') {
+            handleTicTacToeGameEnd();
+            return;
+        }
+
+        // AI回合（500ms延迟）
+        tttStatus.textContent = 'AI思考中...';
+        setTimeout(() => {
+            TicTacToeInstance.makeAIMove();
+            updateTicTacToeBoard();
+
+            if (TicTacToeInstance.getGameState() !== 'playing') {
+                handleTicTacToeGameEnd();
+            } else {
+                tttStatus.textContent = '你的回合';
+            }
+        }, 500);
+    }
+
+    // 更新棋盘显示
+    function updateTicTacToeBoard() {
+        const cells = tttBoard.children;
+        const board = TicTacToeInstance.board;
+
+        for (let i = 0; i < 9; i++) {
+            const cell = cells[i];
+            const value = board[i];
+
+            // 清除之前的状态
+            cell.className = 'tictactoe-cell';
+
+            if (value === 'X') {
+                cell.textContent = 'X';
+                cell.classList.add('cell-x');
+            } else if (value === 'O') {
+                cell.textContent = 'O';
+                cell.classList.add('cell-o');
+            } else {
+                cell.textContent = '';
+            }
+
+            // 禁用已占用的格子
+            if (value !== null) {
+                cell.classList.add('disabled');
+            }
+        }
+
+        // 高亮获胜线
+        const winningLine = TicTacToeInstance.getWinningLine();
+        if (winningLine) {
+            winningLine.forEach(index => {
+                cells[index].classList.add('cell-winner');
+            });
+        }
+    }
+
+    // 处理游戏结束
+    function handleTicTacToeGameEnd() {
+        const gameState = TicTacToeInstance.getGameState();
+        const resultText = TicTacToeInstance.getResultText();
+
+        tttStatus.textContent = resultText;
+        tttResult.textContent = resultText;
+        tttResult.classList.remove('hidden');
+
+        // 设置结果样式
+        tttResult.className = 'tictactoe-result';
+        if (gameState === 'won') {
+            tttResult.classList.add('result-win');
+        } else if (gameState === 'lost') {
+            tttResult.classList.add('result-lose');
+        } else if (gameState === 'draw') {
+            tttResult.classList.add('result-draw');
+        }
+
+        // 如果玩家赢了或平局，发放奖励
+        if (gameState === 'won' || gameState === 'draw') {
+            setTimeout(() => {
+                showTicTacToeReward(gameState === 'won');
+            }, 1000);
+        } else {
+            // 玩家输了，1.5秒后关闭
+            setTimeout(() => {
+                closeTicTacToeScreen();
+            }, 1500);
+        }
+    }
+
+    // 显示奖励
+    function showTicTacToeReward(isWin) {
+        tttBoardContainer.classList.add('hidden');
+        tttRewardContainer.classList.remove('hidden');
+
+        // 随机选择奖励
+        tttCurrentReward = RewardSystemInstance.getRandomReward();
+
+        // 显示奖励信息
+        if (isWin) {
+            tttRewardText.textContent = `恭喜！获得：${tttCurrentReward.name}`;
+        } else {
+            tttRewardText.textContent = `平局奖励：${tttCurrentReward.name}`;
+        }
+    }
+
+    // 领取奖励
+    function collectTicTacToeReward() {
+        if (tttCurrentReward && player) {
+            RewardSystemInstance.applyReward(player, tttCurrentReward);
+        }
+
+        closeTicTacToeScreen();
+    }
+
+    // 关闭井字棋界面
+    function closeTicTacToeScreen() {
+        uiTicTacToeScreen.classList.add('hidden');
+        uiTicTacToeScreen.classList.remove('active');
+
+        // 重置游戏状态
+        if (GameStateMachine.currentState === 'tictactoe') {
+            GameStateMachine.changeState('playing');
+        }
+
+        // 重置井字棋游戏
+        TicTacToeInstance.reset();
+        tttTriggerData = null;
+        tttCurrentReward = null;
+
+        // 重置UI
+        tttConfirmDialog.classList.remove('hidden');
+        tttBoardContainer.classList.add('hidden');
+        tttRewardContainer.classList.add('hidden');
+        tttResult.classList.add('hidden');
+        initTicTacToeBoard();
+    }
+
+    // 拒绝挑战
+    function declineTicTacToeChallenge() {
+        closeTicTacToeScreen();
+    }
+
+    // 接受挑战
+    function acceptTicTacToeChallenge() {
+        tttConfirmDialog.classList.add('hidden');
+        tttBoardContainer.classList.remove('hidden');
+        tttStatus.textContent = '你的回合';
+        initTicTacToeBoard();
+    }
+
+    // 监听井字棋触发事件
+    EventBus.on('TIC_TAC_TOE_TRIGGER', (data) => {
+        console.log('[TicTacToe] 触发井字棋挑战', data);
+
+        // 暂停游戏
+        tttTriggerData = data;
+        GameStateMachine.changeState('tictactoe');
+
+        // 显示井字棋界面
+        uiTicTacToeScreen.classList.remove('hidden');
+        uiTicTacToeScreen.classList.add('active');
+    });
+
+    // 井字棋按钮事件监听
+    if (btnTicTacToeAccept) {
+        btnTicTacToeAccept.addEventListener('click', acceptTicTacToeChallenge);
+    }
+    if (btnTicTacToeDecline) {
+        btnTicTacToeDecline.addEventListener('click', declineTicTacToeChallenge);
+    }
+    if (btnTicTacToeCollect) {
+        btnTicTacToeCollect.addEventListener('click', collectTicTacToeReward);
+    }
+
+    // 初始化棋盘
+    initTicTacToeBoard();
+
+    // ============================================
+    // 移动端触摸输入初始化
+    // ============================================
+    if (typeof TouchInput !== 'undefined' && TouchInput.init) {
+        // Only initialize TouchInput on actual mobile devices
+        // This prevents touch controls from blocking button clicks on desktop
+        if (Input.isTouchDevice) {
+            TouchInput.init();
+            console.log('[Mobile] TouchInput initialized');
+        } else {
+            console.log('[Desktop] TouchInput skipped, ensuring touch controls are hidden');
+            // Make sure touch controls stay hidden on desktop
+            const touchControls = document.getElementById('touch-controls');
+            if (touchControls) {
+                touchControls.classList.add('hidden');
+            }
+        }
+    }
 
     // ============================================
     // 测试钩子 (Test Hooks for Playwright E2E)

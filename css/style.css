@@ -866,3 +866,649 @@ canvas {
 .level-card:active {
     transform: scale(0.97) translateY(-2px);
 }
+
+/* =============================================
+   Touch Controls (Mobile)
+   ============================================= */
+#touch-controls {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+}
+
+#touch-controls.hidden {
+    display: none;
+}
+
+/* Virtual Joystick */
+.virtual-joystick {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(0, 255, 204, 0.3);
+    border-radius: 50%;
+    pointer-events: auto;
+    touch-action: none;
+    transition: all 0.3s ease;
+}
+
+/* SIT 模式激活时的视觉反馈 */
+.virtual-joystick.sit-active {
+    background: rgba(255, 200, 0, 0.2);
+    border-color: rgba(255, 200, 0, 0.6);
+    box-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
+    animation: sit-pulse 1s infinite;
+}
+
+@keyframes sit-pulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 200, 0, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 30px rgba(255, 200, 0, 0.7);
+    }
+}
+
+.joystick-knob {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50px;
+    height: 50px;
+    background: rgba(0, 255, 204, 0.5);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    transition: transform 0.05s, background 0.3s;
+}
+
+.joystick-knob:active {
+    background: rgba(0, 255, 204, 0.8);
+}
+
+/* SIT 模式下摇杆按钮变色 */
+.virtual-joystick.sit-active .joystick-knob {
+    background: rgba(255, 200, 0, 0.7);
+    box-shadow: 0 0 20px rgba(255, 200, 0, 0.6);
+}
+
+/* Action Buttons Container */
+.action-buttons-container {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    pointer-events: auto;
+}
+
+.action-btn-row {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.action-btn {
+    min-width: 60px;
+    height: 60px;
+    background: rgba(255, 0, 255, 0.2);
+    border: 2px solid var(--secondary-color);
+    border-radius: 50%;
+    color: #fff;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    transition: all 0.1s;
+}
+
+.action-btn.active {
+    background: rgba(255, 0, 255, 0.5);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
+    transform: scale(0.95);
+}
+
+.action-btn.btn-shoot {
+    background: rgba(255, 51, 51, 0.3);
+    border-color: var(--danger-color);
+    box-shadow: 0 0 15px rgba(255, 51, 51, 0.4);
+}
+
+.action-btn.btn-shoot.active {
+    background: rgba(255, 51, 51, 0.6);
+    box-shadow: 0 0 25px rgba(255, 51, 51, 0.7);
+}
+
+.action-btn.btn-jump {
+    background: rgba(0, 255, 102, 0.2);
+    border-color: var(--success-color);
+    box-shadow: 0 0 15px rgba(0, 255, 102, 0.3);
+}
+
+.action-btn.btn-jump.active {
+    background: rgba(0, 255, 102, 0.5);
+    box-shadow: 0 0 25px rgba(0, 255, 102, 0.6);
+}
+
+.action-btn.small {
+    min-width: 45px;
+    height: 45px;
+    font-size: 0.4rem;
+}
+
+.action-btn.btn-m {
+    background: rgba(100, 100, 255, 0.2);
+    border-color: #6666ff;
+}
+
+.action-btn.btn-m.active {
+    background: rgba(100, 100, 255, 0.5);
+}
+
+.action-btn.btn-k {
+    background: rgba(255, 165, 0, 0.2);
+    border-color: orange;
+}
+
+.action-btn.btn-k.active {
+    background: rgba(255, 165, 0, 0.5);
+}
+
+.action-btn.btn-sit {
+    background: rgba(128, 128, 128, 0.2);
+    border-color: #888;
+}
+
+.action-btn.btn-sit.active {
+    background: rgba(128, 128, 128, 0.5);
+}
+
+/* Touch Control Positioning Helpers */
+.touch-bottom-left {
+    position: absolute;
+    bottom: 20px;
+    left: 180px;
+    pointer-events: auto;
+}
+
+.touch-top-right {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    pointer-events: auto;
+}
+
+.pause-btn {
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 0, 0.2);
+    border: 2px solid yellow;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 0 10px rgba(255, 255, 0, 0.3);
+}
+
+.pause-btn:active {
+    background: rgba(255, 255, 0, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
+}
+
+/* =============================================
+   Responsive Design (Mobile)
+   ============================================= */
+@media (max-width: 801px) {
+    body {
+        height: 100vh;
+        width: 100vw;
+        overflow: hidden;
+    }
+
+    #game-container {
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    canvas {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+    /* Touch controls visible on touch devices */
+    #touch-controls {
+        display: block;
+    }
+
+    /* Adjust HUD for mobile */
+    #hud {
+        padding: 8px 12px;
+        font-size: 0.5rem;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .hud-item {
+        font-size: 0.5rem;
+    }
+
+    .hp-bar-container {
+        width: 100px;
+        height: 10px;
+    }
+
+    #hp-val {
+        font-size: 0.4rem;
+    }
+
+    #score-val {
+        font-size: 0.7rem;
+        min-width: 80px;
+    }
+
+    /* 移动端摇杆位置优化 */
+    .virtual-joystick {
+        bottom: 20px;
+        left: 20px;
+        width: 100px;
+        height: 100px;
+    }
+
+    .joystick-knob {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* 移动端按钮优化 */
+    .action-buttons-container {
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .action-btn {
+        min-width: 50px;
+        height: 50px;
+        font-size: 0.45rem;
+    }
+
+    .action-btn.small {
+        min-width: 40px;
+        height: 40px;
+        font-size: 0.4rem;
+    }
+
+    /* 暂停按钮位置调整 */
+    .touch-top-right {
+        top: 10px;
+        right: 10px;
+    }
+
+    .pause-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 0.7rem;
+    }
+
+    /* 底部左侧按钮 */
+    .touch-bottom-left {
+        bottom: 20px;
+        left: 150px;
+    }
+
+    /* Adjust boss HUD */
+    #boss-hud {
+        bottom: 100px;
+        left: 5%;
+        width: 90%;
+    }
+
+    .boss-hp-bar-container {
+        height: 12px;
+    }
+
+    /* Adjust level cards for mobile */
+    .level-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .level-card {
+        width: 280px;
+    }
+
+    /* Modal responsive */
+    .modal-box {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .modal-body {
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+
+    /* Start screen buttons */
+    .start-buttons {
+        gap: 10px;
+    }
+
+    .btn-primary-glow {
+        padding: 12px 30px;
+        font-size: 0.8rem;
+    }
+
+    .btn-secondary {
+        padding: 10px 24px;
+        font-size: 0.65rem;
+    }
+
+    /* Big text adjustments */
+    .big-text {
+        font-size: 3rem;
+        letter-spacing: 5px;
+    }
+
+    .glow-secondary {
+        font-size: 0.9rem;
+    }
+}
+
+/* Landscape orientation optimization */
+@media (max-width: 801px) and (orientation: landscape) {
+    #hud {
+        font-size: 0.45rem;
+        padding: 5px 10px;
+    }
+
+    .hp-bar-container {
+        width: 80px;
+        height: 8px;
+    }
+
+    /* Adjust joystick position for landscape */
+    .virtual-joystick {
+        bottom: 15px;
+        left: 15px;
+        width: 90px;
+        height: 90px;
+    }
+
+    .joystick-knob {
+        width: 35px;
+        height: 35px;
+    }
+
+    .action-buttons-container {
+        bottom: 15px;
+        right: 15px;
+    }
+
+    .action-btn {
+        min-width: 45px;
+        height: 45px;
+    }
+
+    .action-btn.small {
+        min-width: 35px;
+        height: 35px;
+    }
+    
+    /* 横屏模式下 SIT 按钮隐藏（使用长按替代） */
+    .touch-bottom-left {
+        display: none;
+    }
+}
+
+/* iPhone notch support */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    #touch-controls {
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+    }
+
+    .virtual-joystick {
+        left: calc(20px + env(safe-area-inset-left));
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+
+    .action-buttons-container {
+        right: calc(20px + env(safe-area-inset-right));
+        bottom: calc(20px + env(safe-area-inset-bottom));
+    }
+    
+    .touch-top-right {
+        top: calc(10px + env(safe-area-inset-top));
+        right: calc(10px + env(safe-area-inset-right));
+    }
+}
+/* =============================================
+   Tic Tac Toe Minigame
+   ============================================= */
+#tictactoe-screen {
+    background: rgba(5, 5, 18, 0.95);
+    backdrop-filter: blur(8px);
+    z-index: 65;
+}
+
+.tictactoe-container {
+    background: rgba(10, 10, 30, 0.98);
+    border: 2px solid #ffd700;
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(255, 215, 0, 0.4), inset 0 0 30px rgba(255, 215, 0, 0.05);
+    padding: 30px 40px;
+    min-width: 320px;
+    animation: tictactoeSlideIn 0.3s ease-out;
+}
+
+@keyframes tictactoeSlideIn {
+    from {
+        transform: scale(0.9) translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* 确认对话框 */
+.tictactoe-confirm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* 3x3 棋盘 */
+.tictactoe-board-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.tictactoe-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+}
+
+.tictactoe-cell {
+    width: 70px;
+    height: 70px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.tictactoe-cell:hover:not(.disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.05);
+}
+
+.tictactoe-cell.disabled {
+    cursor: not-allowed;
+}
+
+/* 粉色X - 玩家 */
+.tictactoe-cell.cell-x {
+    color: #ff6b9d;
+    text-shadow: 0 0 15px #ff6b9d, 0 0 30px #ff6b9d;
+}
+
+/* 青色O - AI */
+.tictactoe-cell.cell-o {
+    color: #00e5ff;
+    text-shadow: 0 0 15px #00e5ff, 0 0 30px #00e5ff;
+}
+
+/* 获胜格子高亮 */
+.tictactoe-cell.cell-winner {
+    animation: winnerPulse 0.6s ease-in-out infinite;
+    background: rgba(255, 215, 0, 0.2);
+}
+
+@keyframes winnerPulse {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+        transform: scale(1);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(255, 215, 0, 0.9);
+        transform: scale(1.08);
+    }
+}
+
+/* 游戏结果 */
+.tictactoe-result {
+    margin-top: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    text-align: center;
+    animation: resultFadeIn 0.5s ease-out;
+}
+
+@keyframes resultFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tictactoe-result.result-win {
+    background: rgba(0, 255, 102, 0.2);
+    border: 2px solid #00ff66;
+    color: #00ff66;
+    text-shadow: 0 0 10px #00ff66;
+}
+
+.tictactoe-result.result-lose {
+    background: rgba(255, 51, 51, 0.2);
+    border: 2px solid #ff3333;
+    color: #ff3333;
+    text-shadow: 0 0 10px #ff3333;
+}
+
+.tictactoe-result.result-draw {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid #aaa;
+    color: #aaa;
+}
+
+/* 奖励展示 */
+.tictactoe-reward {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: rewardGlow 1.5s ease-in-out infinite;
+}
+
+@keyframes rewardGlow {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+.reward-glow {
+    padding: 30px 40px;
+    background: rgba(255, 215, 0, 0.1);
+    border: 3px solid #ffd700;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+    animation: rewardPulse 2s ease-in-out infinite;
+}
+
+@keyframes rewardPulse {
+    0%, 100% {
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.5), inset 0 0 20px rgba(255, 215, 0, 0.2);
+    }
+    50% {
+        box-shadow: 0 0 50px rgba(255, 215, 0, 0.8), inset 0 0 30px rgba(255, 215, 0, 0.3);
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 801px) {
+    .tictactoe-container {
+        padding: 20px;
+        min-width: auto;
+        width: 90%;
+    }
+
+    .tictactoe-cell {
+        width: 55px;
+        height: 55px;
+        font-size: 1.5rem;
+    }
+
+    .tictactoe-board {
+        gap: 6px;
+        margin: 15px 0;
+    }
+}

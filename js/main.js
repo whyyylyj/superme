@@ -16,8 +16,10 @@ if (canvas) {
  * 响应式 Canvas 缩放 (支持 High DPI/Retina)
  * 注意：自适应主要由 responsive.js (transform: scale) 在外层容器处理。
  * 这里只负责 canvas 内部基于设备像素比 (dpr) 的高清绘图缓冲大小。
+ *
+ * 🔧 修复：将 resizeCanvas 暴露到全局作用域，供 responsive.js 调用
  */
-function resizeCanvas() {
+window.resizeCanvas = function() {
     const container = document.getElementById('game-container');
     if (!container || !canvas) return;
 
@@ -47,7 +49,7 @@ function resizeCanvas() {
 
     // 调试日志
     console.log(`[Main] Canvas resized: ${canvas.width}x${canvas.height} (buffer), ${canvas.style.width}x${canvas.style.height} (display), DPR: ${dpr}`);
-}
+};
 
 // 主程序
 document.addEventListener('DOMContentLoaded', () => {
@@ -57,7 +59,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const ctx = canvas.getContext('2d');
 
     // 初始化 Canvas 尺寸
-    resizeCanvas();
+    // 🔧 修复：使用全局 window.resizeCanvas 确保 Responsive 可以调用
+    window.resizeCanvas();
 
     // UI Elements
     const uiHUD = document.getElementById('hud');

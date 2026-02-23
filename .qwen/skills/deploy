@@ -1,0 +1,38 @@
+# deploy — 一键部署到 GitHub Pages
+
+## 功能
+
+一键提交当前代码变更并推送到 main 分支，自动触发 GitHub Actions 部署到 GitHub Pages。
+
+## 使用方法
+
+```
+skill: "deploy"
+```
+
+## 执行流程
+
+1. **检查状态** — `git status` 查看当前变更
+2. **添加文件** — `git add -A` 添加所有变更
+3. **提交代码** — 自动生成简洁的提交信息
+4. **推送到 main** — `git push origin main` 触发部署
+
+## 提交信息规范
+
+自动根据变更文件生成提交信息：
+- 仅修改 JS 文件 → `feat: 更新游戏逻辑`
+- 仅修改 CSS 文件 → `style: 更新样式`
+- 仅修改 HTML 文件 → `feat: 更新页面结构`
+- 修改 docs → `docs: 更新文档`
+- 混合修改 → `feat: 更新代码并部署`
+
+## 输出
+
+- ✅ 提交成功：显示 commit hash 和触发部署的链接
+- ⚠️ 无变更：提示没有需要提交的更改
+- ❌ 失败：显示错误信息
+
+## 相关文件
+
+- `.github/workflows/deploy-pages.yml` — GitHub Actions 工作流配置
+- `.gitignore` — 排除 `_site/` 等构建文件

@@ -48,6 +48,9 @@ superme/
 │   │   ├── boss-config.js      # Boss parameterization
 │   │   └── boss-config-helper.js # Boss config utilities
 │   │
+├── scripts/
+│   └── deploy.sh               # 一键部署脚本
+│
 │   ├── entity.js               # Base entity class
 │   ├── physics.js              # AABB collision detection
 │   ├── input.js                # Keyboard input tracking

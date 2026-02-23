@@ -511,6 +511,11 @@ document.addEventListener('DOMContentLoaded', () => {
      * 提取为独立函数，便于状态机调用
      */
     function updateGameplay(dt) {
+        // 🔧 防御性检查：如果玩家不存在，跳过更新
+        if (!player || player.markedForDeletion) {
+            return;
+        }
+
         // Transform with K/X key - cycle through forms
         if (Input.transform && !player.transformBtnWasPressed) {
             player.transformBtnWasPressed = true;
@@ -1010,6 +1015,13 @@ document.addEventListener('DOMContentLoaded', () => {
         // 重置游戏状态
         if (GameStateMachine.currentState === 'tictactoe') {
             GameStateMachine.changeState('playing');
+        }
+
+        // 🔧 修复：给玩家短暂的无敌时间，防止关闭井字棋界面后立即被敌人伤害
+        if (player) {
+            player.invincible = true;
+            player.invincibleTimer = 2; // 2秒无敌时间
+            console.log('[TicTacToe] 给予玩家2秒无敌时间');
         }
 
         // 重置井字棋游戏

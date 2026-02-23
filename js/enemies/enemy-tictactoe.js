@@ -144,22 +144,20 @@ class EnemyTicTacToe extends Entity {
             this.triggerChallenge(this.levelNumber || 1);
         }
 
-        // 检查与子弹碰撞（触发井字棋）
-        if (this.active && bullets) {
-            for (let bullet of bullets) {
-                if (!bullet.markedForDeletion && Physics.checkCollision(this, bullet)) {
-                    // 标记子弹为删除
-                    bullet.markedForDeletion = true;
-                    // 触发井字棋挑战
-                    this.triggerChallenge(this.levelNumber || 1);
-                    break;
-                }
-            }
-        }
-
         // 更新动画
         this.rotation += dt * Math.PI; // 每秒旋转 180 度
         this.pulseIntensity = Math.sin(Date.now() / 100) * 0.5 + 0.5; // 快速闪烁
+    }
+
+    /**
+     * 受到伤害时触发（被子弹击中）
+     * @param {number} damage - 伤害值（忽略）
+     */
+    takeDamage(damage) {
+        // 子弹击中时触发井字棋挑战
+        if (this.active) {
+            this.triggerChallenge(this.levelNumber || 1);
+        }
     }
 
     /**

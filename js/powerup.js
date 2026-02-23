@@ -13,6 +13,13 @@ class PowerUp extends Entity {
         if (type === 'transform_mecha') color = '#cccccc';
         if (type === 'transform_dragon') color = '#ff6600';
         if (type === 'transform_phantom') color = '#aa00ff';
+        
+        // 5 New Types
+        if (type === 'heart_plus') color = '#ff3333';
+        if (type === 'fire_flower') color = '#ff5500';
+        if (type === 'power_spread') color = '#ff00ff';
+        if (type === 'gold_bullet') color = '#ffd700';
+        if (type === 'giant_mushroom') color = '#ffffff';
 
         super(x, y, 20, 20, color);
         this.type = type;
@@ -62,14 +69,61 @@ class PowerUp extends Entity {
         ctx.scale(scale, scale);
 
         ctx.fillStyle = this.color;
-        // diamond shape
-        ctx.beginPath();
-        ctx.moveTo(0, -this.height / 2);
-        ctx.lineTo(this.width / 2, 0);
-        ctx.lineTo(0, this.height / 2);
-        ctx.lineTo(-this.width / 2, 0);
-        ctx.closePath();
-        ctx.fill();
+        
+        if (this.type === 'heart_plus') {
+            // Heart shape
+            ctx.beginPath();
+            ctx.moveTo(0, 5);
+            ctx.bezierCurveTo(-15, -15, -15, 15, 0, 15);
+            ctx.bezierCurveTo(15, 15, 15, -15, 0, 5);
+            ctx.fill();
+        } else if (this.type === 'gold_bullet') {
+            // Star shape
+            const spikes = 5;
+            const outerRadius = this.width / 2;
+            const innerRadius = this.width / 4;
+            let rot = Math.PI / 2 * 3;
+            let x = 0;
+            let y = 0;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(0, -outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = Math.cos(rot) * outerRadius;
+                y = Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = Math.cos(rot) * innerRadius;
+                y = Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.closePath();
+            ctx.fill();
+        } else if (this.type === 'fire_flower') {
+            // Flower shape (multi-circle)
+            for (let i = 0; i < 8; i++) {
+                ctx.rotate(Math.PI / 4);
+                ctx.beginPath();
+                ctx.arc(8, 0, 6, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(0, 0, 6, 0, Math.PI * 2);
+            ctx.fill();
+        } else {
+            // Diamond shape (default)
+            ctx.beginPath();
+            ctx.moveTo(0, -this.height / 2);
+            ctx.lineTo(this.width / 2, 0);
+            ctx.lineTo(0, this.height / 2);
+            ctx.lineTo(-this.width / 2, 0);
+            ctx.closePath();
+            ctx.fill();
+        }
 
         ctx.restore();
     }

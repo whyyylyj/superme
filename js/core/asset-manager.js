@@ -15,7 +15,7 @@ const CONFIG = {
         JUMP_FORCE: -600,
         GRAVITY: 1500,
         MAX_HP: 5,               // 从 3 提升到 5
-        MAX_JUMPS: 3,
+        MAX_JUMPS: 7,
         DAMAGE_COOLDOWN: 1.0,
         SHOOT_COOLDOWN_NORMAL: 0.2,
         SHOOT_COOLDOWN_RAPID: 0.08,
@@ -23,6 +23,8 @@ const CONFIG = {
         BULLET_SPEED: 800,
         WIDTH: 30,
         HEIGHT: 40,
+        SIT_HEAL_TIME: 5.0,      // 坐下回血所需时间（秒）
+        SIT_HEAL_AMOUNT: 1,      // 每次回血量
     },
 
     // 弹幕配置
@@ -85,6 +87,24 @@ const CONFIG = {
         SPEED: {
             DURATION: 8,
             BOOSTED_SPEED: 500,
+        },
+        HP_MAX_UP: {
+            INCREMENT: 2,
+            HEAL: 2,
+        },
+        GIANT_MUSHROOM: {
+            DURATION: 15,
+            SCALE_MULT: 1.5,
+            DAMAGE_MULT: 2.0,
+        },
+        FIRE_FLOWER: {
+            DAMAGE: 2.0,
+        },
+        POWER_SPREAD: {
+            DAMAGE: 1.5,
+        },
+        GOLD_BULLET: {
+            DAMAGE: 3.0,
         },
     }
 };

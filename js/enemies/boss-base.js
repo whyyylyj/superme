@@ -101,6 +101,9 @@ class BossBase extends EnemyBase {
      * 更新Boss
      */
     update(dt, player, platforms, bullets = null) {
+        // 存储子弹数组引用，供 fireBullet 使用
+        this.currentBulletsArray = bullets;
+
         // 入场动画
         if (this.entering) {
             this.updateEntering(dt);
@@ -196,6 +199,7 @@ class BossBase extends EnemyBase {
     updateBattleBehavior(dt, player) {
         this.stateTimer -= dt;
         this.patternTimer -= dt;
+        if (this.attackCooldown > 0) this.attackCooldown -= dt; // 确保冷却时间递减
 
         // 状态机
         if (this.stateTimer <= 0) {
@@ -386,7 +390,11 @@ class BossBase extends EnemyBase {
         // 使用现有的子弹系统
         if (typeof Bullet !== 'undefined') {
             const bulletColor = color || this.themeColor;
-            return new Bullet(x, y, dirX, dirY, speed, bulletColor, false);
+            const bullet = new Bullet(x, y, dirX, dirY, speed, bulletColor, false);
+            if (this.currentBulletsArray) {
+                this.currentBulletsArray.push(bullet);
+            }
+            return bullet;
         }
     }
 

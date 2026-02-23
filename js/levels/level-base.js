@@ -33,7 +33,7 @@ class LevelBase {
      */
     update(dt, player, bullets) {
         // 更新敌人
-        this.enemies.forEach(e => e.update(dt, this.platforms));
+        this.enemies.forEach(e => e.update(dt, player, this.platforms, bullets));
         this.enemies = this.enemies.filter(e => !e.markedForDeletion);
 
         // 更新道具
@@ -41,7 +41,7 @@ class LevelBase {
 
         // 更新 Boss
         if (this.boss && !this.boss.markedForDeletion) {
-            this.boss.update(dt, player, bullets, this.platforms);
+            this.boss.update(dt, player, this.platforms, bullets);
         } else if (this.boss && this.boss.markedForDeletion) {
             this.isCompleted = true;
         }

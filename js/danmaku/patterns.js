@@ -70,18 +70,19 @@ const DanmakuPatterns = {
         return bullets;
     },
 
-    rain(areaX, areaWidth, originY, options = {}) {
+    rain(originX, originY, options = {}) {
         const {
             count = 8,
             speed = 200,
             color = '#44aaff',
             friendly = false,
-            spreadX = 0.3
+            spreadX = 0.3,
+            areaWidth = 800
         } = options;
 
         const bullets = [];
         for (let i = 0; i < count; i++) {
-            const x = areaX + Math.random() * areaWidth;
+            const x = (originX - areaWidth / 2) + Math.random() * areaWidth;
             const dx = (Math.random() - 0.5) * spreadX;
             bullets.push({
                 x: x, y: originY,

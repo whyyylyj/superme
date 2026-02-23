@@ -93,6 +93,7 @@ class EnemyBase extends Entity {
      * @param {Array} bullets - 子弹数组（可选，用于发射子弹）
      */
     update(dt, player, platforms, bullets = null) {
+        this.lastDt = dt; // 存储 dt 以供子系统使用
         // 更新状态计时器
         if (this.stateTimer > 0) {
             this.stateTimer -= dt;
@@ -284,11 +285,14 @@ class EnemyBase extends Entity {
      */
     handlePlatformCollision(platforms) {
         let onGround = false;
+        // 🔧 P1修复：使用存储的 dt 以支持变帧率物理
+        const physicsDt = this.lastDt || 0.016;
 
         for (let plat of platforms) {
             if (Physics.checkCollision(this, plat)) {
                 // Y轴碰撞（落地）
-                if (this.vy > 0 && this.y + this.height - this.vy * 0.016 <= plat.y) {
+                // 🔧 P1修复：更稳健的落地判定
+                if (this.vy >= 0 && this.y + this.height - this.vy * physicsDt <= plat.y + 5) {
                     this.y = plat.y - this.height;
                     this.vy = 0;
                     onGround = true;

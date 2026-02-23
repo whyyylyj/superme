@@ -32,6 +32,7 @@ class TreantKing extends BossBase {
         super(x, y, {
             name: 'Treant King',
             maxHp: 300,
+            hp: 300,          // 🔧 P1修复：显式传递 hp，避免继承自 EnemyBase 的默认低生命值
             phaseCount: 2,
             width: 120,
             height: 140,
@@ -309,10 +310,11 @@ class TreantKing extends BossBase {
         // 创建小树人敌人（使用EnemyTypes工厂，如果存在）
         if (typeof EnemyTypes !== 'undefined' && EnemyTypes.createSeedling) {
             const seedling = EnemyTypes.createSeedling(spawnX, spawnY);
-            // 将敌人添加到游戏（需要通过事件系统或直接添加）
-            // 暂时通过全局LevelMap添加
-            if (typeof LevelMap !== 'undefined' && LevelMap.enemies) {
-                LevelMap.enemies.push(seedling);
+            
+            // 🔧 P1修复：将敌人添加到当前关卡的敌人数组中
+            const level = (typeof LevelManager !== 'undefined') ? LevelManager.currentLevel : null;
+            if (level && level.enemies) {
+                level.enemies.push(seedling);
             }
         }
 

@@ -15,6 +15,7 @@ const Input = {
         z: false,
         k: false,
         x: false,
+        m: false,
         Escape: false
     },
 
@@ -26,7 +27,9 @@ const Input = {
     get jump() { return this.keys[' ']; },
     get shoot() { return this.keys.j || this.keys.z; },
     get transform() { return this.keys.k || this.keys.x; },
+    get homing() { return this.keys.m; },
     get pause() { return this.keys.Escape; },
+    get sit() { return this.keys.s; },
 
     init: function () {
         window.addEventListener('keydown', (e) => {

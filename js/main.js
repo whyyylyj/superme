@@ -1,7 +1,19 @@
+// ============================================
+// 测试钩子 (Test Hooks for Playwright E2E)
+// 在全局作用域暴露函数
+// ============================================
+
+// 标记 Canvas 就绪
+const canvas = document.getElementById('gameCanvas');
+if (canvas) {
+    canvas.dataset.ready = "0";  // 初始未就绪
+}
+
+// 主程序
 document.addEventListener('DOMContentLoaded', () => {
 // main.js
 
-const canvas = document.getElementById('gameCanvas');
+// canvas 已在全局作用域声明
 const ctx = canvas.getContext('2d');
 
 // UI Elements
@@ -96,6 +108,9 @@ function updateHUD() {
             let wpnStr = 'Normal';
             if (player.weapon === 'spread') wpnStr = 'Scatter';
             if (player.weapon === 'rapid') wpnStr = 'Rapid';
+            if (player.weapon === 'fireball') wpnStr = 'Fire Ball';
+            if (player.weapon === 'power_spread') wpnStr = 'Omega Spread';
+            if (player.weapon === 'gold') wpnStr = 'Gold Bullet';
             wpnVal.innerText = wpnStr;
         }
 
@@ -105,6 +120,8 @@ function updateHUD() {
             if (player.invincible) pwText += 'INVINCIBLE ';
             if (player.shieldMode) pwText += 'SHIELD ';
             if (player.speedMode) pwText += 'SPEED ';
+            if (player.homingMode) pwText += 'HOMING ';
+            if (player.isGiant) pwText += `GIANT (${Math.ceil(player.giantTimer)}s) `;
 
             // Add current transform form
             if (typeof TransformSystem !== 'undefined') {
@@ -187,6 +204,29 @@ function checkPowerupCollisions() {
                     TransformSystem.transform('Phantom', player);
                     ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#aa00ff', 60);
                     break;
+                case 'heart_plus':
+                    player.maxHp += CONFIG.POWERUPS.HP_MAX_UP.INCREMENT;
+                    player.hp += CONFIG.POWERUPS.HP_MAX_UP.HEAL;
+                    if (player.hp > player.maxHp) player.hp = player.maxHp;
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ff3333', 40);
+                    break;
+                case 'fire_flower':
+                    player.weapon = 'fireball';
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ff4400', 40);
+                    break;
+                case 'power_spread':
+                    player.weapon = 'power_spread';
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ff00ff', 40);
+                    break;
+                case 'gold_bullet':
+                    player.weapon = 'gold';
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ffd700', 40);
+                    break;
+                case 'giant_mushroom':
+                    player.isGiant = true;
+                    player.giantTimer = player.giantMaxTime;
+                    ParticleSystem.createExplosion(pu.x + pu.width / 2, pu.y + pu.height / 2, '#ffffff', 60);
+                    break;
             }
             pu.markedForDeletion = true;
         }
@@ -259,6 +299,22 @@ function checkEnemyCollisions() {
  * 提取为独立函数，便于状态机调用
  */
 function updateGameplay(dt) {
+    // Toggle homing mode with M key
+    if (Input.homing && !player.homingBtnWasPressed) {
+        player.homingMode = !player.homingMode;
+        player.homingBtnWasPressed = true;
+        // Visual feedback for homing mode toggle
+        ParticleSystem.createExplosion(
+            player.x + player.width / 2,
+            player.y + player.height / 2,
+            player.homingMode ? '#00ff00' : '#ff0000',
+            10
+        );
+    }
+    if (!Input.homing) {
+        player.homingBtnWasPressed = false;
+    }
+
     if (Input.shoot) {
         player.shoot(bullets);
     }
@@ -332,6 +388,9 @@ function update(dt) {
                     GameStateMachine.changeState('level_transition');
                 } else {
                     GameStateMachine.changeState('game_win');
+                    uiWinScreen.classList.remove('hidden');
+                    uiWinScreen.classList.add('active');
+                    uiHUD.classList.add('hidden');
                 }
             }
 
@@ -352,7 +411,7 @@ function update(dt) {
                 // 重置玩家位置到新关卡起始点
                 player.x = 100;
                 player.y = 300;
-                player.hp = CONFIG.PLAYER.MAX_HP;
+                player.hp = player.maxHp;
                 bullets = [];
                 GameStateMachine.changeState('playing');
             }
@@ -376,6 +435,7 @@ function update(dt) {
                 );
             }
             ParticleSystem.update(dt);
+            updateHUD();
             break;
 
         case 'start':
@@ -439,4 +499,76 @@ if (level) {
 btnStart.addEventListener('click', initGame);
 btnRestart.addEventListener('click', initGame);
 btnPlayAgain.addEventListener('click', initGame);
+
+// ============================================
+// 测试钩子 (Test Hooks for Playwright E2E)
+// ============================================
+
+// 标记 Canvas 就绪
+canvas.dataset.ready = "0";  // 初始未就绪
+
+// 暴露游戏状态到 window 对象供测试使用
+window.getGameState = () => ({
+    gameState: GameStateMachine.currentState,  // 使用状态机的状态
+    playerHp: player ? player.hp : 0,
+    playerX: player ? player.x : 0,
+    playerY: player ? player.y : 0,
+    playerWeapon: player ? player.weapon : 'none',
+    currentLevel: LevelManager ? LevelManager.currentLevelIndex : -1,
+    bossExists: LevelManager && LevelManager.currentLevel && LevelManager.currentLevel.boss ? true : false,
+    bossHp: (LevelManager && LevelManager.currentLevel && LevelManager.currentLevel.boss) ? LevelManager.currentLevel.boss.hp : 0,
+    enemyCount: LevelManager && LevelManager.currentLevel ? LevelManager.currentLevel.enemies.length : 0,
+    bulletCount: bullets ? bullets.length : 0,
+    transformForm: typeof TransformSystem !== 'undefined' ? TransformSystem.currentForm?.name || 'Normal' : 'Normal',
+    transformTimeRemaining: typeof TransformSystem !== 'undefined' ? (TransformSystem.getRemainingTime ? TransformSystem.getRemainingTime() : 0) : 0
+});
+
+// 测试辅助函数：设置玩家状态
+window.setPlayerState = (state) => {
+    if (!player) return;
+    if (state.hp !== undefined) player.hp = state.hp;
+    if (state.x !== undefined) player.x = state.x;
+    if (state.y !== undefined) player.y = state.y;
+    if (state.weapon !== undefined) player.weapon = state.weapon;
+};
+
+// 测试辅助函数：跳过当前关卡
+window.skipLevel = () => {
+    if (LevelManager && LevelManager.currentLevel) {
+        LevelManager.currentLevel.isCompleted = true;
+    }
+};
+
+// 测试辅助函数：直接击败 Boss
+window.defeatBoss = () => {
+    if (LevelManager && LevelManager.currentLevel && LevelManager.currentLevel.boss) {
+        LevelManager.currentLevel.boss.hp = 0;
+    }
+};
+
+// 测试辅助函数：设置无敌模式
+window.setInvincible = (enabled) => {
+    if (player) {
+        player.invincible = enabled;
+        player.invincibleMaxTime = enabled ? 9999 : 0;
+    }
+};
+
+// 测试辅助函数：直接变身
+window.transformTo = (formName) => {
+    if (typeof TransformSystem !== 'undefined') {
+        TransformSystem.transform(formName, player);
+    }
+};
+
+// 替换原始 initGame 为带钩子的版本
+const oldInitGame = initGame;
+initGame = function() {
+    oldInitGame();
+    // 游戏开始运行后标记为就绪（给一点延迟确保渲染完成）
+    setTimeout(() => {
+        canvas.dataset.ready = "1";
+        console.log('[Test Hook] Game ready, canvas.dataset.ready = "1"');
+    }, 500);
+};
 });

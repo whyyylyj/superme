@@ -1,12 +1,13 @@
 // bullet.js
 
 class Bullet extends Entity {
-    constructor(x, y, dx, dy, speed, color = '#ff00ff', friendly = true) {
+    constructor(x, y, dx, dy, speed, color = '#ff00ff', friendly = true, shape = 'circle', damage = 1) {
         super(x, y, 10, 10, color);
         this.vx = dx * speed;
         this.vy = dy * speed;
         this.friendly = friendly;
-        this.damage = 1;
+        this.damage = damage;
+        this.shape = shape;
         this.life = 120;
 
         this.active = true;
@@ -58,13 +59,49 @@ class Bullet extends Entity {
         ctx.shadowColor = this.color;
         ctx.fillStyle = this.color;
 
-        ctx.beginPath();
-        ctx.arc(
-            this.x - cameraX + this.width / 2,
-            this.y - cameraY + this.height / 2,
-            this.width / 2, 0, Math.PI * 2
-        );
-        ctx.fill();
+        const centerX = this.x - cameraX + this.width / 2;
+        const centerY = this.y - cameraY + this.height / 2;
+        const radius = this.width / 2;
+
+        if (this.shape === 'star') {
+            const spikes = 5;
+            const outerRadius = radius * 1.5;
+            const innerRadius = radius * 0.7;
+            let rot = Math.PI / 2 * 3;
+            let x = centerX;
+            let y = centerY;
+            const step = Math.PI / spikes;
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - outerRadius);
+            for (let i = 0; i < spikes; i++) {
+                x = centerX + Math.cos(rot) * outerRadius;
+                y = centerY + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = centerX + Math.cos(rot) * innerRadius;
+                y = centerY + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.lineTo(centerX, centerY - outerRadius);
+            ctx.closePath();
+            ctx.fill();
+        } else if (this.shape === 'diamond') {
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY - radius * 1.5);
+            ctx.lineTo(centerX + radius * 1.5, centerY);
+            ctx.lineTo(centerX, centerY + radius * 1.5);
+            ctx.lineTo(centerX - radius * 1.5, centerY);
+            ctx.closePath();
+            ctx.fill();
+        } else {
+            // Default circle
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
 
         if (this.homing) {
             ctx.globalAlpha = 0.3;

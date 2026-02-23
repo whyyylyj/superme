@@ -57,6 +57,10 @@ class FormDragon {
             const b = new Bullet(startX, startY, player.facing, angle, speed, '#ff4400');
             b.life = 60;
             b.damage = 1.5;
+            if (player.homingMode) {
+                b.homing = true;
+                b.homingStrength = 4;
+            }
             bullets.push(b);
         }
 

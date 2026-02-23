@@ -200,20 +200,23 @@ class SkyTyrant extends BossBase {
 
         if (typeof EnemyTypes !== 'undefined') {
             const minion = EnemyTypes.createForLevel(3, enemyType, spawnX - 15, spawnY);
-            if (typeof LevelMap !== 'undefined' && LevelMap.enemies) {
-                LevelMap.enemies.push(minion);
+            
+            // 🔧 P1修复：使用 LevelManager 获取当前关卡
+            const level = (typeof LevelManager !== 'undefined') ? LevelManager.currentLevel : null;
+            if (level && level.enemies) {
+                level.enemies.push(minion);
             }
 
             // 阶段4召唤多个
-            if (this.currentPhase === 4) {
+            if (this.currentPhase === 4 && level && level.enemies) {
                 setTimeout(() => {
                     const minion2 = EnemyTypes.createForLevel(3, enemyType, spawnX - 40, spawnY);
-                    LevelMap.enemies.push(minion2);
+                    level.enemies.push(minion2);
                 }, 500);
 
                 setTimeout(() => {
                     const minion3 = EnemyTypes.createForLevel(3, enemyType, spawnX + 10, spawnY);
-                    LevelMap.enemies.push(minion3);
+                    level.enemies.push(minion3);
                 }, 1000);
             }
         }

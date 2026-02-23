@@ -46,6 +46,10 @@ class FormMecha {
         spreadAngles.forEach(angle => {
             const b = new Bullet(startX, startY, player.facing, angle, bulletSpeed, '#ffff88');
             b.damage = 2;
+            if (player.homingMode) {
+                b.homing = true;
+                b.homingStrength = 3.5;
+            }
             bullets.push(b);
         });
 

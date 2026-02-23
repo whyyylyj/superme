@@ -193,8 +193,17 @@ class PatternWeaver {
             const originX = this.emitter.x !== undefined ? this.emitter.x : this.emitter.originX || 0;
             const originY = this.emitter.y !== undefined ? this.emitter.y : this.emitter.originY || 0;
 
-            // 调用弹幕模式
-            patternFunc(originX, originY, patternDef.params);
+            // 调用弹幕模式并获取子弹配置
+            const bulletConfigs = patternFunc(originX, originY, patternDef.params);
+            
+            // 🔧 P0修复：使用 DanmakuEngine 将子弹发射到游戏中
+            if (bulletConfigs && bulletConfigs.length > 0 && typeof DanmakuEngine !== 'undefined') {
+                // 我们需要一个目标子弹数组。由于 PatternWeaver 是由 Boss 持有的，
+                // 而 Boss.update 接收 bullets 数组，我们可以让 Boss 将其传给 weaver
+                if (this.emitter.currentBulletsArray) {
+                    DanmakuEngine.fireBullets(bulletConfigs, this.emitter.currentBulletsArray);
+                }
+            }
         }
     }
 

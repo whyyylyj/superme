@@ -75,8 +75,10 @@ const TransformSystem = {
         return this.currentForm ? this.currentForm.damageMultiplier : 1;
     },
 
-    getAttackMultiplier() {
-        return this.currentForm ? this.currentForm.attackMultiplier : 1;
+    getAttackMultiplier(player) {
+        let mult = this.currentForm ? this.currentForm.attackMultiplier : 1;
+        if (player && player.isGiant) mult *= CONFIG.POWERUPS.GIANT_MUSHROOM.DAMAGE_MULT;
+        return mult;
     },
 
     shoot(player, bullets) {
@@ -87,7 +89,21 @@ const TransformSystem = {
 
     draw(ctx, player, cameraX, cameraY) {
         if (this.currentForm) {
+            ctx.save();
+            if (player.isGiant) {
+                const scale = CONFIG.POWERUPS.GIANT_MUSHROOM.SCALE_MULT;
+                const centerX = player.x - cameraX + player.width / 2;
+                const centerY = player.y - cameraY + player.height / 2;
+                ctx.translate(centerX, centerY);
+                ctx.scale(scale, scale);
+                ctx.translate(-centerX, -centerY);
+                
+                // Pulsing glow for giant mode
+                ctx.shadowBlur = 20 + Math.sin(Date.now() / 100) * 10;
+                ctx.shadowColor = 'white';
+            }
             this.currentForm.draw(ctx, player, cameraX, cameraY);
+            ctx.restore();
         }
     },
 

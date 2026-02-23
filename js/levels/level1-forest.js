@@ -51,6 +51,13 @@ class Level1Forest extends LevelBase {
         // 生成道具
         this.generatePowerups();
 
+        // Add 5 new special powerups at fixed locations for testing
+        this.powerups.push(new PowerUp(600, 300, 'heart_plus'));
+        this.powerups.push(new PowerUp(900, 300, 'fire_flower'));
+        this.powerups.push(new PowerUp(1200, 300, 'power_spread'));
+        this.powerups.push(new PowerUp(1500, 300, 'gold_bullet'));
+        this.powerups.push(new PowerUp(1800, 300, 'giant_mushroom'));
+
         // 生成Boss
         this.generateBoss();
 
@@ -378,9 +385,9 @@ class Level1Forest extends LevelBase {
     /**
      * 更新关卡
      */
-    update(dt, player, bullets, level) {
+    update(dt, player, bullets) {
         // 更新敌人（传入player和bullets以支持高级AI）
-        this.enemies.forEach(e => e.update(dt, player, this.platforms, bullets, level));
+        this.enemies.forEach(e => e.update(dt, player, this.platforms, bullets));
         this.enemies = this.enemies.filter(e => !e.markedForDeletion);
 
         // 更新道具
@@ -388,10 +395,13 @@ class Level1Forest extends LevelBase {
 
         // 更新Boss
         if (this.boss && !this.boss.markedForDeletion) {
-            this.boss.update(dt, player, this.platforms, bullets, level);
+            this.boss.update(dt, player, this.platforms, bullets);
         } else if (this.boss && this.boss.markedForDeletion) {
-            this.isCompleted = true;
-            this.triggerVictoryEffects();
+            // 🔧 P1修复：增加状态检查，防止在 start 状态下意外触发
+            if (typeof GameStateMachine !== 'undefined' && GameStateMachine.is('playing')) {
+                this.isCompleted = true;
+                this.triggerVictoryEffects();
+            }
         }
     }
 

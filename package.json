@@ -1,0 +1,30 @@
+{
+  "name": "superme",
+  "version": "1.0.0",
+  "description": "HTML5 Canvas 横版飞行射击游戏",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:ui": "npx playwright test --ui",
+    "test:update-snapshots": "npx playwright test --update-snapshots",
+    "test:report": "npx playwright show-report"
+  },
+  "keywords": [
+    "html5",
+    "canvas",
+    "game",
+    "shooter",
+    "danmaku"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2",
+    "serve": "^14.2.5"
+  }
+}

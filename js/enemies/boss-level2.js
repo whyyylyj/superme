@@ -226,8 +226,11 @@ class InfernoDragon extends BossBase {
 
         if (typeof EnemyTypes !== 'undefined') {
             const fireElement = EnemyTypes.createFireElement(spawnX, spawnY);
-            if (typeof LevelMap !== 'undefined' && LevelMap.enemies) {
-                LevelMap.enemies.push(fireElement);
+            
+            // 🔧 P1修复：将敌人添加到当前关卡的敌人数组中
+            const level = (typeof LevelManager !== 'undefined') ? LevelManager.currentLevel : null;
+            if (level && level.enemies) {
+                level.enemies.push(fireElement);
             }
         }
 

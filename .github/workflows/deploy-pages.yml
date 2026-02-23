@@ -1,0 +1,52 @@
+# GitHub Pages Deploy Workflow
+# 自动部署到 GitHub Pages
+# 
+# 触发条件：每次推送到 main 分支时自动部署
+# 部署目标：https://whyyylyj.github.io/superme/
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # 允许手动触发部署
+
+# 设置 GITHUB_TOKEN 权限
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 只允许一个部署任务同时运行
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. 检出代码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. 设置 Pages 环境
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 3. 上传构建产物（本项目无需构建，直接上传整个项目）
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # 上传整个项目根目录
+          path: '.'
+
+      # 4. 部署到 GitHub Pages
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

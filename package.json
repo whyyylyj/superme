@@ -7,6 +7,10 @@
     "doc": "docs"
   },
   "scripts": {
+    "start": "npx serve . -p 8000 -L",
+    "dev": "npx serve . -p 8000 -L",
+    "deploy": "./deploy.sh",
+    "deploy:github": "./scripts/deploy-to-github.sh",
     "test": "npx playwright test",
     "test:headed": "npx playwright test --headed",
     "test:ui": "npx playwright test --ui",

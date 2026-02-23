@@ -22,10 +22,18 @@ const TouchInput = {
         deadzone: 10
     },
 
+    // 连射模式
+    autoFire: {
+        enabled: false,
+        interval: 150, // 连射间隔（毫秒）
+        timer: null,
+        isActive: false
+    },
+
     // 长按 SIT 模式
     sitMode: {
-        enabled: true,        // 是否启用长按进入 SIT 模式
-        longPressDuration: 800, // 长按时间阈值（毫秒）
+        enabled: false,       // 禁用长按，现在使用按钮控制
+        longPressDuration: 800,
         timer: null,
         isActive: false
     },
@@ -111,8 +119,8 @@ const TouchInput = {
             this.joystick.startX = rect.left + rect.width / 2;
             this.joystick.startY = rect.top + rect.height / 2;
 
-            // 启动长按计时器（用于 SIT 模式）
-            this.startSitModeTimer();
+            // 长按 SIT 模式已禁用，移除计时器
+            // this.startSitModeTimer();
 
             this.vibrate(10); // Small feedback on start
             this.moveJoystick(touch);
@@ -123,15 +131,7 @@ const TouchInput = {
 
             for (let i = 0; i < e.changedTouches.length; i++) {
                 if (e.changedTouches[i].identifier === this.joystick.touchId) {
-                    // 如果移动距离超过阈值，取消 SIT 模式
-                    const dx = e.changedTouches[i].clientX - this.joystick.startX;
-                    const dy = e.changedTouches[i].clientY - this.joystick.startY;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance > this.joystick.maxRadius * 0.8) {
-                        this.cancelSitMode();
-                    }
-                    
+                    // 移除 SIT 模式相关逻辑
                     this.moveJoystick(e.changedTouches[i]);
                     break;
                 }
@@ -143,11 +143,7 @@ const TouchInput = {
 
             for (let i = 0; i < e.changedTouches.length; i++) {
                 if (e.changedTouches[i].identifier === this.joystick.touchId) {
-                    // 检查是否触发了 SIT 模式
-                    if (this.sitMode.isActive) {
-                        // SIT 模式已激活，保持下蹲状态
-                        console.log('[TouchInput] SIT mode activated via long-press');
-                    }
+                    // 移除 SIT 模式相关逻辑
                     this.resetJoystick();
                     break;
                 }
@@ -206,8 +202,11 @@ const TouchInput = {
     },
 
     moveJoystick: function (touch) {
-        const dx = touch.clientX - this.joystick.startX;
-        const dy = touch.clientY - this.joystick.startY;
+        // Get current scale to convert screen pixels to game pixels
+        const scale = (typeof Responsive !== 'undefined') ? Responsive.getScale() : 1;
+        
+        const dx = (touch.clientX - this.joystick.startX) / scale;
+        const dy = (touch.clientY - this.joystick.startY) / scale;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         const knob = document.getElementById('joystick-knob');
@@ -220,6 +219,7 @@ const TouchInput = {
         knob.style.transform = `translate(calc(-50% + ${moveX}px), calc(-50% + ${moveY}px))`;
 
         // Map to Input.virtualKeys
+        // Note: deadzone is now in game pixels
         Input.virtualKeys.left = dx < -this.joystick.deadzone;
         Input.virtualKeys.right = dx > this.joystick.deadzone;
         Input.virtualKeys.up = dy < -this.joystick.deadzone;
@@ -243,16 +243,74 @@ const TouchInput = {
         Input.virtualKeys.sit = false;
     },
 
+    /**
+     * 启动连射模式
+     */
+    startAutoFire: function() {
+        if (this.autoFire.isActive) return;
+
+        this.autoFire.isActive = true;
+        Input.virtualKeys.autofire = true;
+
+        const fireLoop = () => {
+            if (!this.autoFire.isActive) return;
+
+            // 触发射击
+            Input.virtualKeys.shoot = true;
+            this.vibrate(3);
+
+            // 短暂释放后再按下，模拟连射
+            setTimeout(() => {
+                if (this.autoFire.isActive) {
+                    Input.virtualKeys.shoot = false;
+                }
+            }, 50);
+
+            this.autoFire.timer = setTimeout(fireLoop, this.autoFire.interval);
+        };
+
+        fireLoop();
+        console.log('[TouchInput] Auto-fire started');
+    },
+
+    /**
+     * 停止连射模式
+     */
+    stopAutoFire: function() {
+        if (!this.autoFire.isActive) return;
+
+        this.autoFire.isActive = false;
+        Input.virtualKeys.autofire = false;
+        Input.virtualKeys.shoot = false;
+
+        if (this.autoFire.timer) {
+            clearTimeout(this.autoFire.timer);
+            this.autoFire.timer = null;
+        }
+
+        console.log('[TouchInput] Auto-fire stopped');
+    },
+
     setupButtons: function () {
-        const buttons = document.querySelectorAll('.action-btn, .pause-btn, .sit-btn');
+        const buttons = document.querySelectorAll('.action-btn, .aux-btn, .pause-btn');
         buttons.forEach(btn => {
             const key = btn.dataset.key;
             if (!key) return;
 
             btn.addEventListener('touchstart', (e) => {
+                // 特殊处理连射按钮
+                if (key === 'autofire') {
+                    this.startAutoFire();
+                    btn.classList.add('active');
+                    this.vibrate([10, 30, 10]);
+                    e.preventDefault();
+                    return;
+                }
+
+                // 正常按钮处理
                 Input.virtualKeys[key] = true;
                 btn.classList.add('active');
-                
+
                 // Haptic feedback
                 if (key === 'shoot') {
                     this.vibrate(10);
@@ -260,23 +318,61 @@ const TouchInput = {
                     this.vibrate(15);
                 } else if (key === 'pause') {
                     this.vibrate([10, 50, 10]);
+                    // 特殊处理暂停：立即释放，防止因为UI隐藏导致状态粘滞
+                    setTimeout(() => {
+                        Input.virtualKeys.pause = false;
+                        btn.classList.remove('active');
+                    }, 100);
+                } else if (key === 'sit') {
+                    this.vibrate([5, 10, 5]);
                 } else {
                     this.vibrate(5);
                 }
-                
+
                 e.preventDefault();
             });
 
             btn.addEventListener('touchend', (e) => {
+                // 如果是暂停按钮，忽略 touchend，因为已经在 touchstart 中处理了脉冲
+                if (key === 'pause') return;
+
+                // 特殊处理连射按钮
+                if (key === 'autofire') {
+                    this.stopAutoFire();
+                    btn.classList.remove('active');
+                    e.preventDefault();
+                    return;
+                }
+
+                // 正常按钮处理
                 Input.virtualKeys[key] = false;
                 btn.classList.remove('active');
                 e.preventDefault();
             });
 
             btn.addEventListener('touchcancel', (e) => {
+                if (key === 'autofire') {
+                    this.stopAutoFire();
+                    btn.classList.remove('active');
+                    return;
+                }
                 Input.virtualKeys[key] = false;
                 btn.classList.remove('active');
             });
+        });
+
+        // 增加全局触摸释放监听，防止手指滑出按钮导致状态卡死
+        window.addEventListener('touchend', (e) => {
+            // 如果所有手指都离开了，且不是在处理摇杆，重置除自动连发外的所有虚拟键
+            if (e.touches.length === 0) {
+                Object.keys(Input.virtualKeys).forEach(k => {
+                    if (k !== 'autofire' && !this.joystick.active) {
+                        Input.virtualKeys[k] = false;
+                    }
+                });
+                // 清除所有按钮的 active 类
+                document.querySelectorAll('.action-btn, .aux-btn').forEach(b => b.classList.remove('active'));
+            }
         });
     }
 };

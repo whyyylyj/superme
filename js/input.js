@@ -29,7 +29,8 @@ const Input = {
         transform: false,
         homing: false,
         sit: false,
-        pause: false
+        pause: false,
+        autofire: false // 连射模式
     },
 
     // Derived properties for easy access

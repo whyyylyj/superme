@@ -976,32 +976,38 @@ body.desktop-device .desktop-only-text {
     box-shadow: 0 0 20px rgba(255, 200, 0, 0.6);
 }
 
-/* Action Buttons Container */
+/* =============================================
+   Touch Controls (Mobile)
+   重新设计：主战斗按钮在右下，辅助功能在右上
+   ============================================= */
+
+/* 主要战斗按钮容器（右下角） */
 .action-buttons-container {
     position: absolute;
     bottom: 30px;
     right: 30px;
     display: flex;
     flex-direction: column;
-    gap: 16px; /* 增加垂直间距 */
+    gap: 20px; /* 增加垂直间距 */
     pointer-events: auto;
 }
 
 .action-btn-row {
     display: flex;
-    gap: 16px; /* 增加水平间距 */
+    gap: 20px; /* 增加水平间距 */
     justify-content: flex-end;
+    align-items: center;
 }
 
+/* 主战斗按钮样式 - 更大更突出 */
 .action-btn {
-    min-width: 60px;
-    height: 60px;
+    width: 75px; /* 增大主按钮 */
+    height: 75px;
     background: rgba(255, 0, 255, 0.2);
-    border: 2px solid var(--secondary-color);
+    border: 3px solid var(--secondary-color);
     border-radius: 50%;
     color: #fff;
-    font-family: 'Press Start 2P', cursive;
-    font-size: 0.5rem;
+    font-size: 1.8rem; /* 使用 emoji，字号更大 */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1009,25 +1015,24 @@ body.desktop-device .desktop-only-text {
     user-select: none;
     -webkit-user-select: none;
     touch-action: manipulation;
-    box-shadow: 0 0 10px rgba(255, 0, 255, 0.3);
+    box-shadow: 0 0 15px rgba(255, 0, 255, 0.4);
     transition: all 0.1s;
-    /* 增加触摸区域，防止误触 */
     position: relative;
+    /* 增加触摸区域 */
 }
 
-/* 为每个按钮增加额外的透明padding区域 */
 .action-btn::before {
     content: '';
     position: absolute;
-    inset: -8px;
+    inset: -10px;
     border-radius: 50%;
     pointer-events: auto;
 }
 
 .action-btn.active {
     background: rgba(255, 0, 255, 0.5);
-    box-shadow: 0 0 20px rgba(255, 0, 255, 0.6);
-    transform: scale(0.95);
+    box-shadow: 0 0 25px rgba(255, 0, 255, 0.7);
+    transform: scale(0.92);
 }
 
 .action-btn.btn-shoot {
@@ -1085,12 +1090,124 @@ body.desktop-device .desktop-only-text {
     background: rgba(128, 128, 128, 0.5);
 }
 
-/* Touch Control Positioning Helpers */
-.touch-bottom-left {
+/* =============================================
+   辅助功能按钮区域（右上角）
+   ============================================= */
+.touch-top-right {
     position: absolute;
-    bottom: 180px; /* 移到更高的位置，避免与摇杆冲突 */
-    left: 40px; /* 紧贴左边缘 */
+    top: 20px;
+    right: 20px;
     pointer-events: auto;
+    z-index: 110;
+}
+
+.auxiliary-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.aux-btn-row {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+/* 辅助按钮 - 较小，防止误触 */
+.aux-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(100, 100, 100, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px; /* 方形圆角 */
+    color: #fff;
+    font-size: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+    transition: all 0.15s;
+}
+
+.aux-btn.small {
+    width: 38px;
+    height: 38px;
+    font-size: 0.6rem;
+}
+
+.aux-btn.active {
+    background: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+    transform: scale(0.95);
+}
+
+/* 辅助按钮颜色 */
+.aux-btn.btn-k {
+    background: rgba(255, 165, 0, 0.3);
+    border-color: orange;
+}
+
+.aux-btn.btn-k.active {
+    background: rgba(255, 165, 0, 0.5);
+}
+
+.aux-btn.btn-m {
+    background: rgba(100, 100, 255, 0.3);
+    border-color: #6666ff;
+}
+
+.aux-btn.btn-m.active {
+    background: rgba(100, 100, 255, 0.5);
+}
+
+.aux-btn.btn-sit {
+    background: rgba(128, 128, 128, 0.3);
+    border-color: #888;
+}
+
+.aux-btn.btn-sit.active {
+    background: rgba(128, 128, 128, 0.5);
+}
+
+/* 连射按钮 */
+.aux-btn.btn-auto {
+    background: rgba(255, 100, 100, 0.3);
+    border-color: #ff6666;
+}
+
+.aux-btn.btn-auto.active {
+    background: rgba(255, 100, 100, 0.5);
+    box-shadow: 0 0 15px rgba(255, 100, 100, 0.6);
+    animation: autofire-pulse 0.5s ease-in-out infinite;
+}
+
+@keyframes autofire-pulse {
+    0%, 100% {
+        box-shadow: 0 0 15px rgba(255, 100, 100, 0.6);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 100, 100, 0.9);
+    }
+}
+
+/* 暂停按钮在辅助区域 */
+.aux-btn-row .pause-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 0, 0.2);
+    border: 2px solid yellow;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.8rem;
+}
+
+.aux-btn-row .pause-btn:active {
+    background: rgba(255, 255, 0, 0.5);
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.6);
 }
 
 .touch-top-right {
@@ -1193,31 +1310,57 @@ body.desktop-device .desktop-only-text {
         height: 45px;
     }
 
-    /* 移动端按钮优化 - 增加尺寸和间距 */
+    /* 移动端按钮优化 - 主战斗按钮更大 */
     body.mobile-device .action-buttons-container {
         bottom: 25px;
         right: 20px;
-        gap: 18px; /* 增加垂直间距 */
+        gap: 22px;
     }
 
     body.mobile-device .action-btn-row {
-        gap: 18px; /* 增加水平间距 */
+        gap: 22px;
     }
 
     body.mobile-device .action-btn {
-        min-width: 58px; /* 增大按钮 */
-        height: 58px;
-        font-size: 0.5rem;
+        width: 70px; /* 移动端主按钮尺寸 */
+        height: 70px;
+        font-size: 1.6rem;
     }
 
     body.mobile-device .action-btn::before {
-        inset: -10px; /* 增加触摸区域 */
+        inset: -12px;
     }
 
-    body.mobile-device .action-btn.small {
-        min-width: 48px;
-        height: 48px;
-        font-size: 0.45rem;
+    /* 移动端辅助按钮区域 */
+    body.mobile-device .touch-top-right {
+        top: 15px;
+        right: 15px;
+    }
+
+    body.mobile-device .auxiliary-buttons {
+        gap: 8px;
+    }
+
+    body.mobile-device .aux-btn-row {
+        gap: 8px;
+    }
+
+    body.mobile-device .aux-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.65rem;
+    }
+
+    body.mobile-device .aux-btn.small {
+        width: 36px;
+        height: 36px;
+        font-size: 0.55rem;
+    }
+
+    body.mobile-device .aux-btn-row .pause-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 0.7rem;
     }
 
     /* 暂停按钮位置调整 */
@@ -1232,10 +1375,45 @@ body.desktop-device .desktop-only-text {
         font-size: 0.7rem;
     }
 
-    /* 底部左侧按钮 - 移到更高的位置 */
-    body.mobile-device .touch-bottom-left {
-        bottom: 160px; /* 移动端更高的位置 */
-        left: 25px; /* 紧贴左边缘 */
+    /* 横屏模式主战斗按钮 */
+    body.mobile-device .action-buttons-container {
+        bottom: 20px;
+        right: 15px;
+        gap: 18px;
+    }
+
+    body.mobile-device .action-btn-row {
+        gap: 18px;
+    }
+
+    body.mobile-device .action-btn {
+        width: 65px;
+        height: 65px;
+    }
+
+    /* 横屏模式辅助按钮 */
+    body.mobile-device .touch-top-right {
+        top: 12px;
+        right: 12px;
+    }
+
+    body.mobile-device .auxiliary-buttons {
+        gap: 6px;
+    }
+
+    body.mobile-device .aux-btn-row {
+        gap: 6px;
+    }
+
+    body.mobile-device .aux-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.6rem;
+    }
+
+    body.mobile-device .aux-btn.small {
+        width: 32px;
+        height: 32px;
     }
 
     /* 移动端 Boss HUD */
@@ -1322,37 +1500,6 @@ body.desktop-device .desktop-only-text {
         width: 38px;
         height: 38px;
     }
-
-    body.mobile-device .action-buttons-container {
-        bottom: 20px;
-        right: 15px;
-        gap: 14px;
-    }
-
-    body.mobile-device .action-btn-row {
-        gap: 14px;
-    }
-
-    body.mobile-device .action-btn {
-        min-width: 50px;
-        height: 50px;
-    }
-
-    body.mobile-device .action-btn.small {
-        min-width: 42px;
-        height: 42px;
-    }
-
-    /* 横屏模式 SIT 按钮位置 */
-    body.mobile-device .touch-bottom-left {
-        bottom: 140px;
-        left: 20px;
-    }
-
-    /* 横屏模式下 SIT 按钮隐藏（使用长按替代） */
-    body.mobile-device .touch-bottom-left {
-        display: none;
-    }
 }
 
 /* iPhone notch support */
@@ -1374,14 +1521,9 @@ body.desktop-device .desktop-only-text {
         bottom: calc(30px + env(safe-area-inset-bottom));
     }
 
-    .touch-bottom-left {
-        left: calc(40px + env(safe-area-inset-left));
-        bottom: 180px;
-    }
-
     .touch-top-right {
-        top: calc(10px + env(safe-area-inset-top));
-        right: calc(10px + env(safe-area-inset-right));
+        top: calc(20px + env(safe-area-inset-top));
+        right: calc(20px + env(safe-area-inset-right));
     }
 }
 

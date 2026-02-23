@@ -59,6 +59,26 @@ npm run test:ui       # UI 模式
 
 ---
 
+## 🌐 部署
+
+### 一键部署到 GitHub Pages
+
+```bash
+# 使用部署脚本
+./scripts/deploy-to-github.sh "feat: 更新内容"
+
+# 或直接推送
+git add .
+git commit -m "feat: 更新内容"
+git push origin main
+```
+
+部署成功后访问：`https://你的用户名.github.io/superme/`
+
+详细部署指南见 [docs/DEPLOY.md](docs/DEPLOY.md)
+
+---
+
 ## 🎯 操作说明
 
 | 按键 | 功能 |

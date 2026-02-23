@@ -1,8 +1,12 @@
 # GitHub Pages Deploy Workflow
-# 使用 gh-pages 分支部署（更简单，不需要手动启用 Pages）
-# 
+# SUPERME 一键部署到 GitHub Pages
+#
 # 触发条件：每次推送到 main 分支时自动部署
 # 部署目标：https://whyyylyj.github.io/superme/
+#
+# 使用方法：
+#   1. 推送到 main 分支自动部署
+#   2. 或在 GitHub Actions 页面手动触发 "Deploy to GitHub Pages"
 
 name: Deploy to GitHub Pages
 
@@ -19,7 +23,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       # 1. 检出代码
       - name: Checkout
@@ -28,15 +32,13 @@ jobs:
       # 2. 准备部署文件
       - name: Prepare deployment files
         run: |
+          echo "📦 准备部署文件..."
           mkdir -p ./_site
-          cp index.html ./_site/
-          mkdir -p ./_site/css
-          cp css/*.css ./_site/css/
-          mkdir -p ./_site/js
-          cp -r js/* ./_site/js/
+          cp -r index.html css/ js/ ./_site/
           cp README.md ./_site/ 2>/dev/null || true
-          mkdir -p ./_site/docs
-          cp docs/*.md ./_site/docs/ 2>/dev/null || true
+          cp -r docs/ ./_site/ 2>/dev/null || true
+          echo "✅ 部署文件准备完成"
+          ls -la ./_site/
 
       # 3. 部署到 gh-pages 分支
       - name: Deploy to gh-pages
@@ -44,5 +46,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./_site
-          # 创建 .nojekyll 文件，防止 Jekyll 处理 .md 等文件
           create_nojekyll: true
+          force_orphan: true
+          commit_message: "🚀 Deploy to GitHub Pages: ${{ github.sha }}"

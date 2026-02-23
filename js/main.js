@@ -198,7 +198,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentHp = Number(player.hp) || 0;
             const maxHp = Number(player.maxHp) || CONFIG.PLAYER.MAX_HP;
 
-            if (hpVal) hpVal.innerText = Math.max(0, currentHp);
+            if (hpVal) hpVal.innerText = Math.ceil(Math.max(0, currentHp));
             if (hpFill) {
                 const hpPercent = maxHp > 0 ? (currentHp / maxHp) * 100 : 0;
                 hpFill.style.width = Math.max(0, hpPercent) + '%';
@@ -377,7 +377,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const types = ['spread', 'rapid', 'star', 'shield', 'speed', 'bamboo', 'heart_plus'];
                 type = types[Math.floor(Math.random() * types.length)];
             }
-            
+
             const pu = new PowerUp(x, y, type);
             level.powerups.push(pu);
         }

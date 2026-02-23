@@ -16,11 +16,8 @@
       - generic:
         - generic: Normal
       - generic:
-        - generic: Phantom (8s)
+        - generic: Phantom (7s)
       - generic:
         - text: LV
         - generic: "1"
-    - generic:
-      - heading "STAGE 1" [level=1]
-      - paragraph: PREPARE TO FIGHT
 ```

@@ -12,15 +12,12 @@
             - generic: "5"
         - generic:
           - generic: SCORE
-          - generic: "000000"
+          - generic: "000050"
       - generic:
         - generic: Normal
       - generic:
-        - generic: Mecha (12s)
+        - generic: Mecha (11s)
       - generic:
         - text: LV
         - generic: "1"
-    - generic:
-      - heading "STAGE 1" [level=1]
-      - paragraph: PREPARE TO FIGHT
 ```

@@ -1020,11 +1020,11 @@ document.addEventListener('DOMContentLoaded', () => {
             GameStateMachine.changeState('playing');
         }
 
-        // 🔧 修复：给玩家短暂的无敌时间，防止关闭井字棋界面后立即被敌人伤害
+        // 🔧 关闭弹窗后给予短暂无敌时间缓冲
         if (player) {
             player.invincible = true;
-            player.invincibleTimer = 2; // 2秒无敌时间
-            console.log('[TicTacToe] 给予玩家2秒无敌时间');
+            player.invincibleTimer = 3; // 3秒无敌时间
+            console.log('[TicTacToe] 弹窗关闭，给予玩家3秒无敌缓冲');
         }
 
         // 重置井字棋游戏
@@ -1056,6 +1056,37 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听井字棋触发事件
     EventBus.on('TIC_TAC_TOE_TRIGGER', (data) => {
         console.log('[TicTacToe] 触发井字棋挑战', data);
+
+        // 🔧 触发一次后，清除关卡中所有井字棋彩蛋怪
+        const level = LevelManager.currentLevel;
+        if (level && level.enemies) {
+            let removedCount = 0;
+            level.enemies.forEach(enemy => {
+                if (enemy instanceof EnemyTicTacToe && !enemy.markedForDeletion) {
+                    enemy.markedForDeletion = true;
+                    // 创建消失粒子效果
+                    if (typeof ParticleSystem !== 'undefined') {
+                        ParticleSystem.createExplosion(
+                            enemy.x + enemy.width / 2,
+                            enemy.y + enemy.height / 2,
+                            '#ffd700',
+                            20
+                        );
+                    }
+                    removedCount++;
+                }
+            });
+            if (removedCount > 0) {
+                console.log(`[TicTacToe] 已清除 ${removedCount} 个彩蛋怪`);
+            }
+        }
+
+        // 🔧 弹窗过程中玩家无敌
+        if (player) {
+            player.invincible = true;
+            player.invincibleTimer = 9999; // 持续无敌直到关闭弹窗
+            console.log('[TicTacToe] 弹窗显示，玩家进入无敌模式');
+        }
 
         // 暂停游戏
         tttTriggerData = data;

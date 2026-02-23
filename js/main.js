@@ -128,7 +128,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Hide touch controls when paused
             const touchControls = document.getElementById('touch-controls');
-            if (touchControls) touchControls.classList.add('hidden');
+            if (touchControls) {
+                touchControls.classList.add('hidden');
+                touchControls.classList.remove('playing'); // 禁用摇杆
+            }
         }
     }
 
@@ -140,7 +143,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Show touch controls when resumed if it's a touch device
             const touchControls = document.getElementById('touch-controls');
-            if (touchControls && Input.isTouchDevice) touchControls.classList.remove('hidden');
+            if (touchControls && Input.isTouchDevice) {
+                touchControls.classList.remove('hidden');
+                touchControls.classList.add('playing'); // 启用摇杆
+            }
         }
     }
 
@@ -225,7 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show touch controls if on mobile
         if (Input.isTouchDevice) {
             const tc = document.getElementById('touch-controls');
-            if (tc) tc.classList.remove('hidden');
+            if (tc) {
+                tc.classList.remove('hidden');
+                tc.classList.add('playing'); // 启用摇杆
+            }
         }
 
         // Show Level Start Message
@@ -656,6 +665,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         uiWinScreen.classList.remove('hidden');
                         uiWinScreen.classList.add('active');
                         uiHUD.classList.add('hidden');
+                        
+                        // 禁用摇杆，让按钮可以被点击
+                        const tc = document.getElementById('touch-controls');
+                        if (tc) tc.classList.remove('playing');
                     }
                 }
 
@@ -665,6 +678,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     uiGameOverScreen.classList.remove('hidden');
                     uiGameOverScreen.classList.add('active');
                     uiHUD.classList.add('hidden');
+                    
+                    // 禁用摇杆，让按钮可以被点击
+                    const tc = document.getElementById('touch-controls');
+                    if (tc) tc.classList.remove('playing');
                 }
                 break;
 

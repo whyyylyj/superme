@@ -931,7 +931,17 @@ body.desktop-device .desktop-only-text {
     background: transparent;
     pointer-events: auto;
     touch-action: none;
-    z-index: 100;
+    z-index: 50; /* 降低 z-index，避免覆盖 UI 界面 */
+}
+
+/* 游戏进行时才启用 pointer-events */
+#touch-controls.playing .joystick-zone {
+    pointer-events: auto;
+}
+
+/* 游戏暂停/结束时禁用 pointer-events，让按钮可以被点击 */
+#touch-controls:not(.playing) .joystick-zone {
+    pointer-events: none;
 }
 
 /* 原有的摇杆样式保留（可用于调试或可选显示） */

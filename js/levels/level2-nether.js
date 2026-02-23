@@ -53,9 +53,18 @@ class Level2Nether extends LevelBase {
         this.generateBoss();
 
         // 井字棋触发点系统
-        this.addPossibleTriggerLocation({ x: 1200, y: 200 });
-        this.addPossibleTriggerLocation({ x: 2200, y: 150 });
-        this.addPossibleTriggerLocation({ x: 3500, y: 250 });
+        this.addPossibleTriggerLocation({ 
+            x: 600, y: 420,
+            hint: '岩浆边的神秘符文！'
+        });
+        this.addPossibleTriggerLocation({ 
+            x: 2000, y: 420,
+            hint: '火焰峡谷的金色光芒！'
+        });
+        this.addPossibleTriggerLocation({ 
+            x: 3500, y: 420,
+            hint: '地狱深处的古老祭坛！'
+        });
         this.activateRandomTriggers(2);
 
         console.log(`✅ 第二关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.geysers.length} 喷泉, ${this.ticTacToeTriggers.length} 井字棋触发点`);

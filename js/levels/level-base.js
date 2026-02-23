@@ -26,14 +26,15 @@ class LevelBase {
 
     /**
      * 添加可能的井字棋触发点位置
-     * @param {Object} location - {x, y} 触发点位置
+     * @param {Object} location - {x, y, width, height, hint} 触发点位置
      */
     addPossibleTriggerLocation(location) {
         this.possibleTriggerLocations.push({
             x: location.x,
             y: location.y,
-            width: 60,
-            height: 60,
+            width: location.width || 100,  // 增大到 100px 更容易发现
+            height: location.height || 100,
+            hint: location.hint || '发现神秘符文！',  // 添加提示文字
             active: false,
             cooldown: 0
         });
@@ -196,7 +197,7 @@ class LevelBase {
     }
 
     /**
-     * 绘制井字棋触发点
+     * 绘制井字棋触发点（增强版 - 更显眼）
      * @param {CanvasRenderingContext2D} ctx
      * @param {Object} trigger - 触发点对象
      * @param {number} cameraX
@@ -205,31 +206,67 @@ class LevelBase {
     drawTicTacToeTrigger(ctx, trigger, cameraX, cameraY) {
         const x = trigger.x - cameraX;
         const y = trigger.y - cameraY;
+        const centerX = x + trigger.width / 2;
+        const centerY = y + trigger.height / 2;
 
         ctx.save();
 
-        // 闪烁效果（使用时间）
-        const flashIntensity = Math.sin(Date.now() / 200) * 0.5 + 0.5;
+        // 更快的闪烁频率（200ms → 150ms）更引人注目
+        const flashIntensity = Math.sin(Date.now() / 150) * 0.5 + 0.5;
 
-        // 金色光晕
+        // 旋转动画（每 2 秒旋转一周）
+        const rotation = Date.now() / 2000 * Math.PI * 2;
+
+        // 外层光晕（更大范围）
+        const gradient = ctx.createRadialGradient(
+            centerX, centerY, 0,
+            centerX, centerY, trigger.width * 0.8
+        );
+        gradient.addColorStop(0, `rgba(255, 215, 0, ${0.6 + 0.4 * flashIntensity})`);
+        gradient.addColorStop(0.5, `rgba(255, 200, 0, ${0.3 + 0.2 * flashIntensity})`);
+        gradient.addColorStop(1, 'rgba(255, 150, 0, 0)');
+
+        ctx.fillStyle = gradient;
         ctx.shadowColor = '#ffd700';
-        ctx.shadowBlur = 20 * flashIntensity;
-        ctx.fillStyle = `rgba(255, 215, 0, ${0.3 + 0.2 * flashIntensity})`;
-        ctx.fillRect(x, y, trigger.width, trigger.height);
+        ctx.shadowBlur = 40 * flashIntensity + 20;
+        ctx.fillRect(
+            x - trigger.width * 0.3,
+            y - trigger.height * 0.3,
+            trigger.width * 1.6,
+            trigger.height * 1.6
+        );
 
-        // 金色边框
-        ctx.strokeStyle = `rgba(255, 215, 0, ${0.5 + 0.5 * flashIntensity})`;
-        ctx.lineWidth = 2;
+        // 金色边框（加粗）
+        ctx.strokeStyle = `rgba(255, 215, 0, ${0.8 + 0.2 * flashIntensity})`;
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#ffd700';
+        ctx.shadowBlur = 30;
         ctx.strokeRect(x, y, trigger.width, trigger.height);
 
-        // # 符号
-        ctx.shadowBlur = 30;
+        // 内部填充（半透明）
+        ctx.fillStyle = `rgba(255, 215, 0, ${0.2 + 0.1 * flashIntensity})`;
+        ctx.fillRect(x, y, trigger.width, trigger.height);
+
+        // # 符号（更大 + 旋转动画）
+        ctx.translate(centerX, centerY);
+        ctx.rotate(rotation);
+        ctx.shadowBlur = 40;
         ctx.fillStyle = '#ffd700';
-        ctx.font = 'bold 24px "Press Start 2P", monospace';
+        ctx.font = 'bold 40px "Press Start 2P", monospace';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('#', x + trigger.width / 2, y + trigger.height / 2);
+        ctx.fillText('#', 0, 0);
 
+        ctx.restore();
+
+        // 地面提示文字（始终显示）
+        ctx.save();
+        ctx.shadowColor = '#ffffff';
+        ctx.shadowBlur = 10;
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '10px "Press Start 2P", monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('神秘符文', centerX, y - 15);
         ctx.restore();
     }
 

@@ -53,9 +53,18 @@ class Level3Sky extends LevelBase {
         this.generateBoss();
 
         // 井字棋触发点系统
-        this.addPossibleTriggerLocation({ x: 1500, y: 100 });
-        this.addPossibleTriggerLocation({ x: 2800, y: 80 });
-        this.addPossibleTriggerLocation({ x: 4200, y: 120 });
+        this.addPossibleTriggerLocation({ 
+            x: 400, y: 280,
+            hint: '云端的神秘书符！'
+        });
+        this.addPossibleTriggerLocation({ 
+            x: 1500, y: 280,
+            hint: '天空神殿的试炼！'
+        });
+        this.addPossibleTriggerLocation({ 
+            x: 3000, y: 280,
+            hint: '神圣的井字棋盘！'
+        });
         this.activateRandomTriggers(2);
 
         console.log(`✅ 第三关初始化完成: ${this.movingPlatforms.length} 移动平台, ${this.enemies.length} 敌人, ${this.lightPillars.length} 光柱, ${this.ticTacToeTriggers.length} 井字棋触发点`);

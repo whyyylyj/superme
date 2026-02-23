@@ -67,9 +67,18 @@ class Level1Forest extends LevelBase {
         this.generateBoss();
 
         // 井字棋触发点系统
-        this.addPossibleTriggerLocation({ x: 800, y: 250 });
-        this.addPossibleTriggerLocation({ x: 1500, y: 180 });
-        this.addPossibleTriggerLocation({ x: 2500, y: 300 });
+        this.addPossibleTriggerLocation({ 
+            x: 500, y: 420,
+            hint: '森林地面上的金色符文！'
+        });
+        this.addPossibleTriggerLocation({ 
+            x: 1200, y: 420,
+            hint: '神秘的光芒闪烁...'
+        });
+        this.addPossibleTriggerLocation({ 
+            x: 2000, y: 420,
+            hint: '古老的森林祭坛'
+        });
         this.activateRandomTriggers(2);
 
         console.log(`✅ 第一关初始化完成: ${this.platforms.length} 平台, ${this.enemies.length} 敌人, ${this.powerups.length} 道具, ${this.ticTacToeTriggers.length} 井字棋触发点`);

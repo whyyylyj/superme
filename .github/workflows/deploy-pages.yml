@@ -1,5 +1,5 @@
 # GitHub Pages Deploy Workflow
-# 自动部署到 GitHub Pages
+# 使用 gh-pages 分支部署（更简单，不需要手动启用 Pages）
 # 
 # 触发条件：每次推送到 main 分支时自动部署
 # 部署目标：https://whyyylyj.github.io/superme/
@@ -12,22 +12,8 @@ on:
       - main
   workflow_dispatch: # 允许手动触发部署
 
-# 设置 GITHUB_TOKEN 权限
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# 只允许一个部署任务同时运行
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     
     steps:
@@ -35,33 +21,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 2. 设置 Pages 环境（自动启用 Pages）
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-        with:
-          enablement: true
-
-      # 3. 准备部署文件（排除不必要的文件）
+      # 2. 准备部署文件
       - name: Prepare deployment files
         run: |
-          # 创建部署目录
           mkdir -p ./_site
-          
-          # 复制必要的文件
           cp -r index.html css/ js/ ./_site/
-          
-          # 复制文档和 README（可选）
           cp README.md ./_site/ 2>/dev/null || true
           cp -r docs/ ./_site/ 2>/dev/null || true
 
-      # 4. 上传构建产物
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      # 3. 部署到 gh-pages 分支
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          # 只上传 _site 目录（不含 tests, node_modules 等）
-          path: './_site'
-
-      # 5. 部署到 GitHub Pages
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./_site
+          # 保留 .nojekyll 文件（防止 Jekyll 处理）
+          nojekyll: true

@@ -32,7 +32,7 @@ class InfernoDragon extends BossBase {
     constructor(x, y) {
         super(x, y, {
             name: 'Inferno Dragon',
-            maxHp: 600,
+            maxHp: 300,
             phaseCount: 3,
             width: 140,
             height: 100,

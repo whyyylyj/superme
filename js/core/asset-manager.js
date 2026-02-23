@@ -97,6 +97,9 @@ const CONFIG = {
             SCALE_MULT: 1.5,
             DAMAGE_MULT: 2.0,
         },
+        HEALTH_PACK: {
+            HEAL: 2,
+        },
         FIRE_FLOWER: {
             DAMAGE: 2.0,
         },

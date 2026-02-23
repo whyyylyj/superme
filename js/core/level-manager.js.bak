@@ -12,18 +12,6 @@ const LevelManager = {
     transitionTimer: 0,
     transitionDuration: CONFIG.LEVELS.TRANSITION_DURATION,
 
-    checkpoint: null,       // 保存当前关卡的暂存点信息 {levelIndex, x, y}
-
-    setCheckpoint(levelIndex, x, y) {
-        this.checkpoint = { levelIndex, x, y };
-        console.log(`Checkpoint saved: Level ${levelIndex}, X:${x}, Y:${y}`);
-    },
-
-    clearCheckpoint() {
-        this.checkpoint = null;
-        console.log('Checkpoint cleared');
-    },
-
     /**
      * 注册关卡
      * @param {LevelBase} level - 关卡实例
@@ -65,8 +53,6 @@ const LevelManager = {
      * @returns {boolean} 是否还有下一关
      */
     nextLevel() {
-        console.log(`[LevelManager] nextLevel() called: currentLevelIndex=${this.currentLevelIndex}, levels.length=${this.levels.length}`);
-
         if (this.currentLevelIndex + 1 >= this.levels.length) {
             // 已经是最后一关，游戏通关
             EventBus.emit(EventBus.EVENTS.GAME_WIN, {});
@@ -154,7 +140,6 @@ const LevelManager = {
         this.currentLevelIndex = -1;
         this.currentLevel = null;
         this.transitionTimer = 0;
-        this.levels = []; // 清空关卡列表，确保 initGame 时重新注册全新实例
         console.log('LevelManager reset');
     }
 };

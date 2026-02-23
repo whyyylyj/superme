@@ -27,7 +27,23 @@ const SEGMENT_LIBRARY = {
             platforms: [
                 { x: 0, y: 500, width: 800, height: 40, type: 'ground' }
             ],
+            powerup: { x: 400, y: 450, type: 'health_pack' },
             description: "基础地面片段"
+        },
+
+        // 补给点
+        health_oasis: {
+            width: 600,
+            platforms: [
+                { x: 0, y: 500, width: 600, height: 40, type: 'ground' },
+                { x: 150, y: 380, width: 300, height: 40, type: 'platform' }
+            ],
+            powerups: [
+                { x: 200, y: 330, type: 'health_pack' },
+                { x: 300, y: 330, type: 'health_pack' },
+                { x: 400, y: 330, type: 'health_pack' }
+            ],
+            description: "生命补给绿洲"
         },
 
         // 低跳平台（教学用）
@@ -50,7 +66,7 @@ const SEGMENT_LIBRARY = {
                 { x: 500, y: 450, width: 100, height: 40, type: 'platform', hasSecret: true },
                 { x: 650, y: 500, width: 150, height: 40, type: 'ground' }
             ],
-            powerup: { x: 550, y: 400, type: 'spread' },
+            powerup: { x: 550, y: 400, type: 'fire_flower' },
             description: "树洞隐藏道具片段"
         },
 
@@ -105,7 +121,7 @@ const SEGMENT_LIBRARY = {
             enemies: [
                 { x: 500, y: 450, type: 'walking' }
             ],
-            powerup: { x: 650, y: 300, type: 'rapid' },
+            powerup: { x: 650, y: 300, type: 'giant_mushroom' },
             description: "起始教程区域"
         },
 
@@ -121,6 +137,7 @@ const SEGMENT_LIBRARY = {
                 { x: 300, y: 450, type: 'walking' },
                 { x: 600, y: 450, type: 'walking' }
             ],
+            powerup: { x: 400, y: 330, type: 'health_pack' },
             description: "小型战斗区域"
         },
 
@@ -133,7 +150,13 @@ const SEGMENT_LIBRARY = {
                 { x: 350, y: 250, width: 100, height: 40, type: 'platform' },
                 { x: 500, y: 500, width: 100, height: 40, type: 'ground' }
             ],
-            powerup: { x: 400, y: 200, type: 'bamboo' },
+            powerups: [
+                { x: 400, y: 200, type: 'bamboo' },
+                { x: 50, y: 450, type: 'gold_bullet' }
+            ],
+            enemies: [
+                { x: 200, y: 300, type: 'flying' }
+            ],
             description: "高空平台竹蜻蜓教学"
         },
 

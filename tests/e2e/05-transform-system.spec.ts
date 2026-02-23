@@ -40,7 +40,7 @@ test.describe('变身系统', () => {
         expect(gameState.transformTimeRemaining).toBeGreaterThan(10); // Mecha 持续 12 秒
         
         // 验证 Mecha 射击（散弹）
-        await page.keyboard.press('KeyJ');
+        await page.keyboard.press('j');
         await page.waitForTimeout(300);
         
         const bulletState = await page.evaluate(() => window.getGameState());
@@ -83,7 +83,7 @@ test.describe('变身系统', () => {
         expect(gameState.transformTimeRemaining).toBeGreaterThan(6); // Phantom 持续 8 秒
         
         // 验证 Phantom 射击（追踪弹）
-        await page.keyboard.press('KeyJ');
+        await page.keyboard.press('j');
         await page.waitForTimeout(300);
         
         const bulletState = await page.evaluate(() => window.getGameState());
@@ -126,7 +126,7 @@ test.describe('变身系统', () => {
         
         // 用 Mecha 散弹攻击 Boss
         for (let i = 0; i < 10; i++) {
-            await page.keyboard.press('KeyJ');
+            await page.keyboard.press('j');
             await page.waitForTimeout(150);
         }
         
@@ -175,7 +175,7 @@ test.describe('变身系统', () => {
         // 测试 Normal 形态
         await page.evaluate(() => window.transformTo('Normal'));
         await page.waitForTimeout(300);
-        await page.keyboard.press('KeyJ');
+        await page.keyboard.press('j');
         await page.waitForTimeout(200);
         let state = await page.evaluate(() => window.getGameState());
         bulletCounts['Normal'] = state.bulletCount;
@@ -189,7 +189,7 @@ test.describe('变身系统', () => {
         // 测试 Mecha 形态
         await page.evaluate(() => window.transformTo('Mecha'));
         await page.waitForTimeout(300);
-        await page.keyboard.press('KeyJ');
+        await page.keyboard.press('j');
         await page.waitForTimeout(200);
         state = await page.evaluate(() => window.getGameState());
         bulletCounts['Mecha'] = state.bulletCount;

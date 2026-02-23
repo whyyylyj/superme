@@ -34,8 +34,9 @@ class Level3Sky extends LevelBase {
         // 特殊机制
         this.movingPlatforms = []; // 移动平台
         this.lightPillars = []; // 光柱陷阱
-        this.voidLine = 550; // 虚空死亡线
+        this.voidLine = 580; // 虚空死亡线（调整为580，给玩家更多缓冲）
         this.backgroundLayers = [];
+        this.victoryTriggered = false; // 防止胜利特效重复触发
     }
 
     /**
@@ -84,7 +85,31 @@ class Level3Sky extends LevelBase {
      * 生成移动平台
      */
     generateMovingPlatforms() {
+        // ============ 起始平台（静止，保证玩家出生时有站脚处）============
+        // 玩家出生在 (100, 300)，此平台放在其正下方
+        this.movingPlatforms.push({
+            x: 50,
+            y: 340,
+            width: 300,
+            height: 20,
+            // 无 moveX/moveY → 静止平台
+            speed: 0,
+            color: '#5a4a9a',
+            isStarter: true
+        });
+
         // ============ 区域1: 入口训练 (0-1750px) ============
+        // 🔧 ADD: 第一个暂存点（早期平台）
+        this.movingPlatforms.push({
+            x: 150,
+            y: 400,
+            width: 100,
+            height: 20,
+            speed: 0,
+            color: '#5a5a9a'
+        });
+        this.createCheckpoint(180, 340); // 暂存点 1：起始区域
+
         // 简单的左右移动平台
         this.movingPlatforms.push({
             x: 200,
@@ -214,45 +239,102 @@ class Level3Sky extends LevelBase {
             color: '#7a7aba'
         });
 
+        // 🔧 ADD: 中场休息稳定平台（含暂存点）
+        this.movingPlatforms.push({
+            x: 3400,
+            y: 400,
+            width: 120,
+            height: 20,
+            speed: 0,
+            color: '#aaaaaa'
+        });
+        this.createCheckpoint(3450, 340); // 暂存点 FLAG
+
         // ============ 区域4: Boss竞技场 (5250-7000px) ============
-        // 大型圆形移动平台
+        // 🔧 FIX: 静态Boss竞技场主平台（宽大，给玩家稳定的战斗区域）
+        this.movingPlatforms.push({
+            x: 5400,
+            y: 450,
+            width: 1500,
+            height: 30,
+            speed: 0,
+            color: '#7a5aaa',
+            isBossArena: true
+        });
+        // 🔧 ADD: Boss战前暂存点
+        this.createCheckpoint(5500, 390);
+
+        // Boss竞技场高层战术平台（静止）
         this.movingPlatforms.push({
             x: 5600,
-            y: 350,
+            y: 300,
             width: 200,
             height: 20,
-            circular: true,
-            centerX: 5600,
-            centerY: 350,
-            radius: 100,
-            speed: 0.5,
+            speed: 0,
             color: '#8a8aca'
         });
 
         this.movingPlatforms.push({
-            x: 6000,
+            x: 6100,
             y: 250,
-            width: 180,
+            width: 200,
             height: 20,
-            circular: true,
-            centerX: 6000,
-            centerY: 250,
-            radius: 80,
-            speed: 0.6,
+            speed: 0,
             color: '#8a8aca'
         });
 
         this.movingPlatforms.push({
-            x: 6400,
+            x: 6500,
             y: 300,
-            width: 250,
+            width: 200,
             height: 20,
-            circular: true,
-            centerX: 6400,
-            centerY: 300,
-            radius: 120,
-            speed: 0.4,
+            speed: 0,
+            color: '#8a8aca'
+        });
+
+        // 竞技场内缓慢移动的辅助平台
+        this.movingPlatforms.push({
+            x: 5900,
+            y: 350,
+            width: 150,
+            height: 20,
+            moveX: 100,
+            speed: 0.3,
             color: '#9a9ada'
+        });
+
+        // 🔧 FIX: Give moving platforms a `draw` method here so main.js can draw them
+        this.movingPlatforms.forEach(mp => {
+            mp.draw = (ctx, cameraX, cameraY) => {
+                ctx.save();
+
+                // 平台主体
+                ctx.fillStyle = mp.color;
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#9932cc';
+                ctx.fillRect(mp.x - cameraX, mp.y - cameraY, mp.width, mp.height);
+
+                // 边框
+                ctx.strokeStyle = '#bfaaff';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(mp.x - cameraX, mp.y - cameraY, mp.width, mp.height);
+
+                // 装饰图案
+                ctx.fillStyle = 'rgba(191, 170, 255, 0.3)';
+                const patternSize = 10;
+                for (let px = 0; px < mp.width; px += patternSize * 2) {
+                    for (let py = 0; py < mp.height; py += patternSize * 2) {
+                        ctx.fillRect(
+                            mp.x - cameraX + px,
+                            mp.y - cameraY + py,
+                            patternSize,
+                            patternSize
+                        );
+                    }
+                }
+
+                ctx.restore();
+            };
         });
     }
 
@@ -314,19 +396,19 @@ class Level3Sky extends LevelBase {
         this.powerups.push(this.createPowerUp(2100, 350, 'bamboo'));
         this.powerups.push(this.createPowerUp(2500, 250, 'shield'));
         this.powerups.push(this.createPowerUp(2900, 150, 'spread'));
-        this.powerups.push(this.createPowerUp(3300, 230, 'rapid'));
+        this.powerups.push(this.createPowerUp(3300, 230, 'transform_phantom')); // Added transform_phantom
 
         // 区域3
         this.powerups.push(this.createPowerUp(3800, 300, 'star'));
         this.powerups.push(this.createPowerUp(4200, 200, 'bamboo'));
         this.powerups.push(this.createPowerUp(4600, 250, 'shield'));
-        this.powerups.push(this.createPowerUp(5000, 250, 'spread'));
-        this.powerups.push(this.createPowerUp(5400, 150, 'star'));
+        this.powerups.push(this.createPowerUp(5000, 250, 'transform_phantom')); // Added transform_phantom
 
         // Boss前补给
         this.powerups.push(this.createPowerUp(5700, 300, 'bamboo'));
         this.powerups.push(this.createPowerUp(6100, 200, 'shield'));
         this.powerups.push(this.createPowerUp(6500, 250, 'star'));
+        this.powerups.push(this.createPowerUp(6800, 200, 'transform_phantom')); // Last chance before Boss
     }
 
     /**
@@ -356,6 +438,9 @@ class Level3Sky extends LevelBase {
 
         // 绘制虚空线
         this.drawVoidLine(ctx, cameraX, cameraY, canvas);
+
+        // 绘制光柱（因为main.js不调用 level.draw，所以需要在这里绘制）
+        this.drawLightPillars(ctx, cameraX, cameraY);
 
         // 绘制提示
         this.drawHints(ctx, cameraX, canvas);
@@ -511,8 +596,11 @@ class Level3Sky extends LevelBase {
         if (this.boss && !this.boss.markedForDeletion) {
             this.boss.update(dt, player, this.movingPlatforms, bullets);
         } else if (this.boss && this.boss.markedForDeletion) {
-            this.isCompleted = true;
-            this.triggerVictoryEffects();
+            if (!this.victoryTriggered && typeof GameStateMachine !== 'undefined' && GameStateMachine.is('playing')) {
+                this.isCompleted = true;
+                this.victoryTriggered = true;
+                this.triggerVictoryEffects();
+            }
         }
     }
 
@@ -579,27 +667,9 @@ class Level3Sky extends LevelBase {
      */
     checkVoidDeath(player) {
         if (player.y > this.voidLine) {
-            // 掉入虚空，直接死亡
+            // 掉入虚空，直接死亡（跳过伤害冷却直接标记）
             player.hp = 0;
-            player.takeDamage(10); // 触发死亡逻辑
-        }
-    }
-
-    /**
-     * 绘制关卡
-     */
-    draw(ctx, cameraX, cameraY) {
-        // 绘制光柱
-        this.drawLightPillars(ctx, cameraX, cameraY);
-
-        // 绘制移动平台
-        this.drawMovingPlatforms(ctx, cameraX, cameraY);
-
-        // 绘制道具、敌人、Boss
-        this.powerups.forEach(p => p.draw(ctx, cameraX, cameraY));
-        this.enemies.forEach(e => e.draw(ctx, cameraX, cameraY));
-        if (this.boss && !this.boss.markedForDeletion) {
-            this.boss.draw(ctx, cameraX, cameraY);
+            player.markedForDeletion = true;
         }
     }
 
@@ -648,42 +718,6 @@ class Level3Sky extends LevelBase {
     }
 
     /**
-     * 绘制移动平台
-     */
-    drawMovingPlatforms(ctx, cameraX, cameraY) {
-        this.movingPlatforms.forEach(mp => {
-            ctx.save();
-
-            // 平台主体
-            ctx.fillStyle = mp.color;
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#9932cc';
-            ctx.fillRect(mp.x - cameraX, mp.y - cameraY, mp.width, mp.height);
-
-            // 边框
-            ctx.strokeStyle = '#bfaaff';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(mp.x - cameraX, mp.y - cameraY, mp.width, mp.height);
-
-            // 装饰图案
-            ctx.fillStyle = 'rgba(191, 170, 255, 0.3)';
-            const patternSize = 10;
-            for (let px = 0; px < mp.width; px += patternSize * 2) {
-                for (let py = 0; py < mp.height; py += patternSize * 2) {
-                    ctx.fillRect(
-                        mp.x - cameraX + px,
-                        mp.y - cameraY + py,
-                        patternSize,
-                        patternSize
-                    );
-                }
-            }
-
-            ctx.restore();
-        });
-    }
-
-    /**
      * 触发胜利特效
      */
     triggerVictoryEffects() {
@@ -713,10 +747,23 @@ class Level3Sky extends LevelBase {
      */
     cleanup() {
         super.cleanup();
-        this.movingPlatforms = [];
+        // movingPlatforms 已通过 super.cleanup() -> this.platforms setter 清理
         this.lightPillars = [];
         this.backgroundLayers = [];
+        this.victoryTriggered = false;
         console.log('🧹 第三关已清理');
+    }
+
+    // 🔧 FIX: 覆盖 platforms getter，让 main.js 能正确使用 movingPlatforms 进行碰撞检测
+    // main.js 中 player.update(dt, level.platforms, ...) 和 bullet 碰撞都使用 level.platforms
+    get platforms() {
+        return this.movingPlatforms;
+    }
+
+    set platforms(val) {
+        // LevelBase.cleanup() 会设置 this.platforms = []
+        // 这里拦截并同步清理 movingPlatforms
+        this.movingPlatforms = val;
     }
 
     // 覆盖 width getter，因为平台是动态的

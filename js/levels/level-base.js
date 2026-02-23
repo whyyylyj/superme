@@ -13,8 +13,47 @@ class LevelBase {
         this.platforms = [];
         this.enemies = [];
         this.powerups = [];
+        this.checkpoints = [];
         this.boss = null;
         this.isCompleted = false;
+    }
+
+    /**
+     * 创建暂存点
+     * @param {number} x
+     * @param {number} y
+     */
+    createCheckpoint(x, y) {
+        this.checkpoints.push({
+            x: x,
+            y: y,
+            width: 40,
+            height: 60,
+            active: false,
+            draw(ctx, cameraX, cameraY) {
+                ctx.save();
+                ctx.translate(this.x - cameraX, this.y - cameraY);
+                // Draw flagpole
+                ctx.fillStyle = '#cccccc';
+                ctx.fillRect(0, 0, 4, this.height);
+                // Draw flag
+                ctx.fillStyle = this.active ? '#00ff00' : '#ff0000';
+                ctx.beginPath();
+                ctx.moveTo(4, 0);
+                ctx.lineTo(this.width, 15);
+                ctx.lineTo(4, 30);
+                ctx.fill();
+
+                if (this.active) {
+                    ctx.shadowColor = '#00ff00';
+                    ctx.shadowBlur = 10;
+                    ctx.fillStyle = '#00ff00';
+                    ctx.font = '10px "Press Start 2P"';
+                    ctx.fillText('SAVED', -5, -10);
+                }
+                ctx.restore();
+            }
+        });
     }
 
     /**
@@ -32,6 +71,20 @@ class LevelBase {
      * @param {Array} bullets - 子弹数组
      */
     update(dt, player, bullets) {
+        // 更新并检查暂存点
+        this.checkpoints.forEach(cp => {
+            if (!cp.active && Physics.checkCollision(player, cp)) {
+                cp.active = true;
+                if (typeof LevelManager !== 'undefined') {
+                    LevelManager.setCheckpoint(this.levelNumber - 1, cp.x, cp.y - player.height); // Spawn slightly above checkpoint
+                }
+                if (typeof showLevelMessage !== 'undefined') {
+                    showLevelMessage('CHECKPOINT REACHED', 'PROGRESS SAVED', 2000);
+                }
+            }
+            if (cp.update) cp.update(dt);
+        });
+
         // 更新敌人
         this.enemies.forEach(e => e.update(dt, player, this.platforms, bullets));
         this.enemies = this.enemies.filter(e => !e.markedForDeletion);
@@ -54,6 +107,9 @@ class LevelBase {
      * @param {number} cameraY
      */
     draw(ctx, cameraX, cameraY) {
+        this.checkpoints.forEach(cp => {
+            if (cp.draw) cp.draw(ctx, cameraX, cameraY);
+        });
         this.platforms.forEach(p => p.draw(ctx, cameraX, cameraY));
         this.powerups.forEach(p => p.draw(ctx, cameraX, cameraY));
         this.enemies.forEach(e => e.draw(ctx, cameraX, cameraY));
@@ -98,6 +154,7 @@ class LevelBase {
         this.platforms = [];
         this.enemies = [];
         this.powerups = [];
+        this.checkpoints = [];
         this.boss = null;
         this.isCompleted = false;
     }

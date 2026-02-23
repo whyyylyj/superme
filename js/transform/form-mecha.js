@@ -6,7 +6,7 @@ class FormMecha {
         this.color = CONFIG.FORMS.MECHA;
         this.speed = 250;
         this.canFly = false;
-        this.maxJumps = 2;
+        this.maxJumps = 10;
         this.damageMultiplier = 0.5;
         this.attackMultiplier = 2;
         this.duration = 12;
@@ -41,11 +41,11 @@ class FormMecha {
         const bulletSpeed = CONFIG.PLAYER.BULLET_SPEED;
         const startX = player.facing === 1 ? player.x + player.width : player.x - 10;
         const startY = player.y + player.height / 2;
+        const atkMult = TransformSystem.getAttackMultiplier(player);
 
         const spreadAngles = [-0.4, -0.2, 0, 0.2, 0.4];
         spreadAngles.forEach(angle => {
-            const b = new Bullet(startX, startY, player.facing, angle, bulletSpeed, '#ffff88');
-            b.damage = 2;
+            const b = new Bullet(startX, startY, player.facing, angle, bulletSpeed, '#ffff88', true, 'diamond', 2 * atkMult);
             if (player.homingMode) {
                 b.homing = true;
                 b.homingStrength = 3.5;

@@ -34,6 +34,7 @@ class Level2Nether extends LevelBase {
         this.geysers = []; // 喷泉
         this.flyingPlatforms = []; // 飞行平台
         this.backgroundLayers = [];
+        this.victoryTriggered = false; // 防止胜利特效重复触发
     }
 
     /**
@@ -211,11 +212,13 @@ class Level2Nether extends LevelBase {
         // 区域1
         this.powerups.push(this.createPowerUp(400, 350, 'star'));
         this.powerups.push(this.createPowerUp(600, 250, 'spread'));
+        this.powerups.push(this.createPowerUp(900, 300, 'transform_dragon')); // Added transformation powerup
 
         // 区域2
         this.powerups.push(this.createPowerUp(1600, 320, 'shield'));
         this.powerups.push(this.createPowerUp(2000, 100, 'rapid'));
         this.powerups.push(this.createPowerUp(2500, 200, 'bamboo'));
+        this.powerups.push(this.createPowerUp(2800, 350, 'transform_dragon')); // Backup transformation
 
         // 区域3
         this.powerups.push(this.createPowerUp(3300, 280, 'star'));
@@ -390,8 +393,11 @@ class Level2Nether extends LevelBase {
         if (this.boss && !this.boss.markedForDeletion) {
             this.boss.update(dt, player, this.platforms, bullets);
         } else if (this.boss && this.boss.markedForDeletion) {
-            this.isCompleted = true;
-            this.triggerVictoryEffects();
+            if (!this.victoryTriggered && typeof GameStateMachine !== 'undefined' && GameStateMachine.is('playing')) {
+                this.isCompleted = true;
+                this.victoryTriggered = true;
+                this.triggerVictoryEffects();
+            }
         }
     }
 
@@ -447,7 +453,9 @@ class Level2Nether extends LevelBase {
      */
     checkLavaDamage(player) {
         // 如果玩家是Dragon形态，免疫熔岩伤害
-        if (player.transformMode === 'dragon') return;
+        if (typeof TransformSystem !== 'undefined' && TransformSystem.currentForm && TransformSystem.currentForm.name === 'Dragon') {
+            return;
+        }
 
         this.lavaAreas.forEach(lava => {
             if (Physics.checkCollision(player, lava)) {
@@ -615,6 +623,7 @@ class Level2Nether extends LevelBase {
         this.geysers = [];
         this.flyingPlatforms = [];
         this.backgroundLayers = [];
+        this.victoryTriggered = false;
         console.log('🧹 第二关已清理');
     }
 }

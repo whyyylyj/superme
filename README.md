@@ -13,17 +13,19 @@
 
 | 灵感来源 | 借鉴元素 |
 |---------|---------|
-| **东方 Project** | 华丽弹幕花样、符卡 Boss 攻击 |
-| **魂斗罗 (Contra)** | 多武器切换、横版射击节奏 |
-| **Minecraft** | 像素方块美学、可破坏地形 |
+| **东方 Project** | 华丽弹幕花样、符卡 Boss 攻击、子弹基因系统 |
+| **魂斗罗 (Contra)** | 多武器切换、横版射击节奏、追踪弹模式 |
+| **Minecraft** | 像素方块美学、可破坏地形、程序化关卡生成 |
 | **超级马里奥** | 变身系统、道具收集、关卡设计 |
 
 ### 核心玩法
 
 - 🚁 **飞行 + 平台跳跃**：地面跑跳与空中飞行自由切换
-- 💥 **弹幕射击**：华丽的子弹图案和 Boss 符卡攻击
+- 💥 **弹幕射击**：华丽的子弹图案、Boss 符卡攻击、图案编织系统
 - 🦎 **4 种变身形态**：Normal、Mecha、Dragon、Phantom
-- 🏆 **3 个关卡**：独立主题、Boss 战、递进难度
+- 🏰 **程序化关卡**：基于片段库的动态关卡生成
+- 🏆 **3 个关卡**：Pixel Forest, Inferno Nether, Sky Temple
+- ⚙️ **配置驱动**：参数化的 Boss 属性与弹幕配置
 
 ---
 
@@ -75,9 +77,9 @@ npm run test:ui       # UI 模式
 | 形态 | 解锁关卡 | 特性 | 持续时间 |
 |------|---------|------|---------|
 | **Normal** | 初始 | 标准射击 | 无限 |
-| **Mecha** | 关卡 1 | 散弹枪 (5 发子弹)、更肉 | 12 秒 |
-| **Dragon** | 关卡 2 | 飞行、火焰喷射、熔岩免疫 | 10 秒 |
-| **Phantom** | 关卡 3 | 穿墙、追踪子弹、最快速度 | 8 秒 |
+| **Mecha** | 关卡 1 | 散弹枪 (5 发子弹)、防御力提升 | 12 秒 |
+| **Dragon** | 关卡 2 | 飞行能力、火焰喷射、熔岩免疫 | 10 秒 |
+| **Phantom** | 关卡 3 | 穿墙能力、追踪子弹、极速移动 | 8 秒 |
 
 ---
 
@@ -95,11 +97,11 @@ npm run test:ui       # UI 模式
 
 | 技术 | 用途 |
 |------|------|
-| HTML5 Canvas | 800×600 游戏渲染 |
-| Vanilla JavaScript (ES6 Classes) | 游戏逻辑 |
-| CSS3 | 霓虹 UI 主题、Press Start 2P 字体 |
-| Web Audio API | 8 位音效 |
-| Playwright | E2E 测试 |
+| HTML5 Canvas | 800×600 游戏渲染、粒子系统 |
+| Vanilla JavaScript (ES6) | 面向对象游戏逻辑、发布订阅模式 |
+| CSS3 | 霓虹 UI 主题、CRT 扫描线效果 |
+| Web Audio API | 8 位音效合成与音乐管理 |
+| Playwright | 自动化 E2E 冒烟与回归测试 |
 
 **无框架依赖** — 纯 HTML/CSS/JavaScript
 
@@ -113,7 +115,7 @@ superme/
 ├── package.json                # 项目配置
 ├── playwright.config.ts        # Playwright 测试配置
 ├── README.md                   # 本文件
-├── QWEN.md                     # 项目上下文文档
+├── CLAUDE.md                   # 开发者上下文文档
 │
 ├── css/
 │   └── style.css               # 霓虹 UI 主题
@@ -123,11 +125,14 @@ superme/
 │   │   ├── event-bus.js        # 发布订阅事件系统
 │   │   ├── game-state.js       # 有限状态机
 │   │   ├── level-manager.js    # 关卡管理器
-│   │   ├── asset-manager.js    # 资源管理器
-│   │   ├── audio-manager.js    # 音效管理
-│   │   └── screen-effects.js   # 屏幕特效 (震动、闪烁)
+│   │   ├── asset-manager.js    # 资源与全局配置
+│   │   ├── audio-manager.js    # Web Audio 音效管理
+│   │   ├── screen-effects.js   # 屏幕特效 (震动、闪烁、CRT)
+│   │   ├── boss-config.js      # Boss 参数化配置
+│   │   └── boss-config-helper.js # 配置辅助工具
 │   │
 │   ├── transform/              # 变身系统
+│   │   ├── transform-system.js # 变身核心逻辑
 │   │   ├── form-normal.js      # 普通形态
 │   │   ├── form-mecha.js       # 机甲形态
 │   │   ├── form-dragon.js      # 龙形态
@@ -135,17 +140,17 @@ superme/
 │   │
 │   ├── danmaku/                # 弹幕引擎
 │   │   ├── danmaku-engine.js   # 弹幕核心引擎
-│   │   ├── patterns.js         # 弹幕图案库 (8 种)
+│   │   ├── patterns.js         # 弹幕图案库
 │   │   ├── bullet-pool.js      # 子弹对象池
-│   │   ├── bullet-genes.js     # 子弹基因系统
+│   │   ├── bullet-genes.js     # 子弹基因系统 (轨迹控制)
 │   │   └── pattern-weaver.js   # 图案编织器
 │   │
 │   ├── enemies/                # 敌人系统
 │   │   ├── enemy-base.js       # 敌人基类
 │   │   ├── boss-base.js        # Boss 基类
-│   │   ├── boss-level1.js      # 关卡 1 Boss
-│   │   ├── boss-level2.js      # 关卡 2 Boss
-│   │   ├── boss-level3.js      # 关卡 3 Boss
+│   │   ├── boss-level1.js      # 树精王 (Forest boss)
+│   │   ├── boss-level2.js      # 炎龙 (Nether boss)
+│   │   ├── boss-level3.js      # 天空暴君 (Sky boss)
 │   │   └── enemy-types.js      # 敌人类型定义
 │   │
 │   ├── levels/                 # 关卡系统
@@ -159,29 +164,24 @@ superme/
 │   │   └── segment-builder.js  # 关卡构建器
 │   │
 │   ├── physics.js              # AABB 碰撞检测
-│   ├── input.js                # 键盘输入
+│   ├── input.js                # 键盘/输入管理
 │   ├── entity.js               # 实体基类
 │   ├── particle.js             # 粒子系统
-│   ├── bullet.js               # 子弹系统
+│   ├── bullet.js               # 子弹逻辑
 │   ├── powerup.js              # 道具系统
-│   ├── player.js               # 玩家控制
-│   ├── enemy.js                # 敌人 AI
-│   ├── boss.js                 # Boss 逻辑
-│   ├── level.js                # 关卡生成
-│   └── main.js                 # 游戏主循环
+│   ├── player.js               # 玩家核心逻辑
+│   ├── enemy.js                # 基础敌人 AI
+│   ├── boss.js                 # 基础 Boss 逻辑
+│   ├── level.js                # 基础关卡生成
+│   └── main.js                 # 游戏启动与主循环
 │
-├── docs/                       # 设计文档
-│   ├── 00-ARCHITECTURE.md      # 总架构设计 (必读)
-│   ├── 01-CORE-REFACTOR.md     # 核心重构
-│   ├── 02-TRANSFORM-SYSTEM.md  # 变身系统
-│   ├── 03-BULLET-DANMAKU.md    # 弹幕引擎
-│   ├── 04-LEVEL1-FOREST.md     # 关卡 1 设计
-│   ├── 05-LEVEL2-NETHER.md     # 关卡 2 设计
-│   ├── 06-LEVEL3-SKY.md        # 关卡 3 设计
-│   └── 07-UI-AUDIO-POLISH.md   # UI/音效/打磨
+├── docs/                       # 设计与技术文档
+│   ├── 00-ARCHITECTURE.md      # 总架构设计
+│   ├── 08-BOSS-CONFIG.md       # Boss 配置指南
+│   └── 09-BOSS-CONFIG-SUMMARY.md # Boss 参数化总结
 │
 └── tests/                      # E2E 测试
-    └── *.spec.ts               # Playwright 测试用例
+    └── e2e/*.spec.ts           # Playwright 测试用例
 ```
 
 ---
@@ -298,4 +298,5 @@ ISC License
 
 ---
 
+*Last updated: 2026-02-23*
 *Made with ❤️ using HTML5 Canvas*

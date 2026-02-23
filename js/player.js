@@ -52,15 +52,23 @@ class Player extends Entity {
         this.homingMode = false;
         this.homingBtnWasPressed = false;
 
+        this.transformBtnWasPressed = false;
+
+        this.score = 0;
+
         // 坐下回血
         this.sitMode = false;
         this.sitTimer = 0;
         this.sitWasPressed = false;
-        
+
         // 梦话效果
         this.dreamTextTimer = 0;
         this.currentDreamText = '';
         this.dreamTextY = 0;
+
+        // 🔧 FIX: 天花板碰撞标志，防止飞行模式穿透平台
+        this.hitCeiling = false;
+        this.ceilingPlatform = null;  // 记录撞到的平台
     }
 
     update(dt, platforms, levelWidth) {
@@ -121,13 +129,25 @@ class Player extends Entity {
 
             // 每 5 秒恢复 1 点 HP
             if (this.sitTimer >= CONFIG.PLAYER.SIT_HEAL_TIME) {
-                if (this.hp < this.maxHp) {
-                    this.hp += CONFIG.PLAYER.SIT_HEAL_AMOUNT;
+                // 🔧 防御性编程：确保 hp 和 maxHp 都是有效数字
+                const currentHp = Number(this.hp) || 0;
+                const maxHp = Number(this.maxHp) || CONFIG.PLAYER.MAX_HP;
+                const healAmount = Number(CONFIG.PLAYER.SIT_HEAL_AMOUNT) || 1;
+
+                if (currentHp < maxHp) {
+                    this.hp = Math.min(maxHp, currentHp + healAmount);
                     ParticleSystem.createExplosion(this.x + this.width / 2, this.y + this.height / 2, '#00ff00', 10);
+
+                    // 血满后自动退出休息状态
+                    if (this.hp >= maxHp) {
+                        this.sitMode = false;
+                        this.sitTimer = 0;
+                        this.currentDreamText = '';
+                    }
                 }
                 this.sitTimer = 0;
             }
-            
+
             // 梦话效果：每 2-4 秒显示一个随机梦话
             this.dreamTextTimer += dt;
             const dreamInterval = 2 + Math.random() * 2;
@@ -158,9 +178,46 @@ class Player extends Entity {
         }
 
         if (TransformSystem.canFly()) {
-            if (Input.up) this.vy = -this.speed;
-            else if (Input.down) this.vy = this.speed;
-            else this.vy = 0;
+            // 🔧 FIX: 在飞行模式下，如果撞到天花板，检查玩家是否离开平台底部
+            if (this.hitCeiling && this.ceilingPlatform) {
+                // 检查玩家是否仍然在天花板平台底部附近
+                const platformBottom = this.ceilingPlatform.y + this.ceilingPlatform.height;
+                const playerTop = this.y;
+                const tolerance = 5;  // 容差像素
+
+                // 如果玩家已经向下离开平台底部，清除标志
+                if (playerTop > platformBottom + tolerance) {
+                    this.hitCeiling = false;
+                    this.ceilingPlatform = null;
+                }
+
+                // 如果仍然在平台底部，限制向上移动
+                if (this.hitCeiling) {
+                    if (Input.down) {
+                        // 按下键，清除标志
+                        this.hitCeiling = false;
+                        this.ceilingPlatform = null;
+                        this.vy = this.speed;
+                    } else if (!Input.up) {
+                        // 松开上键，清除标志
+                        this.hitCeiling = false;
+                        this.ceilingPlatform = null;
+                        this.vy = 0;
+                    } else {
+                        // 仍然按上键，保持 vy = 0，阻止穿透
+                        this.vy = 0;
+                    }
+                } else {
+                    // 已经离开平台底部，恢复正常飞行
+                    if (Input.up) this.vy = -this.speed;
+                    else if (Input.down) this.vy = this.speed;
+                    else this.vy = 0;
+                }
+            } else {
+                if (Input.up) this.vy = -this.speed;
+                else if (Input.down) this.vy = this.speed;
+                else this.vy = 0;
+            }
         } else if (this.bambooMode) {
             if (Input.up) this.vy = -this.speed;
             else if (Input.down) this.vy = this.speed;
@@ -201,6 +258,35 @@ class Player extends Entity {
         }
 
         if (this.y < 0) this.y = 0;
+
+        // 🔧 FIX: 下边界处理
+        // 如果是具有 voidLine 的关卡（如第三关），允许落入虚空触发死亡
+        // 在普通关卡中，允许玩家掉入陷阱（死亡线 1200），但对于飞行模式，
+        // 我们给一个合理的下限，防止其无限飞出视界，同时不影响掉入陷阱的逻辑。
+        const currentLevel = (typeof LevelManager !== 'undefined') ? LevelManager.currentLevel : null;
+        const voidLine = currentLevel ? currentLevel.voidLine : null;
+
+        if (voidLine !== null && voidLine !== undefined) {
+            // 虚空关卡：允许下落到虚空线，但超过一定深度后限制位置，防止坐标异常
+            if (this.y > voidLine + 200) this.y = voidLine + 200;
+        } else {
+            // 普通关卡：允许玩家下落到全局死亡线 (1200)，但不允许超过它太远 (1500)
+            if (this.y > 1500) this.y = 1500;
+        }
+
+        // 🔧 FIX: 每帧检查天花板平台是否仍然有效
+        // 如果 ceilingPlatform 存在但玩家已经离开，清除标志
+        if (this.ceilingPlatform) {
+            const platformBottom = this.ceilingPlatform.y + this.ceilingPlatform.height;
+            const playerTop = this.y;
+            const tolerance = 10;  // 稍大的容差
+
+            // 玩家已经向下离开平台
+            if (playerTop > platformBottom + tolerance) {
+                this.hitCeiling = false;
+                this.ceilingPlatform = null;
+            }
+        }
     }
 
     checkCollisions(platforms, axis) {
@@ -211,6 +297,13 @@ class Player extends Entity {
                         this.x = plat.x - this.width;
                     } else if (this.vx < 0) {
                         this.x = plat.x + plat.width;
+                    } else {
+                        // 🔧 FIX: 静止重叠处理（例如变身后尺寸变化）
+                        // 使用 getIntersection 来找到最小重叠并推出
+                        const intersect = Physics.getIntersection(this, plat);
+                        if (intersect && intersect.axis === 'x') {
+                            this.x += intersect.depth * intersect.dir;
+                        }
                     }
                     this.vx = 0;
                 } else if (axis === 'y') {
@@ -218,8 +311,23 @@ class Player extends Entity {
                         this.y = plat.y - this.height;
                         this.onGround = true;
                         this.jumpCount = 0;
+                        this.ceilingPlatform = null;  // 落到地面，清除天花板记录
                     } else if (this.vy < 0) {
+                        // 🔧 FIX: 撞到平台底部时，把玩家推到平台下方
                         this.y = plat.y + plat.height;
+                        this.hitCeiling = true;
+                        this.ceilingPlatform = plat;  // 记录撞到的平台
+                    } else {
+                        // 🔧 FIX: 静止重叠处理
+                        const intersect = Physics.getIntersection(this, plat);
+                        if (intersect && intersect.axis === 'y') {
+                            this.y += intersect.depth * intersect.dir;
+                            // 如果是向上推，视为在地面上
+                            if (intersect.dir < 0) {
+                                this.onGround = true;
+                                this.jumpCount = 0;
+                            }
+                        }
                     }
                     this.vy = 0;
                 }
@@ -254,7 +362,12 @@ class Player extends Entity {
         return dreamTexts[Math.floor(Math.random() * dreamTexts.length)];
     }
 
-    takeDamage() {
+    addScore(amount) {
+        this.score += amount;
+        // 触发得分视觉效果（可选，以后添加）
+    }
+
+    takeDamage(damage = 1) {
         const dmgMult = TransformSystem.getDamageMultiplier();
         if (dmgMult === 0) return;
 
@@ -267,9 +380,15 @@ class Player extends Entity {
             return;
         }
 
-        const damage = Math.ceil(1 * dmgMult);
-        this.hp -= damage;
+        // 🔧 防御性编程：确保 hp 和 damage 都是有效数字
+        const currentHp = Number(this.hp) || 0;
+        const actualDamage = Number(damage) || 1;
+        this.hp = currentHp - actualDamage * dmgMult;
         this.damageCooldown = CONFIG.PLAYER.DAMAGE_COOLDOWN;
+
+        // Visual Feedback
+        ScreenEffects.shake(10, 0.2);
+        ScreenEffects.flash('rgba(255, 0, 0, 0.3)', 0.1);
 
         ParticleSystem.createExplosion(this.x + this.width / 2, this.y + this.height / 2, '#ff0000', 15);
         if (this.hp <= 0) {
@@ -298,12 +417,12 @@ class Player extends Entity {
             const time = Date.now() / 1000;
             const zOffset1 = Math.sin(time * 3) * 3;
             const zOffset2 = Math.sin(time * 3 + 2) * 3;
-            
+
             ctx.font = 'bold 16px "Press Start 2P", monospace';
             ctx.fillStyle = '#88ccff';
             ctx.shadowBlur = 10;
             ctx.shadowColor = '#88ccff';
-            
+
             // 绘制三个 Z，位置逐渐升高
             ctx.fillText('Z', this.x - cameraX + this.width + 5, sitY - cameraY - 10 + zOffset1);
             ctx.font = 'bold 14px "Press Start 2P", monospace';
@@ -315,31 +434,36 @@ class Player extends Entity {
             if (this.currentDreamText) {
                 const bubbleX = this.x - cameraX + this.width / 2;
                 const bubbleY = this.dreamTextY - cameraY;
-                
+
+                // 动态计算气泡大小
+                ctx.font = '10px "Press Start 2P", monospace';
+                const textWidth = ctx.measureText(this.currentDreamText).width;
+                const radiusX = Math.max(40, textWidth / 2 + 15);
+                const radiusY = 18;
+
                 // 气泡主体（半透明圆形）
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.shadowBlur = 5;
                 ctx.shadowColor = '#ffffff';
                 ctx.beginPath();
-                ctx.ellipse(bubbleX, bubbleY, 40, 25, 0, 0, Math.PI * 2);
+                ctx.ellipse(bubbleX, bubbleY, radiusX, radiusY, 0, 0, Math.PI * 2);
                 ctx.fill();
-                
+
                 // 气泡边框
                 ctx.strokeStyle = 'rgba(200, 200, 200, 0.8)';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
+
                 // 气泡尾巴（指向玩家）
                 ctx.beginPath();
-                ctx.moveTo(bubbleX - 10, bubbleY + 20);
-                ctx.quadraticCurveTo(bubbleX - 5, bubbleY + 30, bubbleX, bubbleY + 25);
-                ctx.quadraticCurveTo(bubbleX + 5, bubbleY + 30, bubbleX + 10, bubbleY + 20);
+                ctx.moveTo(bubbleX - 10, bubbleY + radiusY - 3);
+                ctx.lineTo(bubbleX, bubbleY + radiusY + 10);
+                ctx.lineTo(bubbleX + 10, bubbleY + radiusY - 3);
                 ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
                 ctx.fill();
                 ctx.stroke();
-                
+
                 // 梦话文本
-                ctx.font = '10px "Press Start 2P", monospace';
                 ctx.fillStyle = '#333333';
                 ctx.shadowBlur = 0;
                 ctx.textAlign = 'center';

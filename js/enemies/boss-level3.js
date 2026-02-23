@@ -35,13 +35,14 @@ class SkyTyrant extends BossBase {
     constructor(x, y) {
         super(x, y, {
             name: 'Sky Tyrant',
-            maxHp: 1000,
+            maxHp: 500,
             phaseCount: 4,
             width: 150,
             height: 150,
             color: '#8a2be2', // 蓝紫色
             themeColor: '#9932cc', // 暗紫色
             canFly: true,
+            aiType: 'flying', // 🔧 FIX: 必须是flying才不受重力，否则Boss会掉出世界触发假胜利
             speed: 120,
             damage: 3
         });
@@ -95,8 +96,8 @@ class SkyTyrant extends BossBase {
         }
 
         this.attackCooldown = this.currentPhase === 1 ? 1.8 :
-                            this.currentPhase === 2 ? 1.5 :
-                            this.currentPhase === 3 ? 1.2 : 0.8;
+            this.currentPhase === 2 ? 1.5 :
+                this.currentPhase === 3 ? 1.2 : 0.8;
     }
 
     /**
@@ -104,8 +105,8 @@ class SkyTyrant extends BossBase {
      */
     fireLightCircle(x, y) {
         const count = this.currentPhase === 1 ? 10 :
-                      this.currentPhase === 2 ? 14 :
-                      this.currentPhase === 3 ? 18 : 24;
+            this.currentPhase === 2 ? 14 :
+                this.currentPhase === 3 ? 18 : 24;
 
         for (let i = 0; i < count; i++) {
             const angle = (Math.PI * 2 / count) * i;
@@ -148,8 +149,8 @@ class SkyTyrant extends BossBase {
      */
     fireCosmicFlower(x, y) {
         const petals = this.currentPhase === 1 ? 6 :
-                       this.currentPhase === 2 ? 8 :
-                       this.currentPhase === 3 ? 10 : 12;
+            this.currentPhase === 2 ? 8 :
+                this.currentPhase === 3 ? 10 : 12;
         const bulletsPerPetal = 5;
 
         for (let p = 0; p < petals; p++) {
@@ -196,11 +197,11 @@ class SkyTyrant extends BossBase {
 
         // 根据阶段召唤不同的敌人
         const enemyType = this.currentPhase === 2 ? 'angel_orb' :
-                         this.currentPhase === 3 ? 'void_walker' : 'light_orb';
+            this.currentPhase === 3 ? 'void_walker' : 'light_orb';
 
         if (typeof EnemyTypes !== 'undefined') {
             const minion = EnemyTypes.createForLevel(3, enemyType, spawnX - 15, spawnY);
-            
+
             // 🔧 P1修复：使用 LevelManager 获取当前关卡
             const level = (typeof LevelManager !== 'undefined') ? LevelManager.currentLevel : null;
             if (level && level.enemies) {

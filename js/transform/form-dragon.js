@@ -6,7 +6,7 @@ class FormDragon {
         this.color = CONFIG.FORMS.DRAGON;
         this.speed = 350;
         this.canFly = true;
-        this.maxJumps = Infinity;
+        this.maxJumps = 10;
         this.damageMultiplier = 1;
         this.attackMultiplier = 1.5;
         this.duration = 10;
@@ -50,13 +50,13 @@ class FormDragon {
     shoot(player, bullets) {
         const startX = player.facing === 1 ? player.x + player.width : player.x - 10;
         const startY = player.y + player.height / 2;
+        const atkMult = TransformSystem.getAttackMultiplier(player);
 
         for (let i = 0; i < 3; i++) {
             const angle = (Math.random() - 0.5) * 0.5;
             const speed = 500 + Math.random() * 200;
-            const b = new Bullet(startX, startY, player.facing, angle, speed, '#ff4400');
+            const b = new Bullet(startX, startY, player.facing, angle, speed, '#ff4400', true, 'circle', 1.5 * atkMult);
             b.life = 60;
-            b.damage = 1.5;
             if (player.homingMode) {
                 b.homing = true;
                 b.homingStrength = 4;

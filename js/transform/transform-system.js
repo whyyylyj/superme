@@ -21,11 +21,12 @@ const TransformSystem = {
 
     transform(formName, player) {
         if (!this.forms[formName]) {
-            console.warn(`Unknown form: ${formName}`);
+            console.warn(`❌ Unknown form: ${formName}`);
             return;
         }
 
         const previousForm = this.currentForm;
+        console.log(`✨ Transform: ${previousForm?.name || 'None'} → ${formName}`);
 
         if (previousForm) {
             previousForm.onExit(player);
@@ -36,6 +37,7 @@ const TransformSystem = {
 
         if (this.currentForm.duration !== Infinity) {
             this.timer = this.currentForm.duration;
+            console.log(`⏱️  Form duration: ${this.timer}s`);
         } else {
             this.timer = 0;
         }

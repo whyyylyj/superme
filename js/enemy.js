@@ -10,6 +10,7 @@ class Enemy extends Entity {
         this.gravity = 1500;
         this.patrolDist = 150;
         this.startX = x;
+        this.score = 100;
     }
 
     update(dt, platforms) {

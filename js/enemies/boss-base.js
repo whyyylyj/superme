@@ -173,6 +173,11 @@ class BossBase extends EnemyBase {
         // 阶段转换特效
         this.flashIntensity = 1.0;
         this.shakeAmount = 20;
+        
+        // 全屏特效
+        ScreenEffects.shake(15, 0.5);
+        ScreenEffects.flash('rgba(255, 255, 255, 0.5)', 0.3);
+        ScreenEffects.slowMotion(0.3, 0.5);
 
         // 爆炸特效
         ParticleSystem.createExplosion(
@@ -379,6 +384,25 @@ class BossBase extends EnemyBase {
     }
 
     /**
+     * 十字弹幕（4个方向）
+     */
+    fireCrossPattern(x, y) {
+        const arms = 4;
+        const bulletsPerArm = 5;
+        const baseSpeed = 200;
+        const speedIncrement = 30;
+
+        for (let a = 0; a < arms; a++) {
+            const baseAngle = (Math.PI / 2) * a;
+            for (let b = 1; b <= bulletsPerArm; b++) {
+                const angle = baseAngle;
+                const speed = baseSpeed + b * speedIncrement;
+                this.fireBullet(x, y, Math.cos(angle), Math.sin(angle), speed);
+            }
+        }
+    }
+
+    /**
      * 发射子弹（通用方法）
      */
     fireBullet(x, y, dirX, dirY, speed = 300, color = null) {
@@ -438,6 +462,11 @@ class BossBase extends EnemyBase {
      */
     die() {
         super.die();
+
+        // Screen Effects
+        ScreenEffects.shake(25, 1.5);
+        ScreenEffects.flash('#ffffff', 0.5);
+        ScreenEffects.slowMotion(0.1, 1.2);
 
         // Boss死亡大爆炸
         for (let i = 0; i < 10; i++) {

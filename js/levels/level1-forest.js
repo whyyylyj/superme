@@ -58,6 +58,11 @@ class Level1Forest extends LevelBase {
         this.powerups.push(new PowerUp(1500, 300, 'gold_bullet'));
         this.powerups.push(new PowerUp(1800, 300, 'giant_mushroom'));
 
+        // 🔧 FIX: Add transform powerups for tutorial (ensure players can transform)
+        this.powerups.push(new PowerUp(2000, 300, 'transform_mecha'));
+        this.powerups.push(new PowerUp(2500, 300, 'transform_dragon'));
+        this.powerups.push(new PowerUp(3000, 300, 'transform_phantom'));
+
         // 生成Boss
         this.generateBoss();
 
@@ -105,7 +110,8 @@ class Level1Forest extends LevelBase {
                .addSegment(SEGMENT_LIBRARY.forest.basic_ground);
 
         // 第一个战斗区域
-        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.small_battle)
+               .addSegment(SEGMENT_LIBRARY.forest.health_oasis);
 
         // 多层跳跃挑战
         builder.addSegment(SEGMENT_LIBRARY.forest.multi_layer)
@@ -124,6 +130,7 @@ class Level1Forest extends LevelBase {
         // Boss 前连续战斗
         builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush)
                .addSegment(SEGMENT_LIBRARY.forest.small_battle)
+               .addSegment(SEGMENT_LIBRARY.forest.health_oasis)
                .addSegment(SEGMENT_LIBRARY.forest.empty)
                .addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
@@ -153,6 +160,7 @@ class Level1Forest extends LevelBase {
         builder.addSegment(SEGMENT_LIBRARY.forest.low_jump);
         builder.addSegment(SEGMENT_LIBRARY.forest.basic_ground);
         builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.health_oasis);
         builder.addSegment(SEGMENT_LIBRARY.forest.multi_layer);
         builder.addSegment(SEGMENT_LIBRARY.forest.big_gap);
         builder.addSegment(SEGMENT_LIBRARY.forest.high_platform);
@@ -161,6 +169,7 @@ class Level1Forest extends LevelBase {
         builder.addSegment(SEGMENT_LIBRARY.forest.tree_hideout);
         builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
         builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.health_oasis);
         builder.addSegment(SEGMENT_LIBRARY.forest.empty);
         builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
@@ -209,6 +218,7 @@ class Level1Forest extends LevelBase {
         builder.addSegment(SEGMENT_LIBRARY.forest.low_jump);
         builder.addSegment(SEGMENT_LIBRARY.forest.basic_ground);
         builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.health_oasis);
         builder.addSegment(SEGMENT_LIBRARY.forest.multi_layer);
         builder.addSegment(SEGMENT_LIBRARY.forest.big_gap);
         builder.addSegment(SEGMENT_LIBRARY.forest.high_platform);
@@ -217,6 +227,7 @@ class Level1Forest extends LevelBase {
         builder.addSegment(SEGMENT_LIBRARY.forest.tree_hideout);
         builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
         builder.addSegment(SEGMENT_LIBRARY.forest.small_battle);
+        builder.addSegment(SEGMENT_LIBRARY.forest.health_oasis);
         builder.addSegment(SEGMENT_LIBRARY.forest.empty);
         builder.addSegment(SEGMENT_LIBRARY.forest.enemy_ambush);
 
@@ -227,7 +238,11 @@ class Level1Forest extends LevelBase {
             this.powerups.push(new PowerUp(p.x, p.y, p.type));
         });
 
-        console.log(`🎁 片段系统生成道具: ${levelData.powerups.length}个`);
+        // Add transformation powerups at specific milestones
+        this.powerups.push(new PowerUp(2500, 300, 'transform_mecha'));
+        this.powerups.push(new PowerUp(4000, 300, 'transform_mecha'));
+
+        console.log(`🎁 片段系统生成道具: ${levelData.powerups.length + 2}个`);
     }
 
     /**

@@ -334,8 +334,8 @@ class EnemyBase extends Entity {
      * 边界检查
      */
     checkBounds() {
-        // 如果掉出关卡，标记删除
-        if (this.y > 1000) {
+        // 如果掉出关卡，标记删除（Boss不受此限制，Boss只能通过战斗击杀）
+        if (this.y > 1000 && !(this instanceof BossBase)) {
             this.markedForDeletion = true;
         }
     }

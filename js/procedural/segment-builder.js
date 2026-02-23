@@ -60,7 +60,15 @@ class SegmentBuilder {
         }
 
         // 添加道具
-        if (segment.powerup) {
+        if (segment.powerups && Array.isArray(segment.powerups)) {
+            segment.powerups.forEach(pu => {
+                this.powerups.push({
+                    x: this.currentX + pu.x,
+                    y: pu.y,
+                    type: pu.type
+                });
+            });
+        } else if (segment.powerup) {
             this.powerups.push({
                 x: this.currentX + segment.powerup.x,
                 y: segment.powerup.y,

@@ -30,16 +30,72 @@ body {
     position: relative;
     width: 800px;
     height: 600px;
-    box-shadow: 0 0 30px var(--primary-color);
-    border: 2px solid var(--primary-color);
-    border-radius: 8px;
+    box-shadow: 0 0 50px rgba(0, 255, 204, 0.4);
+    border: 4px solid var(--primary-color);
+    border-radius: 4px;
     overflow: hidden;
+}
+
+/* CRT & Visual Overlays */
+.overlay-full {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 10;
+}
+
+#crt-overlay {
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%,
+            rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg,
+            rgba(255, 0, 0, 0.03),
+            rgba(0, 255, 0, 0.01),
+            rgba(0, 0, 255, 0.03));
+    background-size: 100% 4px, 3px 100%;
+    animation: flicker 0.15s infinite;
+}
+
+#screen-glitch {
+    background: rgba(255, 0, 255, 0.05);
+    z-index: 11;
+}
+
+@keyframes flicker {
+    0% {
+        opacity: 0.95;
+    }
+
+    5% {
+        opacity: 0.85;
+    }
+
+    10% {
+        opacity: 0.95;
+    }
+
+    15% {
+        opacity: 0.9;
+    }
+
+    25% {
+        opacity: 0.85;
+    }
+
+    30% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0.9;
+    }
 }
 
 canvas {
     display: block;
     image-rendering: pixelated;
-    /* Keeps pixel art looking sharp */
+    filter: brightness(1.2) contrast(1.1);
 }
 
 /* UI Layer Overlays */
@@ -50,7 +106,6 @@ canvas {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    /* Let clicks pass through to canvas if needed */
 }
 
 .overlay {
@@ -65,102 +120,152 @@ canvas {
     justify-content: center;
     align-items: center;
     pointer-events: auto;
-    /* Re-enable clicks for overlays */
     text-align: center;
     transition: opacity 0.5s ease;
+    z-index: 50;
 }
 
 .hidden {
     display: none !important;
 }
 
-.active {
-    display: flex !important;
+.overlay.no-bg {
+    background: transparent !important;
+    pointer-events: none;
 }
 
-/* Typography & Effects */
-h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-p {
-    font-size: 1rem;
-    line-height: 1.5;
-    margin-bottom: 30px;
-}
-
-.glow {
-    text-shadow: 0 0 10px var(--primary-color), 0 0 20px var(--primary-color), 0 0 30px var(--secondary-color);
-}
-
-.text-danger {
-    color: var(--danger-color);
-    text-shadow: 0 0 10px var(--danger-color), 0 0 20px var(--danger-color);
-}
-
-.text-success {
-    color: var(--success-color);
-    text-shadow: 0 0 10px var(--success-color), 0 0 20px var(--success-color);
-}
-
-/* Buttons */
-.btn {
-    font-family: 'Press Start 2P', cursive;
-    background-color: transparent;
-    color: var(--primary-color);
-    border: 2px solid var(--primary-color);
-    padding: 15px 30px;
-    font-size: 1.2rem;
-    cursor: pointer;
-    text-transform: uppercase;
-    transition: all 0.3s ease;
-    box-shadow: inset 0 0 10px rgba(0, 255, 204, 0.2);
-    position: relative;
-    overflow: hidden;
-}
-
-.btn:hover {
-    background-color: var(--primary-color);
-    color: var(--bg-color);
-    box-shadow: 0 0 20px var(--primary-color), inset 0 0 10px rgba(255, 255, 255, 0.5);
-    transform: scale(1.05);
-}
-
-.btn:active {
-    transform: scale(0.95);
-}
-
-.controls-info {
-    margin: 20px 0 40px;
-    font-size: 0.8rem;
-    color: #ccc;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 20px;
-    border-radius: 8px;
-    border: 1px dotted var(--secondary-color);
-}
-
-.controls-info p {
+/* Level Messages */
+.big-text {
+    font-size: 5rem;
     margin-bottom: 10px;
+    letter-spacing: 10px;
+    animation: textZoom 2.5s ease-out forwards;
+    color: #fff;
+    text-shadow: 0 0 20px var(--primary-color), 0 0 40px var(--primary-color);
+}
+
+.glow-secondary {
+    color: var(--secondary-color);
+    text-shadow: 0 0 10px var(--secondary-color);
+    letter-spacing: 5px;
+    font-size: 1.2rem;
+    animation: slideIn 2s ease-out forwards;
+}
+
+@keyframes textZoom {
+    0% {
+        transform: scale(0.5);
+        opacity: 0;
+        filter: blur(10px);
+    }
+
+    20% {
+        transform: scale(1.1);
+        opacity: 1;
+        filter: blur(0);
+    }
+
+    80% {
+        transform: scale(1.0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+@keyframes slideIn {
+    0% {
+        transform: translateX(-100px);
+        opacity: 0;
+    }
+
+    20% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    80% {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(100px);
+        opacity: 0;
+    }
 }
 
 /* HUD System */
 #hud {
     position: absolute;
-    top: 10px;
-    left: 10px;
-    width: calc(100% - 20px);
+    top: 0;
+    left: 0;
+    width: 100%;
     display: flex;
     justify-content: space-between;
-    background: var(--hud-bg);
-    padding: 10px 20px;
-    border-radius: 5px;
-    border: 1px solid rgba(0, 255, 204, 0.3);
+    align-items: center;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%);
+    padding: 15px 25px;
     pointer-events: none;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
+    z-index: 20;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+}
+
+.stats-group {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-item .label {
+    font-size: 0.5rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+}
+
+.hp-bar-container {
+    position: relative;
+    width: 150px;
+    height: 14px;
+    background: rgba(255, 0, 0, 0.2);
+    border: 1px solid var(--danger-color);
+    border-radius: 2px;
+}
+
+.hp-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #ff3333, #ff6666);
+    box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+    transition: width 0.3s ease-out;
+}
+
+#hp-val {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.5rem;
+    color: #fff;
+    text-shadow: 1px 1px 2px #000;
+}
+
+#score-val {
+    font-size: 1rem;
+    color: #fff;
+    text-shadow: 0 0 10px var(--primary-color);
+    min-width: 120px;
+    display: inline-block;
 }
 
 .hud-item {
@@ -213,6 +318,22 @@ p {
 }
 
 /* Animations */
+.blink-text {
+    animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
 @keyframes pulse {
     0% {
         transform: scale(1);
@@ -380,4 +501,368 @@ p {
     100% {
         background-position: 400% 50%;
     }
+}
+
+/* =============================================
+   Start Screen Improvements
+   ============================================= */
+.start-subtitle {
+    font-size: 0.65rem;
+    color: var(--primary-color);
+    letter-spacing: 2px;
+    margin-bottom: 12px;
+    opacity: 0.8;
+}
+
+.start-badges {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 24px;
+}
+
+.badge {
+    padding: 4px 10px;
+    border: 1px solid var(--primary-color);
+    border-radius: 20px;
+    font-size: 0.5rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+    background: rgba(0, 255, 204, 0.07);
+    text-shadow: 0 0 6px var(--primary-color);
+}
+
+.start-buttons {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.btn-primary-glow {
+    font-size: 0.9rem;
+    padding: 14px 40px;
+    background: linear-gradient(135deg, rgba(0, 255, 204, 0.15), rgba(0, 255, 204, 0.05));
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    text-shadow: 0 0 8px var(--primary-color);
+    box-shadow: 0 0 20px rgba(0, 255, 204, 0.25), inset 0 0 20px rgba(0, 255, 204, 0.05);
+    transition: all 0.3s ease;
+}
+
+.btn-primary-glow:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px rgba(0, 255, 204, 0.5), inset 0 0 20px rgba(0, 255, 204, 0.1);
+}
+
+.btn-secondary {
+    font-size: 0.7rem;
+    padding: 10px 28px;
+    background: rgba(255, 0, 255, 0.08);
+    border: 1.5px solid var(--secondary-color);
+    color: var(--secondary-color);
+    text-shadow: 0 0 6px var(--secondary-color);
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 0, 255, 0.18);
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.3);
+}
+
+.btn-outline {
+    font-size: 0.6rem;
+    padding: 8px 22px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: rgba(255, 255, 255, 0.55);
+    transition: all 0.25s ease;
+}
+
+.btn-outline:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Common btn base reset for new variants */
+.btn-primary-glow,
+.btn-secondary,
+.btn-outline {
+    font-family: 'Press Start 2P', cursive;
+    cursor: pointer;
+    border-radius: 4px;
+    letter-spacing: 1px;
+    animation: none;
+}
+
+/* =============================================
+   Help Modal
+   ============================================= */
+#help-modal {
+    background: rgba(5, 5, 18, 0.92);
+    backdrop-filter: blur(6px);
+    z-index: 60;
+}
+
+.modal-box {
+    background: rgba(10, 10, 30, 0.98);
+    border: 2px solid var(--primary-color);
+    border-radius: 8px;
+    box-shadow: 0 0 40px rgba(0, 255, 204, 0.3), inset 0 0 30px rgba(0, 255, 204, 0.03);
+    width: 480px;
+    max-width: 90%;
+    padding: 0;
+    overflow: hidden;
+    animation: modalSlideIn 0.25s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        transform: scale(0.88) translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 22px;
+    border-bottom: 1px solid rgba(0, 255, 204, 0.2);
+    background: rgba(0, 255, 204, 0.05);
+}
+
+.modal-title {
+    font-size: 0.8rem;
+    color: var(--primary-color);
+    text-shadow: 0 0 8px var(--primary-color);
+    letter-spacing: 2px;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.8rem;
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    line-height: 1;
+}
+
+.modal-close:hover {
+    border-color: var(--danger-color);
+    color: var(--danger-color);
+    background: rgba(255, 51, 51, 0.1);
+}
+
+.modal-body {
+    padding: 20px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.help-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.help-section-title {
+    font-size: 0.55rem;
+    color: var(--secondary-color);
+    text-shadow: 0 0 6px var(--secondary-color);
+    letter-spacing: 2px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255, 0, 255, 0.2);
+}
+
+.help-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+}
+
+.key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px 8px;
+    background: rgba(0, 255, 204, 0.1);
+    border: 1px solid rgba(0, 255, 204, 0.4);
+    border-radius: 3px;
+    font-size: 0.5rem;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+    min-width: 28px;
+    text-align: center;
+    box-shadow: 0 2px 0 rgba(0, 255, 204, 0.3);
+}
+
+.help-sep {
+    color: #555;
+    font-size: 0.5rem;
+}
+
+.help-desc {
+    font-size: 0.5rem;
+    color: rgba(255, 255, 255, 0.65);
+    margin-left: 6px;
+}
+
+.help-hint {
+    font-size: 0.45rem;
+    color: #666;
+    text-align: center;
+    padding: 10px;
+    border: 1px dashed #333;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* =============================================
+   Level Select Screen
+   ============================================= */
+#level-select-screen {
+    background: rgba(5, 5, 18, 0.95);
+    z-index: 55;
+}
+
+.level-cards {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    align-items: stretch;
+}
+
+.level-card {
+    width: 170px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    padding: 20px 14px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.level-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity 0.3s;
+    border-radius: 7px;
+}
+
+#level-card-1::before {
+    background: radial-gradient(ellipse at top, rgba(0, 200, 100, 0.12), transparent 70%);
+}
+
+#level-card-2::before {
+    background: radial-gradient(ellipse at top, rgba(255, 80, 0, 0.14), transparent 70%);
+}
+
+#level-card-3::before {
+    background: radial-gradient(ellipse at top, rgba(100, 100, 255, 0.14), transparent 70%);
+}
+
+.level-card:hover::before {
+    opacity: 1;
+}
+
+#level-card-1:hover {
+    border-color: #00cc66;
+    box-shadow: 0 0 20px rgba(0, 200, 100, 0.3);
+    transform: translateY(-4px);
+}
+
+#level-card-2:hover {
+    border-color: #ff5500;
+    box-shadow: 0 0 20px rgba(255, 80, 0, 0.3);
+    transform: translateY(-4px);
+}
+
+#level-card-3:hover {
+    border-color: #6666ff;
+    box-shadow: 0 0 20px rgba(100, 100, 255, 0.3);
+    transform: translateY(-4px);
+}
+
+.level-card-num {
+    font-size: 0.5rem;
+    color: #555;
+    letter-spacing: 2px;
+}
+
+.level-card-icon {
+    font-size: 2.4rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 8px currentColor);
+}
+
+.level-card-name {
+    font-size: 0.65rem;
+    color: #fff;
+    letter-spacing: 2px;
+    font-weight: bold;
+}
+
+.level-card-desc {
+    font-size: 0.42rem;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.8;
+    letter-spacing: 0.5px;
+}
+
+.level-card-tag {
+    margin-top: 6px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.45rem;
+    letter-spacing: 1px;
+    border: 1px solid currentColor;
+}
+
+#level-card-1 .level-card-tag {
+    color: #00cc66;
+    border-color: #00cc66;
+    background: rgba(0, 204, 102, 0.1);
+}
+
+#level-card-2 .level-card-tag {
+    color: #ff6600;
+    border-color: #ff6600;
+    background: rgba(255, 102, 0, 0.1);
+}
+
+#level-card-3 .level-card-tag {
+    color: #8888ff;
+    border-color: #8888ff;
+    background: rgba(136, 136, 255, 0.1);
+}
+
+.level-card:active {
+    transform: scale(0.97) translateY(-2px);
 }

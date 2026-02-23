@@ -31,8 +31,8 @@ class TreantKing extends BossBase {
     constructor(x, y) {
         super(x, y, {
             name: 'Treant King',
-            maxHp: 300,
-            hp: 300,          // 🔧 P1修复：显式传递 hp，避免继承自 EnemyBase 的默认低生命值
+            maxHp: 150,
+            hp: 150,          // 🔧 P1修复：显式传递 hp，避免继承自 EnemyBase 的默认低生命值
             phaseCount: 2,
             width: 120,
             height: 140,

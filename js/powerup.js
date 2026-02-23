@@ -13,6 +13,7 @@ class PowerUp extends Entity {
         if (type === 'transform_mecha') color = '#cccccc';
         if (type === 'transform_dragon') color = '#ff6600';
         if (type === 'transform_phantom') color = '#aa00ff';
+        if (type === 'health_pack') color = '#ff0000';
         
         // 5 New Types
         if (type === 'heart_plus') color = '#ff3333';
@@ -76,6 +77,14 @@ class PowerUp extends Entity {
             ctx.moveTo(0, 5);
             ctx.bezierCurveTo(-15, -15, -15, 15, 0, 15);
             ctx.bezierCurveTo(15, 15, 15, -15, 0, 5);
+            ctx.fill();
+        } else if (this.type === 'health_pack') {
+            // Cross shape
+            const s = this.width / 2;
+            const t = this.width / 6;
+            ctx.beginPath();
+            ctx.rect(-t, -s, t * 2, s * 2);
+            ctx.rect(-s, -t, s * 2, t * 2);
             ctx.fill();
         } else if (this.type === 'gold_bullet') {
             // Star shape

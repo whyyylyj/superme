@@ -6,7 +6,7 @@ class FormPhantom {
         this.color = CONFIG.FORMS.PHANTOM;
         this.speed = 400;
         this.canFly = true;
-        this.maxJumps = Infinity;
+        this.maxJumps = 10;
         this.damageMultiplier = 0;
         this.attackMultiplier = 1;
         this.duration = 8;
@@ -48,8 +48,9 @@ class FormPhantom {
     shoot(player, bullets) {
         const startX = player.x + player.width / 2;
         const startY = player.y + player.height / 2;
+        const atkMult = TransformSystem.getAttackMultiplier(player);
 
-        const b = new Bullet(startX, startY, player.facing, 0, 600, '#dd44ff');
+        const b = new Bullet(startX, startY, player.facing, 0, 600, '#dd44ff', true, 'diamond', 3 * atkMult);
         b.homing = true;
         b.homingStrength = 5;
         b.life = 180;

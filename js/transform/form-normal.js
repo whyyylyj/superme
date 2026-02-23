@@ -6,7 +6,7 @@ class FormNormal {
         this.color = CONFIG.FORMS.NORMAL;
         this.speed = CONFIG.PLAYER.BASE_SPEED;
         this.canFly = false;
-        this.maxJumps = CONFIG.PLAYER.MAX_JUMPS;
+        this.maxJumps = 10;
         this.damageMultiplier = 1;
         this.attackMultiplier = 1;
         this.duration = Infinity;

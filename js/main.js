@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', () => {
 // main.js
 
 const canvas = document.getElementById('gameCanvas');
@@ -74,45 +75,68 @@ function initGame() {
 }
 
 function updateHUD() {
-    // 更新关卡号
-    const levelNum = LevelManager.currentLevelIndex + 1;
-    document.getElementById('level-val').innerText = levelNum;
-
-    uiHp.innerText = Math.max(0, player.hp);
-    let wpnStr = 'Normal';
-    if (player.weapon === 'spread') wpnStr = 'Scatter';
-    if (player.weapon === 'rapid') wpnStr = 'Rapid';
-    uiWpn.innerText = wpnStr;
-
-    let pwText = '';
-    if (player.bambooMode) pwText += 'BAMBOO ';
-    if (player.invincible) pwText += 'INVINCIBLE ';
-    if (player.shieldMode) pwText += 'SHIELD ';
-    if (player.speedMode) pwText += 'SPEED ';
-
-    // Add current transform form
-    const formName = TransformSystem.currentForm ? TransformSystem.currentForm.name : 'Normal';
-    const remainingTime = TransformSystem.getRemainingTime();
-    if (remainingTime > 0) {
-        pwText += `${formName} (${Math.ceil(remainingTime)}s)`;
-    } else if (formName !== 'Normal') {
-        pwText += formName;
-    }
-
-    uiPowerup.innerText = pwText;
-
-    // Update Boss HUD if boss is active
-    const level = LevelManager.currentLevel;
-    if (level && level.boss && !level.boss.markedForDeletion && player.x > level.boss.x - 800) {
-        uiBossHud.classList.remove('hidden');
-        const hpPercent = (level.boss.hp / level.boss.maxHp) * 100;
-        uiBossHpBar.style.width = Math.max(0, hpPercent) + '%';
-        if (hpPercent < 50) {
-            uiBossHpBar.style.background = 'linear-gradient(90deg, #ffaa00, #ffff00)';
-            uiBossHpBar.style.boxShadow = '0 0 10px #ffaa00';
+    try {
+        // 更新关卡号
+        const levelVal = document.getElementById('level-val');
+        if (levelVal) {
+            const levelNum = (LevelManager && LevelManager.currentLevelIndex !== undefined) ? LevelManager.currentLevelIndex + 1 : 1;
+            levelVal.innerText = levelNum;
         }
-    } else {
-        uiBossHud.classList.add('hidden');
+
+        // 获取并检查所有 UI 元素
+        const hpVal = document.getElementById('hp-val');
+        const wpnVal = document.getElementById('wpn-val');
+        const pwrVal = document.getElementById('powerup-val');
+
+        if (!player) return;
+
+        if (hpVal) hpVal.innerText = Math.max(0, player.hp);
+        
+        if (wpnVal) {
+            let wpnStr = 'Normal';
+            if (player.weapon === 'spread') wpnStr = 'Scatter';
+            if (player.weapon === 'rapid') wpnStr = 'Rapid';
+            wpnVal.innerText = wpnStr;
+        }
+
+        if (pwrVal) {
+            let pwText = '';
+            if (player.bambooMode) pwText += 'BAMBOO ';
+            if (player.invincible) pwText += 'INVINCIBLE ';
+            if (player.shieldMode) pwText += 'SHIELD ';
+            if (player.speedMode) pwText += 'SPEED ';
+
+            // Add current transform form
+            if (typeof TransformSystem !== 'undefined') {
+                const formName = TransformSystem.currentForm ? TransformSystem.currentForm.name : 'Normal';
+                const remainingTime = TransformSystem.getRemainingTime ? TransformSystem.getRemainingTime() : 0;
+                if (remainingTime > 0) {
+                    pwText += `${formName} (${Math.ceil(remainingTime)}s)`;
+                } else if (formName !== 'Normal') {
+                    pwText += formName;
+                }
+            }
+            pwrVal.innerText = pwText;
+        }
+
+        // Update Boss HUD if boss is active
+        const uiBossHud = document.getElementById('boss-hud');
+        const uiBossHpBar = document.getElementById('boss-hp-bar');
+        const level = (LevelManager && LevelManager.currentLevel) ? LevelManager.currentLevel : null;
+        
+        if (uiBossHud && uiBossHpBar && level && level.boss && !level.boss.markedForDeletion && player.x > level.boss.x - 800) {
+            uiBossHud.classList.remove('hidden');
+            const hpPercent = (level.boss.hp / level.boss.maxHp) * 100;
+            uiBossHpBar.style.width = Math.max(0, hpPercent) + '%';
+            if (hpPercent < 50) {
+                uiBossHpBar.style.background = 'linear-gradient(90deg, #ffaa00, #ffff00)';
+                uiBossHpBar.style.boxShadow = '0 0 10px #ffaa00';
+            }
+        } else if (uiBossHud) {
+            uiBossHud.classList.add('hidden');
+        }
+    } catch (e) {
+        console.error('HUD Update Error:', e);
     }
 }
 
@@ -415,3 +439,4 @@ if (level) {
 btnStart.addEventListener('click', initGame);
 btnRestart.addEventListener('click', initGame);
 btnPlayAgain.addEventListener('click', initGame);
+});

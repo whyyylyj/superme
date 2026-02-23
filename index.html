@@ -20,12 +20,18 @@
             <div id="hud" class="hidden">
                 <div class="hud-item title">SUPERME</div>
                 <div class="hud-item">
+                    HP: <span id="hp-val">100</span>
+                </div>
+                <div class="hud-item">
                     <div class="hp-hearts" id="hp-hearts">
                         <!-- JS 动态生成 -->
                     </div>
                 </div>
                 <div class="hud-item">
                     <span id="wpn-val" class="weapon-indicator">Normal</span>
+                </div>
+                <div class="hud-item powerup">
+                    <span id="powerup-val"></span>
                 </div>
                 <div class="hud-item">
                     <div class="transform-bar" id="transform-bar" style="display:none">
@@ -152,8 +158,7 @@
     <!-- 6. 核心管理 + 主循环 -->
     <script src="js/core/level-manager.js"></script>
     <script src="js/core/game-state.js"></script>
-    <script src="js/core/spectator-mode.js"></script> <!-- 🔧 浏览模式 -->
-    <script src="js/main.js"></script>
+    <script src="js/main.js?v=999"></script>
 </body>
 
 </html>
